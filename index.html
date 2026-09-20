@@ -20,6 +20,7 @@
             graphite: '#0D0F14',
             panel: '#151822',
             panelAlt: '#1B1F2A',
+            panelHi: '#20242F',
             hairline: '#262B38',
             ink: '#ECEAE4',
             inkMuted: '#8B90A3',
@@ -27,6 +28,7 @@
             taskA: '#FFB454',
             planA: '#5FD9A4',
             ytA: '#FF6F91',
+            noteA: '#A78BFA',
           },
           fontFamily: {
             display: ['"Space Grotesk"', 'sans-serif'],
@@ -44,7 +46,9 @@
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .dark ::-webkit-scrollbar-thumb { background: #2E3444; }
+    .dark ::-webkit-scrollbar-thumb:hover { background: #3B4255; }
 
     /* Height-animated collapse using the grid-template-rows trick (no JS height math) */
     .panel-body {
@@ -57,12 +61,18 @@
     .panel.collapsed .panel-body { grid-template-rows: 0fr; opacity: 0; }
 
     .item-list { max-height: 300px; }
+    .note-list { max-height: 560px; }
 
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .entrance { animation: fadeInUp 0.5s ease both; }
+
+    /* Keyboard focus stays visible everywhere */
+    :focus-visible { outline: 2px solid #7C9EFF; outline-offset: 2px; }
+
+    textarea { resize: vertical; }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -79,7 +89,9 @@
   <div class="max-w-[1400px] mx-auto space-y-6 entrance">
 
     <!-- Header -->
-    <header class="flex flex-wrap justify-between items-center gap-4 bg-white dark:bg-panel px-6 py-5 rounded-xl border border-slate-200 dark:border-hairline">
+    <header class="relative overflow-hidden flex flex-wrap justify-between items-center gap-4 bg-white dark:bg-panel px-6 py-5 rounded-xl border border-slate-200 dark:border-hairline shadow-sm dark:shadow-none">
+      <div class="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-linkA via-taskA via-planA via-noteA to-ytA opacity-80"></div>
+
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-panelAlt border border-slate-200 dark:border-hairline flex items-center justify-center font-display font-bold text-sm text-slate-500 dark:text-inkMuted">
           UD
@@ -92,6 +104,7 @@
               <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-planA"></span>
             </span>
             <span class="text-xs font-mono text-inkMuted">Synced</span>
+            <span class="text-xs font-mono text-slate-300 dark:text-hairline">/</span>
             <span id="totalCount" class="text-xs font-mono text-inkMuted"></span>
           </div>
         </div>
@@ -112,7 +125,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
 
       <!-- 1. Quick Links -->
-      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-linkA rounded-xl transition-colors" data-panel="links">
+      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-linkA rounded-xl shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-hairline hover:shadow-md dark:hover:shadow-none transition-all" data-panel="links">
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
             <svg class="w-5 h-5 text-linkA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
@@ -127,10 +140,10 @@
           <div>
             <div class="px-5 pb-5">
               <div class="flex flex-col gap-2.5 mb-4">
-                <input type="text" id="linkTitleInput" placeholder="Name (e.g. ChatGPT)" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-linkA/50 transition-colors">
+                <input type="text" id="linkTitleInput" placeholder="Name (e.g. ChatGPT)" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA/40 transition-colors">
                 <div class="flex gap-2">
-                  <input type="text" id="linkUrlInput" placeholder="URL (e.g. chatgpt.com)" class="flex-1 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-linkA/50 transition-colors">
-                  <button id="addLinkBtn" class="bg-linkA text-white px-4 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-linkA/50">+</button>
+                  <input type="text" id="linkUrlInput" placeholder="URL (e.g. chatgpt.com)" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA/40 transition-colors">
+                  <button id="addLinkBtn" class="bg-linkA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-linkA/50" aria-label="Save link">+</button>
                 </div>
               </div>
               <ul id="linkList" class="item-list space-y-2 overflow-y-auto pr-1"></ul>
@@ -140,7 +153,7 @@
       </section>
 
       <!-- 2. What To Do Next -->
-      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-taskA rounded-xl transition-colors" data-panel="tasks">
+      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-taskA rounded-xl shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-hairline hover:shadow-md dark:hover:shadow-none transition-all" data-panel="tasks">
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
             <svg class="w-5 h-5 text-taskA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
@@ -155,8 +168,8 @@
           <div>
             <div class="px-5 pb-5">
               <div class="flex gap-2 mb-4">
-                <input type="text" id="taskInput" placeholder="Add a new task..." class="flex-1 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-taskA/50 transition-colors">
-                <button id="addTaskBtn" class="bg-taskA text-white px-4 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-taskA/50">+</button>
+                <input type="text" id="taskInput" placeholder="Add a new task..." class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-taskA/50 focus:border-taskA/40 transition-colors">
+                <button id="addTaskBtn" class="bg-taskA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-taskA/50" aria-label="Add task">+</button>
               </div>
               <ul id="taskList" class="item-list space-y-2 overflow-y-auto pr-1"></ul>
             </div>
@@ -165,7 +178,7 @@
       </section>
 
       <!-- 3. Long Term Plans -->
-      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-planA rounded-xl transition-colors" data-panel="plans">
+      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-planA rounded-xl shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-hairline hover:shadow-md dark:hover:shadow-none transition-all" data-panel="plans">
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
             <svg class="w-5 h-5 text-planA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22M21.75 12.75V7.5h-5.25"></path></svg>
@@ -180,8 +193,8 @@
           <div>
             <div class="px-5 pb-5">
               <div class="flex gap-2 mb-4">
-                <input type="text" id="planInput" placeholder="Add a future plan..." class="flex-1 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-planA/50 transition-colors">
-                <button id="addPlanBtn" class="bg-planA text-white px-4 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-planA/50">+</button>
+                <input type="text" id="planInput" placeholder="Add a future plan..." class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-planA/50 focus:border-planA/40 transition-colors">
+                <button id="addPlanBtn" class="bg-planA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-planA/50" aria-label="Add plan">+</button>
               </div>
               <ul id="planList" class="item-list space-y-2 overflow-y-auto pr-1"></ul>
             </div>
@@ -190,7 +203,7 @@
       </section>
 
       <!-- 4. YT Videos -->
-      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-ytA rounded-xl transition-colors" data-panel="yt">
+      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-ytA rounded-xl shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-hairline hover:shadow-md dark:hover:shadow-none transition-all" data-panel="yt">
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
             <svg class="w-5 h-5 text-ytA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -205,10 +218,10 @@
           <div>
             <div class="px-5 pb-5">
               <div class="flex flex-col gap-2.5 mb-4">
-                <input type="text" id="ytTitleInput" placeholder="Video Title (e.g. Learn Python)" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-ytA/50 transition-colors">
+                <input type="text" id="ytTitleInput" placeholder="Video Title (e.g. Learn Python)" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA/40 transition-colors">
                 <div class="flex gap-2">
-                  <input type="text" id="ytInput" placeholder="Paste YT Link here..." class="flex-1 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-ytA/50 transition-colors">
-                  <button id="addYtBtn" class="bg-ytA text-white px-4 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-ytA/50">+</button>
+                  <input type="text" id="ytInput" placeholder="Paste YT Link here..." class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA/40 transition-colors">
+                  <button id="addYtBtn" class="bg-ytA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-ytA/50" aria-label="Save video">+</button>
                 </div>
               </div>
               <ul id="ytList" class="item-list space-y-3 overflow-y-auto pr-1"></ul>
@@ -218,6 +231,47 @@
       </section>
 
     </div>
+
+    <!-- 5. Notes (full width) -->
+    <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-noteA rounded-xl shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-hairline hover:shadow-md dark:hover:shadow-none transition-all" data-panel="notes">
+      <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none" aria-expanded="true">
+        <span class="flex items-center gap-2.5 min-w-0">
+          <svg class="w-5 h-5 text-noteA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+          <span class="font-display font-semibold text-lg truncate">Notes</span>
+        </span>
+        <span class="flex items-center gap-3 shrink-0">
+          <span id="noteCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
+          <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </span>
+      </button>
+      <div class="panel-body">
+        <div>
+          <div class="px-5 pb-5 grid grid-cols-1 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] gap-6">
+
+            <!-- Composer -->
+            <div class="flex flex-col gap-2.5 lg:border-r lg:border-slate-200 lg:dark:border-hairline lg:pr-6">
+              <input type="text" id="noteTitleInput" placeholder="Note title" class="w-full px-3.5 py-2.5 text-sm font-medium bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
+              <textarea id="noteBodyInput" rows="4" placeholder="Write the note here..." class="w-full px-3.5 py-2.5 text-sm leading-relaxed bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors"></textarea>
+
+              <div class="flex gap-2">
+                <input type="text" id="noteLinkLabelInput" placeholder="Link name" class="w-[38%] min-w-0 px-3 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
+                <input type="text" id="noteLinkInput" placeholder="Paste a link (YouTube embeds)" class="flex-1 min-w-0 px-3 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
+                <button id="addNoteLinkBtn" class="bg-slate-100 dark:bg-panelAlt text-slate-600 dark:text-ink border border-slate-200 dark:border-hairline w-11 shrink-0 rounded-lg hover:border-noteA hover:text-noteA active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-noteA/50" aria-label="Attach link">+</button>
+              </div>
+
+              <div id="noteLinkChips" class="hidden flex-wrap gap-2"></div>
+
+              <button id="addNoteBtn" class="mt-1 w-full bg-noteA text-white py-2.5 rounded-lg font-semibold text-sm hover:brightness-110 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-noteA/50">Save note</button>
+              <p class="text-xs font-mono text-inkMuted">Ctrl + Enter saves</p>
+            </div>
+
+            <!-- Saved notes -->
+            <ul id="noteList" class="note-list grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto pr-1 content-start"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div>
 
   <script type="module">
@@ -296,19 +350,146 @@
       links: document.getElementById('linkList'),
       tasks: document.getElementById('taskList'),
       plans: document.getElementById('planList'),
-      yt: document.getElementById('ytList')
+      yt: document.getElementById('ytList'),
+      notes: document.getElementById('noteList')
     };
 
-    const counts = { links: 0, tasks: 0, plans: 0, yt: 0 };
+    const counts = { links: 0, tasks: 0, plans: 0, yt: 0, notes: 0 };
     function updateTotalCount() {
-      const total = counts.links + counts.tasks + counts.plans + counts.yt;
+      const total = counts.links + counts.tasks + counts.plans + counts.yt + counts.notes;
       document.getElementById('totalCount').textContent = total + (total === 1 ? ' item tracked' : ' items tracked');
+    }
+
+    // Escape anything that gets injected as HTML
+    function esc(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[c]);
+    }
+
+    function normalizeUrl(url) {
+      const trimmed = url.trim();
+      if (!trimmed) return '';
+      return /^https?:\/\//i.test(trimmed) ? trimmed : 'https://' + trimmed;
+    }
+
+    function hostOf(url) {
+      try { return new URL(url).hostname.replace(/^www\./, ''); }
+      catch { return url; }
     }
 
     function getYTVideoId(url) {
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
       const match = url.match(regExp);
       return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function faviconFor(url) {
+      try {
+        const host = new URL(url).hostname;
+        return `https://www.google.com/s2/favicons?sz=32&domain=${host}`;
+      } catch {
+        return '';
+      }
+    }
+
+    const trashIcon = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
+
+    // --- NOTE COMPOSER: pending links ---
+    let pendingNoteLinks = [];
+    const noteLinkChips = document.getElementById('noteLinkChips');
+
+    function renderNoteChips() {
+      noteLinkChips.innerHTML = '';
+      if (!pendingNoteLinks.length) {
+        noteLinkChips.classList.add('hidden');
+        noteLinkChips.classList.remove('flex');
+        return;
+      }
+      noteLinkChips.classList.remove('hidden');
+      noteLinkChips.classList.add('flex');
+
+      pendingNoteLinks.forEach((link, index) => {
+        const chip = document.createElement('span');
+        chip.className = 'flex items-center gap-2 pl-2 pr-1.5 py-1 text-xs bg-noteA/10 text-slate-700 dark:text-ink border border-noteA/30 rounded-full';
+        chip.innerHTML = `
+          <span class="truncate max-w-[150px]">${esc(link.label || hostOf(link.url))}</span>
+          <button type="button" class="text-inkMuted hover:text-rose-500 transition-colors leading-none px-1" aria-label="Remove link">&times;</button>
+        `;
+        chip.querySelector('button').addEventListener('click', () => {
+          pendingNoteLinks.splice(index, 1);
+          renderNoteChips();
+        });
+        noteLinkChips.appendChild(chip);
+      });
+    }
+
+    function stageNoteLink() {
+      const urlInput = document.getElementById('noteLinkInput');
+      const labelInput = document.getElementById('noteLinkLabelInput');
+      const url = normalizeUrl(urlInput.value);
+      if (!url) return;
+      pendingNoteLinks.push({ url, label: labelInput.value.trim() });
+      urlInput.value = '';
+      labelInput.value = '';
+      renderNoteChips();
+    }
+
+    async function addNote() {
+      const titleInput = document.getElementById('noteTitleInput');
+      const bodyInput = document.getElementById('noteBodyInput');
+
+      // Pick up a link that was typed but not added yet
+      if (document.getElementById('noteLinkInput').value.trim()) stageNoteLink();
+
+      const title = titleInput.value.trim();
+      const body = bodyInput.value.trim();
+      if (!title && !body && !pendingNoteLinks.length) return;
+
+      await addDoc(collection(db, 'notes'), {
+        text: title || 'Untitled note',
+        body,
+        links: pendingNoteLinks,
+        createdAt: serverTimestamp()
+      });
+
+      titleInput.value = '';
+      bodyInput.value = '';
+      pendingNoteLinks = [];
+      renderNoteChips();
+      titleInput.focus();
+    }
+
+    // A note link renders as an interface: YouTube embeds, everything else as a link card
+    function renderNoteLink(link) {
+      if (!link || !link.url) return '';
+      const vidId = getYTVideoId(link.url);
+
+      if (vidId) {
+        return `
+          <div class="flex flex-col gap-2">
+            <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
+              <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${esc(vidId)}" title="${esc(link.label || 'YouTube video')}" frameborder="0" allowfullscreen loading="lazy"></iframe>
+            </div>
+            ${link.label ? `<span class="text-xs text-inkMuted truncate">${esc(link.label)}</span>` : ''}
+          </div>
+        `;
+      }
+
+      const host = hostOf(link.url);
+      const favicon = faviconFor(link.url);
+      return `
+        <a href="${esc(link.url)}" target="_blank" rel="noopener" class="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-panel border border-slate-200 dark:border-hairline hover:border-noteA/60 transition-colors group/link">
+          <span class="w-8 h-8 shrink-0 rounded-md bg-slate-100 dark:bg-panelHi border border-slate-200 dark:border-hairline flex items-center justify-center overflow-hidden">
+            ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4" onerror="this.style.visibility='hidden'" alt="">` : ''}
+          </span>
+          <span class="flex flex-col min-w-0 leading-tight">
+            <span class="text-sm font-medium text-slate-700 dark:text-ink truncate group-hover/link:text-noteA transition-colors">${esc(link.label || host)}</span>
+            <span class="text-xs font-mono text-inkMuted truncate">${esc(host)}</span>
+          </span>
+          <svg class="w-4 h-4 ml-auto shrink-0 text-inkMuted group-hover/link:text-noteA transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+        </a>
+      `;
     }
 
     // Consolidated add function for all types of data
@@ -329,9 +510,7 @@
       else if (type === 'link') {
         const titleInput = document.getElementById('linkTitleInput');
         dataToSave.text = titleInput.value.trim() || 'Saved Link';
-        let url = mainInputValue;
-        if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
-        dataToSave.url = url;
+        dataToSave.url = normalizeUrl(mainInputValue);
         titleInput.value = '';
       }
       else {
@@ -346,17 +525,9 @@
       links: 'No links saved yet — add one above.',
       tasks: 'Nothing on the list — add your first task.',
       plans: 'No plans yet — sketch out what\'s next.',
-      yt: 'No videos saved yet — paste a link above.'
+      yt: 'No videos saved yet — paste a link above.',
+      notes: 'No notes yet — write one on the left.'
     };
-
-    function faviconFor(url) {
-      try {
-        const host = new URL(url).hostname;
-        return `https://www.google.com/s2/favicons?sz=32&domain=${host}`;
-      } catch {
-        return '';
-      }
-    }
 
     function listenToCollection(collectionName, listElement, type, key, countId) {
       const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
@@ -370,7 +541,7 @@
 
         if (snapshot.empty) {
           const li = document.createElement('li');
-          li.className = 'text-sm text-slate-400 dark:text-inkMuted italic py-2';
+          li.className = 'col-span-full text-sm text-slate-400 dark:text-inkMuted italic py-2';
           li.textContent = emptyMessages[key];
           listElement.appendChild(li);
           return;
@@ -381,28 +552,45 @@
           const li = document.createElement('li');
           li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-lg border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
 
-          if (type === 'yt' && data.videoId) {
+          if (type === 'note') {
+            const links = Array.isArray(data.links) ? data.links : [];
+            li.className = 'group/item flex flex-col gap-3 p-4 bg-slate-50 dark:bg-panelAlt rounded-xl border border-slate-200 dark:border-hairline hover:border-noteA/50 transition-colors';
             li.innerHTML = `
               <div class="flex items-start justify-between gap-2">
-                <h3 class="font-medium text-sm text-slate-800 dark:text-ink leading-snug">${data.text}</h3>
-                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <h3 class="font-display font-semibold text-base text-slate-900 dark:text-white leading-snug">${esc(data.text)}</h3>
+                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete note">
+                  ${trashIcon}
+                </button>
+              </div>
+              ${data.body ? `<p class="text-sm text-slate-600 dark:text-ink/80 leading-relaxed whitespace-pre-wrap">${esc(data.body)}</p>` : ''}
+              ${links.length ? `
+                <div class="flex flex-col gap-2 pt-3 border-t border-slate-200 dark:border-hairline">
+                  ${links.map(renderNoteLink).join('')}
+                </div>` : ''}
+            `;
+          }
+          else if (type === 'yt' && data.videoId) {
+            li.innerHTML = `
+              <div class="flex items-start justify-between gap-2">
+                <h3 class="font-medium text-sm text-slate-800 dark:text-ink leading-snug">${esc(data.text)}</h3>
+                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete video">
+                  ${trashIcon}
                 </button>
               </div>
               <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-md bg-black">
-                <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${data.videoId}" frameborder="0" allowfullscreen></iframe>
+                <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${esc(data.videoId)}" frameborder="0" allowfullscreen loading="lazy"></iframe>
               </div>
             `;
           } else if (type === 'link' && data.url) {
             const favicon = faviconFor(data.url);
             li.innerHTML = `
               <div class="flex items-center justify-between w-full gap-3">
-                <a href="${data.url}" target="_blank" rel="noopener" class="flex items-center gap-2.5 min-w-0 text-sm font-medium text-slate-700 dark:text-ink hover:text-linkA dark:hover:text-linkA transition-colors">
-                  ${favicon ? `<img src="${favicon}" class="w-4 h-4 rounded-sm shrink-0" onerror="this.style.visibility='hidden'" alt="">` : ''}
-                  <span class="truncate">${data.text}</span>
+                <a href="${esc(data.url)}" target="_blank" rel="noopener" class="flex items-center gap-2.5 min-w-0 text-sm font-medium text-slate-700 dark:text-ink hover:text-linkA dark:hover:text-linkA transition-colors">
+                  ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4 rounded-sm shrink-0" onerror="this.style.visibility='hidden'" alt="">` : ''}
+                  <span class="truncate">${esc(data.text)}</span>
                 </a>
-                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete link">
+                  ${trashIcon}
                 </button>
               </div>
             `;
@@ -412,10 +600,10 @@
               <div class="flex items-center justify-between w-full gap-3">
                 <span class="flex items-center gap-2.5 min-w-0">
                   <span class="w-1.5 h-1.5 rounded-full ${dotColor} shrink-0"></span>
-                  <span class="text-sm text-slate-700 dark:text-ink truncate">${data.text}</span>
+                  <span class="text-sm text-slate-700 dark:text-ink truncate">${esc(data.text)}</span>
                 </span>
-                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete item">
+                  ${trashIcon}
                 </button>
               </div>
             `;
@@ -435,6 +623,8 @@
     document.getElementById('addTaskBtn').addEventListener('click', () => addItem('tasks', document.getElementById('taskInput'), 'text'));
     document.getElementById('addPlanBtn').addEventListener('click', () => addItem('plans', document.getElementById('planInput'), 'text'));
     document.getElementById('addYtBtn').addEventListener('click', () => addItem('ytLinks', document.getElementById('ytInput'), 'yt'));
+    document.getElementById('addNoteLinkBtn').addEventListener('click', stageNoteLink);
+    document.getElementById('addNoteBtn').addEventListener('click', addNote);
 
     // "Enter" Key Listeners
     ['linkUrlInput', 'taskInput', 'planInput', 'ytInput'].forEach(id => {
@@ -448,11 +638,29 @@
       });
     });
 
+    // Note composer keys: Enter attaches a link, Ctrl/Cmd + Enter saves the note
+    ['noteLinkInput', 'noteLinkLabelInput'].forEach(id => {
+      document.getElementById(id).addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); stageNoteLink(); }
+      });
+    });
+
+    ['noteTitleInput', 'noteBodyInput', 'noteLinkInput', 'noteLinkLabelInput'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); addNote(); }
+      });
+    });
+
+    document.getElementById('noteTitleInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('noteBodyInput').focus(); }
+    });
+
     // Start Listeners
     listenToCollection('quickLinks', lists.links, 'link', 'links', 'linkCount');
     listenToCollection('tasks', lists.tasks, 'text', 'tasks', 'taskCount');
     listenToCollection('plans', lists.plans, 'text', 'plans', 'planCount');
     listenToCollection('ytLinks', lists.yt, 'yt', 'yt', 'ytCount');
+    listenToCollection('notes', lists.notes, 'note', 'notes', 'noteCount');
 
   </script>
 </body>
