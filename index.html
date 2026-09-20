@@ -29,6 +29,8 @@
             planA: '#5FD9A4',
             ytA: '#FF6F91',
             noteA: '#A78BFA',
+            urgent: '#FF5C7A',
+            steady: '#63C8FF',
           },
           fontFamily: {
             display: ['"Space Grotesk"', 'sans-serif'],
@@ -41,7 +43,7 @@
   </script>
 
   <style>
-    body { font-family: 'Inter', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+    body { font-family: 'Inter', sans-serif; transition: background-color .3s ease, color .3s ease; }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -54,79 +56,168 @@
     .panel-body {
       display: grid;
       grid-template-rows: 1fr;
-      transition: grid-template-rows 0.35s ease, opacity 0.3s ease;
+      transition: grid-template-rows .35s ease, opacity .3s ease;
       opacity: 1;
     }
     .panel-body > div { overflow: hidden; min-height: 0; }
     .panel.collapsed .panel-body { grid-template-rows: 0fr; opacity: 0; }
 
-    .item-list { max-height: 300px; }
-    .note-list { max-height: 560px; }
+    .scroll-area { overflow-y: auto; scrollbar-gutter: stable; }
+    .list-short { max-height: 320px; }
+    .list-tall  { max-height: 460px; }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .entrance { animation: fadeInUp 0.5s ease both; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .entrance { animation: fadeInUp .45s ease both; }
 
-    /* Keyboard focus stays visible everywhere */
-    :focus-visible { outline: 2px solid #7C9EFF; outline-offset: 2px; }
+    :focus-visible { outline: 2px solid #7C9EFF; outline-offset: 2px; border-radius: 4px; }
 
     textarea { resize: vertical; }
 
+    .seg { border: 1px solid transparent; }
+    .done-text { text-decoration: line-through; }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
-        animation-duration: 0.01ms !important;
+        animation-duration: .01ms !important;
         animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+        transition-duration: .01ms !important;
         scroll-behavior: auto !important;
       }
     }
   </style>
 </head>
-<body class="bg-[#F7F6F2] dark:bg-graphite text-slate-800 dark:text-ink min-h-screen p-4 md:p-8">
+<body class="bg-[#F7F6F2] dark:bg-graphite text-slate-800 dark:text-ink min-h-screen">
 
-  <div class="max-w-[1400px] mx-auto space-y-6 entrance">
+  <!-- Command bar -->
+  <header class="sticky top-0 z-30 bg-[#F7F6F2]/85 dark:bg-graphite/85 backdrop-blur-md border-b border-slate-200 dark:border-hairline">
+    <div class="max-w-[1500px] mx-auto px-4 md:px-8 py-3 flex flex-wrap items-center gap-x-4 gap-y-3">
 
-    <!-- Header -->
-    <header class="relative overflow-hidden flex flex-wrap justify-between items-center gap-4 bg-white dark:bg-panel px-6 py-5 rounded-xl border border-slate-200 dark:border-hairline shadow-sm dark:shadow-none">
-      <div class="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-linkA via-taskA via-planA via-noteA to-ytA opacity-80"></div>
-
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-panelAlt border border-slate-200 dark:border-hairline flex items-center justify-center font-display font-bold text-sm text-slate-500 dark:text-inkMuted">
+      <div class="flex items-center gap-3 mr-auto min-w-0">
+        <div class="w-9 h-9 rounded-lg bg-slate-900 dark:bg-panelAlt border border-slate-800 dark:border-hairline flex items-center justify-center font-display font-bold text-xs text-white dark:text-inkMuted shrink-0">
           UD
         </div>
-        <div>
-          <h1 class="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white leading-tight">Umar's Dashboard</h1>
-          <div class="flex items-center gap-2 mt-1">
-            <span class="relative flex h-1.5 w-1.5">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-planA opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-planA"></span>
-            </span>
-            <span class="text-xs font-mono text-inkMuted">Synced</span>
-            <span class="text-xs font-mono text-slate-300 dark:text-hairline">/</span>
-            <span id="totalCount" class="text-xs font-mono text-inkMuted"></span>
-          </div>
+        <div class="min-w-0">
+          <h1 id="greeting" class="font-display text-lg md:text-xl font-semibold tracking-tight text-slate-900 dark:text-white leading-tight truncate">Umar's Dashboard</h1>
+          <p id="clockLine" class="text-[11px] font-mono text-inkMuted truncate"></p>
         </div>
       </div>
 
-      <div class="flex items-center gap-4">
-        <div class="hidden sm:flex flex-col items-end leading-tight font-mono text-inkMuted">
-          <span id="clockDate" class="text-xs"></span>
-          <span id="clockTime" class="text-sm font-medium text-slate-700 dark:text-ink"></span>
+      <div class="order-last w-full lg:order-none lg:w-auto lg:flex-1 lg:max-w-md">
+        <div class="relative">
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-inkMuted pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"></path></svg>
+          <input type="search" id="searchInput" placeholder="Search everything" aria-label="Search all panels"
+            class="w-full pl-9 pr-16 py-2.5 text-sm bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA/40 transition-colors">
+          <kbd class="hidden sm:block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-inkMuted border border-slate-200 dark:border-hairline rounded px-1.5 py-0.5">/</kbd>
         </div>
-        <button id="themeToggle" class="p-3 rounded-lg bg-slate-100 dark:bg-panelAlt border border-slate-200 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400" title="Toggle Theme" aria-label="Toggle color theme">
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="collapseAllBtn" class="hidden md:inline-flex items-center gap-2 px-3 py-2.5 text-xs font-medium rounded-lg bg-white dark:bg-panel border border-slate-200 dark:border-hairline text-slate-600 dark:text-inkMuted hover:border-slate-300 dark:hover:border-inkMuted/50 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+          <span id="collapseAllLabel">Collapse all</span>
+        </button>
+        <button id="themeToggle" class="p-2.5 rounded-lg bg-white dark:bg-panel border border-slate-200 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/50 transition-colors" title="Toggle theme" aria-label="Toggle color theme">
           <span id="themeIcon">🌓</span>
         </button>
       </div>
-    </header>
+    </div>
 
-    <!-- 4-Column Grid Layout -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+    <!-- Live counters -->
+    <div class="max-w-[1500px] mx-auto px-4 md:px-8 pb-3">
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs font-mono text-inkMuted">
+        <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-taskA"></span><span id="statOpen">0</span> open</span>
+        <span class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-hairline"></span>
+        <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-urgent"></span><span id="statHigh">0</span> high priority</span>
+        <span class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-hairline"></span>
+        <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-planA"></span><span id="statDone">0</span> done</span>
+        <span class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-hairline"></span>
+        <span id="statTotal">0 items tracked</span>
+        <span id="searchNotice" class="hidden items-center gap-1.5 text-linkA"></span>
+      </div>
+    </div>
+  </header>
 
-      <!-- 1. Quick Links -->
-      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-linkA rounded-xl shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-hairline hover:shadow-md dark:hover:shadow-none transition-all" data-panel="links">
-        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none" aria-expanded="true">
+  <main class="max-w-[1500px] mx-auto px-4 md:px-8 py-6 entrance">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5">
+
+      <!-- What To Do Next -->
+      <section class="panel md:col-span-2 xl:col-span-5 bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="tasks">
+        <div class="h-1 bg-taskA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
+          <span class="flex items-center gap-2.5 min-w-0">
+            <svg class="w-5 h-5 text-taskA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            <span class="font-display font-semibold text-lg truncate">What To Do Next</span>
+          </span>
+          <span class="flex items-center gap-3 shrink-0">
+            <span id="taskCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
+        </button>
+        <div class="panel-body">
+          <div>
+            <div class="px-5 pb-5">
+
+              <div class="flex gap-2">
+                <input type="text" id="taskInput" placeholder="What needs doing?" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-taskA/50 focus:border-taskA/40 transition-colors">
+                <button id="addTaskBtn" class="bg-taskA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Add task">+</button>
+              </div>
+
+              <div class="flex items-center gap-2 mt-2.5">
+                <span class="text-[11px] font-mono text-inkMuted shrink-0">priority</span>
+                <div id="prioritySelect" class="flex gap-1.5 flex-wrap" role="group" aria-label="Priority for new task"></div>
+              </div>
+
+              <div class="flex items-center gap-1.5 mt-4 overflow-x-auto pb-1 -mx-1 px-1" id="taskFilters" role="group" aria-label="Filter tasks"></div>
+
+              <ul id="taskList" class="scroll-area list-tall space-y-2 pr-1 mt-3"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notes -->
+      <section class="panel md:col-span-2 xl:col-span-7 bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="notes">
+        <div class="h-1 bg-noteA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
+          <span class="flex items-center gap-2.5 min-w-0">
+            <svg class="w-5 h-5 text-noteA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+            <span class="font-display font-semibold text-lg truncate">Notes</span>
+          </span>
+          <span class="flex items-center gap-3 shrink-0">
+            <span id="noteCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
+        </button>
+        <div class="panel-body">
+          <div>
+            <div class="px-5 pb-5 grid grid-cols-1 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] gap-5">
+
+              <div class="flex flex-col gap-2.5 lg:border-r lg:border-slate-200 lg:dark:border-hairline lg:pr-5">
+                <input type="text" id="noteTitleInput" placeholder="Note title" class="w-full px-3.5 py-2.5 text-sm font-medium bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
+                <textarea id="noteBodyInput" rows="4" placeholder="Write the note here..." class="w-full px-3.5 py-2.5 text-sm leading-relaxed bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors"></textarea>
+
+                <div class="flex gap-2">
+                  <input type="text" id="noteLinkLabelInput" placeholder="Link name" class="w-[38%] min-w-0 px-3 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
+                  <input type="text" id="noteLinkInput" placeholder="Paste a link" class="flex-1 min-w-0 px-3 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
+                  <button id="addNoteLinkBtn" class="bg-slate-100 dark:bg-panelAlt text-slate-600 dark:text-ink border border-slate-200 dark:border-hairline w-11 shrink-0 rounded-lg hover:border-noteA hover:text-noteA active:scale-95 transition-all font-bold" aria-label="Attach link">+</button>
+                </div>
+
+                <div id="noteLinkChips" class="hidden flex-wrap gap-2"></div>
+
+                <button id="addNoteBtn" class="mt-1 w-full bg-noteA text-white py-2.5 rounded-lg font-semibold text-sm hover:brightness-110 active:scale-[.98] transition-all">Save note</button>
+                <p class="text-[11px] font-mono text-inkMuted">Ctrl + Enter saves · YouTube links embed</p>
+              </div>
+
+              <ul id="noteList" class="scroll-area list-tall grid grid-cols-1 xl:grid-cols-2 gap-4 pr-1 content-start"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Links -->
+      <section class="panel xl:col-span-3 bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="links">
+        <div class="h-1 bg-linkA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
             <svg class="w-5 h-5 text-linkA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
             <span class="font-display font-semibold text-lg truncate">Quick Links</span>
@@ -143,43 +234,19 @@
                 <input type="text" id="linkTitleInput" placeholder="Name (e.g. ChatGPT)" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA/40 transition-colors">
                 <div class="flex gap-2">
                   <input type="text" id="linkUrlInput" placeholder="URL (e.g. chatgpt.com)" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA/40 transition-colors">
-                  <button id="addLinkBtn" class="bg-linkA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-linkA/50" aria-label="Save link">+</button>
+                  <button id="addLinkBtn" class="bg-linkA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Save link">+</button>
                 </div>
               </div>
-              <ul id="linkList" class="item-list space-y-2 overflow-y-auto pr-1"></ul>
+              <ul id="linkList" class="scroll-area list-short space-y-2 pr-1"></ul>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 2. What To Do Next -->
-      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-taskA rounded-xl shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-hairline hover:shadow-md dark:hover:shadow-none transition-all" data-panel="tasks">
-        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none" aria-expanded="true">
-          <span class="flex items-center gap-2.5 min-w-0">
-            <svg class="w-5 h-5 text-taskA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-            <span class="font-display font-semibold text-lg truncate">What To Do Next</span>
-          </span>
-          <span class="flex items-center gap-3 shrink-0">
-            <span id="taskCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
-            <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-          </span>
-        </button>
-        <div class="panel-body">
-          <div>
-            <div class="px-5 pb-5">
-              <div class="flex gap-2 mb-4">
-                <input type="text" id="taskInput" placeholder="Add a new task..." class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-taskA/50 focus:border-taskA/40 transition-colors">
-                <button id="addTaskBtn" class="bg-taskA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-taskA/50" aria-label="Add task">+</button>
-              </div>
-              <ul id="taskList" class="item-list space-y-2 overflow-y-auto pr-1"></ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 3. Long Term Plans -->
-      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-planA rounded-xl shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-hairline hover:shadow-md dark:hover:shadow-none transition-all" data-panel="plans">
-        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none" aria-expanded="true">
+      <!-- Long Term Plans -->
+      <section class="panel xl:col-span-3 bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="plans">
+        <div class="h-1 bg-planA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
             <svg class="w-5 h-5 text-planA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22M21.75 12.75V7.5h-5.25"></path></svg>
             <span class="font-display font-semibold text-lg truncate">Long Term Plans</span>
@@ -194,17 +261,18 @@
             <div class="px-5 pb-5">
               <div class="flex gap-2 mb-4">
                 <input type="text" id="planInput" placeholder="Add a future plan..." class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-planA/50 focus:border-planA/40 transition-colors">
-                <button id="addPlanBtn" class="bg-planA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-planA/50" aria-label="Add plan">+</button>
+                <button id="addPlanBtn" class="bg-planA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Add plan">+</button>
               </div>
-              <ul id="planList" class="item-list space-y-2 overflow-y-auto pr-1"></ul>
+              <ul id="planList" class="scroll-area list-short space-y-2 pr-1"></ul>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 4. YT Videos -->
-      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-ytA rounded-xl shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-hairline hover:shadow-md dark:hover:shadow-none transition-all" data-panel="yt">
-        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none" aria-expanded="true">
+      <!-- YouTube -->
+      <section class="panel md:col-span-2 xl:col-span-6 bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="yt">
+        <div class="h-1 bg-ytA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
             <svg class="w-5 h-5 text-ytA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <span class="font-display font-semibold text-lg truncate">YouTube Links</span>
@@ -217,65 +285,24 @@
         <div class="panel-body">
           <div>
             <div class="px-5 pb-5">
-              <div class="flex flex-col gap-2.5 mb-4">
-                <input type="text" id="ytTitleInput" placeholder="Video Title (e.g. Learn Python)" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA/40 transition-colors">
-                <div class="flex gap-2">
-                  <input type="text" id="ytInput" placeholder="Paste YT Link here..." class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA/40 transition-colors">
-                  <button id="addYtBtn" class="bg-ytA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-ytA/50" aria-label="Save video">+</button>
+              <div class="flex flex-col sm:flex-row gap-2.5 mb-4">
+                <input type="text" id="ytTitleInput" placeholder="Video title (e.g. Learn Python)" class="sm:w-[40%] min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA/40 transition-colors">
+                <div class="flex gap-2 flex-1">
+                  <input type="text" id="ytInput" placeholder="Paste YT link here..." class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA/40 transition-colors">
+                  <button id="addYtBtn" class="bg-ytA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Save video">+</button>
                 </div>
               </div>
-              <ul id="ytList" class="item-list space-y-3 overflow-y-auto pr-1"></ul>
+              <ul id="ytList" class="scroll-area list-tall grid grid-cols-1 lg:grid-cols-2 gap-4 pr-1 content-start"></ul>
             </div>
           </div>
         </div>
       </section>
 
     </div>
-
-    <!-- 5. Notes (full width) -->
-    <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline border-l-4 border-l-noteA rounded-xl shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-hairline hover:shadow-md dark:hover:shadow-none transition-all" data-panel="notes">
-      <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none" aria-expanded="true">
-        <span class="flex items-center gap-2.5 min-w-0">
-          <svg class="w-5 h-5 text-noteA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-          <span class="font-display font-semibold text-lg truncate">Notes</span>
-        </span>
-        <span class="flex items-center gap-3 shrink-0">
-          <span id="noteCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
-          <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-        </span>
-      </button>
-      <div class="panel-body">
-        <div>
-          <div class="px-5 pb-5 grid grid-cols-1 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] gap-6">
-
-            <!-- Composer -->
-            <div class="flex flex-col gap-2.5 lg:border-r lg:border-slate-200 lg:dark:border-hairline lg:pr-6">
-              <input type="text" id="noteTitleInput" placeholder="Note title" class="w-full px-3.5 py-2.5 text-sm font-medium bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
-              <textarea id="noteBodyInput" rows="4" placeholder="Write the note here..." class="w-full px-3.5 py-2.5 text-sm leading-relaxed bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors"></textarea>
-
-              <div class="flex gap-2">
-                <input type="text" id="noteLinkLabelInput" placeholder="Link name" class="w-[38%] min-w-0 px-3 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
-                <input type="text" id="noteLinkInput" placeholder="Paste a link (YouTube embeds)" class="flex-1 min-w-0 px-3 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
-                <button id="addNoteLinkBtn" class="bg-slate-100 dark:bg-panelAlt text-slate-600 dark:text-ink border border-slate-200 dark:border-hairline w-11 shrink-0 rounded-lg hover:border-noteA hover:text-noteA active:scale-95 transition-all font-bold focus:outline-none focus:ring-2 focus:ring-noteA/50" aria-label="Attach link">+</button>
-              </div>
-
-              <div id="noteLinkChips" class="hidden flex-wrap gap-2"></div>
-
-              <button id="addNoteBtn" class="mt-1 w-full bg-noteA text-white py-2.5 rounded-lg font-semibold text-sm hover:brightness-110 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-noteA/50">Save note</button>
-              <p class="text-xs font-mono text-inkMuted">Ctrl + Enter saves</p>
-            </div>
-
-            <!-- Saved notes -->
-            <ul id="noteList" class="note-list grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto pr-1 content-start"></ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </div>
+  </main>
 
   <script type="module">
-    // --- THEME TOGGLE LOGIC ---
+    // --- THEME ---
     const themeToggleBtn = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
     const html = document.documentElement;
@@ -290,48 +317,65 @@
 
     themeToggleBtn.addEventListener('click', () => {
       html.classList.toggle('dark');
-      if (html.classList.contains('dark')) {
-        localStorage.theme = 'dark';
-        themeIcon.textContent = '☀️';
-      } else {
-        localStorage.theme = 'light';
-        themeIcon.textContent = '🌙';
-      }
+      const dark = html.classList.contains('dark');
+      localStorage.theme = dark ? 'dark' : 'light';
+      themeIcon.textContent = dark ? '☀️' : '🌙';
     });
 
-    // --- CLOCK ---
+    // --- CLOCK + GREETING ---
     function updateClock() {
       const now = new Date();
-      document.getElementById('clockDate').textContent = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-      document.getElementById('clockTime').textContent = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      const hour = now.getHours();
+      const part = hour < 5 ? 'Late night' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 22 ? 'Good evening' : 'Winding down';
+      document.getElementById('greeting').textContent = `${part}, Umar`;
+      document.getElementById('clockLine').textContent =
+        now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }) +
+        '   ' + now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
     }
     updateClock();
     setInterval(updateClock, 30000);
 
-    // --- COLLAPSE / EXPAND PANELS ---
-    document.querySelectorAll('.panel').forEach((panel) => {
+    // --- COLLAPSE / EXPAND ---
+    const panels = [...document.querySelectorAll('.panel')];
+    const panelApi = new Map();
+
+    panels.forEach((panel) => {
       const key = 'panelCollapsed:' + panel.dataset.panel;
       const toggleBtn = panel.querySelector('.collapse-toggle');
       const chevron = panel.querySelector('.chevron');
 
-      const setCollapsed = (collapsed) => {
+      const setCollapsed = (collapsed, persist = true) => {
         panel.classList.toggle('collapsed', collapsed);
         chevron.classList.toggle('-rotate-90', collapsed);
         toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+        if (persist) localStorage.setItem(key, String(collapsed));
       };
 
-      if (localStorage.getItem(key) === 'true') setCollapsed(true);
+      panelApi.set(panel, setCollapsed);
+      if (localStorage.getItem(key) === 'true') setCollapsed(true, false);
 
       toggleBtn.addEventListener('click', () => {
-        const collapsed = !panel.classList.contains('collapsed');
-        setCollapsed(collapsed);
-        localStorage.setItem(key, String(collapsed));
+        setCollapsed(!panel.classList.contains('collapsed'));
+        syncCollapseAllLabel();
       });
     });
 
-    // --- FIREBASE LOGIC ---
+    const collapseAllBtn = document.getElementById('collapseAllBtn');
+    const collapseAllLabel = document.getElementById('collapseAllLabel');
+    function syncCollapseAllLabel() {
+      const allCollapsed = panels.every(p => p.classList.contains('collapsed'));
+      collapseAllLabel.textContent = allCollapsed ? 'Expand all' : 'Collapse all';
+    }
+    syncCollapseAllLabel();
+    collapseAllBtn.addEventListener('click', () => {
+      const allCollapsed = panels.every(p => p.classList.contains('collapsed'));
+      panels.forEach(p => panelApi.get(p)(!allCollapsed));
+      syncCollapseAllLabel();
+    });
+
+    // --- FIREBASE ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA4IOS2Kr2jBDnt37_b7YGqTbieNgtpCfU",
@@ -346,37 +390,20 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const lists = {
-      links: document.getElementById('linkList'),
-      tasks: document.getElementById('taskList'),
-      plans: document.getElementById('planList'),
-      yt: document.getElementById('ytList'),
-      notes: document.getElementById('noteList')
-    };
-
-    const counts = { links: 0, tasks: 0, plans: 0, yt: 0, notes: 0 };
-    function updateTotalCount() {
-      const total = counts.links + counts.tasks + counts.plans + counts.yt + counts.notes;
-      document.getElementById('totalCount').textContent = total + (total === 1 ? ' item tracked' : ' items tracked');
-    }
-
-    // Escape anything that gets injected as HTML
+    // --- HELPERS ---
     function esc(value) {
       return String(value ?? '').replace(/[&<>"']/g, (c) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       })[c]);
     }
 
-    function normalizeUrl(url) {
-      const trimmed = url.trim();
-      if (!trimmed) return '';
-      return /^https?:\/\//i.test(trimmed) ? trimmed : 'https://' + trimmed;
-    }
+    const normalizeUrl = (url) => {
+      const t = url.trim();
+      if (!t) return '';
+      return /^https?:\/\//i.test(t) ? t : 'https://' + t;
+    };
 
-    function hostOf(url) {
-      try { return new URL(url).hostname.replace(/^www\./, ''); }
-      catch { return url; }
-    }
+    const hostOf = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; } };
 
     function getYTVideoId(url) {
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -384,38 +411,383 @@
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
-    function faviconFor(url) {
-      try {
-        const host = new URL(url).hostname;
-        return `https://www.google.com/s2/favicons?sz=32&domain=${host}`;
-      } catch {
-        return '';
-      }
-    }
+    const faviconFor = (url) => {
+      try { return `https://www.google.com/s2/favicons?sz=32&domain=${new URL(url).hostname}`; }
+      catch { return ''; }
+    };
 
     const trashIcon = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
 
-    // --- NOTE COMPOSER: pending links ---
+    // --- PRIORITIES ---
+    const PRIORITIES = {
+      high:   { label: 'High',   rank: 0, dot: 'bg-urgent', chip: 'text-rose-600 dark:text-rose-300 bg-rose-500/10 border-rose-500/30', on: 'bg-urgent text-white border-urgent' },
+      medium: { label: 'Medium', rank: 1, dot: 'bg-taskA',  chip: 'text-amber-600 dark:text-amber-300 bg-amber-500/10 border-amber-500/30', on: 'bg-taskA text-white border-taskA' },
+      low:    { label: 'Low',    rank: 2, dot: 'bg-steady', chip: 'text-sky-600 dark:text-sky-300 bg-sky-500/10 border-sky-500/30', on: 'bg-steady text-white border-steady' },
+    };
+    const PRIORITY_ORDER = ['high', 'medium', 'low'];
+    const priorityOf = (t) => PRIORITIES[t.priority] ? t.priority : 'medium';
+
+    let newTaskPriority = localStorage.getItem('newTaskPriority') || 'medium';
+    if (!PRIORITIES[newTaskPriority]) newTaskPriority = 'medium';
+
+    const prioritySelect = document.getElementById('prioritySelect');
+    function renderPrioritySelect() {
+      prioritySelect.innerHTML = '';
+      PRIORITY_ORDER.forEach((p) => {
+        const conf = PRIORITIES[p];
+        const active = p === newTaskPriority;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-pressed', String(active));
+        btn.className = 'seg flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition-all ' +
+          (active ? conf.on + ' font-semibold' : 'bg-slate-100 dark:bg-panelAlt text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/40');
+        btn.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${active ? 'bg-white/80' : conf.dot}"></span>${conf.label}`;
+        btn.addEventListener('click', () => {
+          newTaskPriority = p;
+          localStorage.setItem('newTaskPriority', p);
+          renderPrioritySelect();
+        });
+        prioritySelect.appendChild(btn);
+      });
+    }
+    renderPrioritySelect();
+
+    // --- FILTERS + SEARCH ---
+    let taskFilter = localStorage.getItem('taskFilter') || 'open';
+    let searchTerm = '';
+
+    const FILTERS = [
+      { id: 'open', label: 'Open' },
+      { id: 'high', label: 'High' },
+      { id: 'medium', label: 'Medium' },
+      { id: 'low', label: 'Low' },
+      { id: 'done', label: 'Done' },
+      { id: 'all', label: 'All' },
+    ];
+
+    const taskFilters = document.getElementById('taskFilters');
+    function renderFilters() {
+      taskFilters.innerHTML = '';
+      FILTERS.forEach(f => {
+        const active = f.id === taskFilter;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-pressed', String(active));
+        btn.className = 'seg shrink-0 px-2.5 py-1 rounded-lg text-xs transition-colors ' +
+          (active ? 'bg-slate-900 dark:bg-ink text-white dark:text-graphite border-slate-900 dark:border-ink font-semibold'
+                  : 'bg-transparent text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/40');
+        btn.textContent = f.label;
+        btn.addEventListener('click', () => {
+          taskFilter = f.id;
+          localStorage.setItem('taskFilter', f.id);
+          renderFilters();
+          renderList('tasks');
+          updateStats();
+        });
+        taskFilters.appendChild(btn);
+      });
+    }
+    renderFilters();
+
+    const searchInput = document.getElementById('searchInput');
+    const searchNotice = document.getElementById('searchNotice');
+    searchInput.addEventListener('input', () => {
+      searchTerm = searchInput.value.trim().toLowerCase();
+      Object.keys(state).forEach(renderList);
+      updateStats();
+    });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { searchInput.value = ''; searchInput.dispatchEvent(new Event('input')); searchInput.blur(); }
+    });
+    document.addEventListener('keydown', (e) => {
+      const tag = document.activeElement && document.activeElement.tagName;
+      const typing = tag === 'INPUT' || tag === 'TEXTAREA';
+      if (e.key === '/' && !typing) { e.preventDefault(); searchInput.focus(); }
+    });
+
+    // --- STATE ---
+    const state = { tasks: [], notes: [], links: [], plans: [], yt: [] };
+
+    const config = {
+      tasks: { collection: 'tasks',      el: document.getElementById('taskList'), countId: 'taskCount' },
+      notes: { collection: 'notes',      el: document.getElementById('noteList'), countId: 'noteCount' },
+      links: { collection: 'quickLinks', el: document.getElementById('linkList'), countId: 'linkCount' },
+      plans: { collection: 'plans',      el: document.getElementById('planList'), countId: 'planCount' },
+      yt:    { collection: 'ytLinks',    el: document.getElementById('ytList'),   countId: 'ytCount' },
+    };
+
+    const emptyMessages = {
+      tasks: 'Nothing here — add a task or switch the filter.',
+      notes: 'No notes yet — write one on the left.',
+      links: 'No links saved yet — add one above.',
+      plans: 'No plans yet — sketch out what\'s next.',
+      yt: 'No videos saved yet — paste a link above.'
+    };
+
+    function searchableText(key, item) {
+      if (key === 'notes') {
+        const linkText = (item.links || []).map(l => `${l.label || ''} ${l.url || ''}`).join(' ');
+        return `${item.text || ''} ${item.body || ''} ${linkText}`.toLowerCase();
+      }
+      return `${item.text || ''} ${item.url || ''}`.toLowerCase();
+    }
+
+    // --- RENDERERS ---
+    function renderNoteLink(link) {
+      if (!link || !link.url) return '';
+      const vidId = getYTVideoId(link.url);
+
+      if (vidId) {
+        return `
+          <div class="flex flex-col gap-2">
+            <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
+              <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${esc(vidId)}" title="${esc(link.label || 'YouTube video')}" frameborder="0" allowfullscreen loading="lazy"></iframe>
+            </div>
+            ${link.label ? `<span class="text-xs text-inkMuted truncate">${esc(link.label)}</span>` : ''}
+          </div>`;
+      }
+
+      const host = hostOf(link.url);
+      const favicon = faviconFor(link.url);
+      return `
+        <a href="${esc(link.url)}" target="_blank" rel="noopener" class="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-panel border border-slate-200 dark:border-hairline hover:border-noteA/60 transition-colors group/link">
+          <span class="w-8 h-8 shrink-0 rounded-md bg-slate-100 dark:bg-panelHi border border-slate-200 dark:border-hairline flex items-center justify-center overflow-hidden">
+            ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4" onerror="this.style.visibility='hidden'" alt="">` : ''}
+          </span>
+          <span class="flex flex-col min-w-0 leading-tight">
+            <span class="text-sm font-medium text-slate-700 dark:text-ink truncate group-hover/link:text-noteA transition-colors">${esc(link.label || host)}</span>
+            <span class="text-xs font-mono text-inkMuted truncate">${esc(host)}</span>
+          </span>
+          <svg class="w-4 h-4 ml-auto shrink-0 text-inkMuted group-hover/link:text-noteA transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+        </a>`;
+    }
+
+    function buildTaskItem(item, collectionName) {
+      const p = priorityOf(item);
+      const conf = PRIORITIES[p];
+      const done = !!item.done;
+
+      const li = document.createElement('li');
+      li.className = 'group/item flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-panelAlt border border-slate-200/70 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/30 transition-colors' + (done ? ' opacity-60' : '');
+
+      li.innerHTML = `
+        <button class="toggle-btn mt-0.5 w-5 h-5 shrink-0 rounded-md border-2 flex items-center justify-center transition-colors ${done ? 'bg-planA border-planA text-white' : 'border-slate-300 dark:border-inkMuted/50 hover:border-planA'}" aria-label="${done ? 'Mark as not done' : 'Mark as done'}" aria-pressed="${done}">
+          ${done ? `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>` : ''}
+        </button>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm text-slate-700 dark:text-ink break-words ${done ? 'done-text' : ''}">${esc(item.text)}</p>
+          <button class="priority-btn seg mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] ${conf.chip} hover:brightness-110 transition-all" title="Change priority">
+            <span class="w-1.5 h-1.5 rounded-full ${conf.dot}"></span>${conf.label}
+          </button>
+        </div>
+        <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete task">${trashIcon}</button>
+      `;
+
+      li.querySelector('.toggle-btn').addEventListener('click', () =>
+        updateDoc(doc(db, collectionName, item.id), { done: !done })
+      );
+
+      li.querySelector('.priority-btn').addEventListener('click', () => {
+        const next = PRIORITY_ORDER[(PRIORITY_ORDER.indexOf(p) + 1) % PRIORITY_ORDER.length];
+        updateDoc(doc(db, collectionName, item.id), { priority: next });
+      });
+
+      return li;
+    }
+
+    function buildItem(key, item) {
+      const collectionName = config[key].collection;
+
+      if (key === 'tasks') {
+        const li = buildTaskItem(item, collectionName);
+        li.querySelector('.delete-btn').addEventListener('click', () => deleteDoc(doc(db, collectionName, item.id)));
+        return li;
+      }
+
+      const li = document.createElement('li');
+      li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
+
+      if (key === 'notes') {
+        const links = Array.isArray(item.links) ? item.links : [];
+        li.className = 'group/item flex flex-col gap-3 p-4 bg-slate-50 dark:bg-panelAlt rounded-xl border border-slate-200 dark:border-hairline hover:border-noteA/50 transition-colors';
+        li.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="font-display font-semibold text-base text-slate-900 dark:text-white leading-snug break-words">${esc(item.text)}</h3>
+            <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete note">${trashIcon}</button>
+          </div>
+          ${item.body ? `<p class="text-sm text-slate-600 dark:text-ink/80 leading-relaxed whitespace-pre-wrap break-words">${esc(item.body)}</p>` : ''}
+          ${links.length ? `<div class="flex flex-col gap-2 pt-3 border-t border-slate-200 dark:border-hairline">${links.map(renderNoteLink).join('')}</div>` : ''}
+        `;
+      }
+      else if (key === 'yt' && item.videoId) {
+        li.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="font-medium text-sm text-slate-800 dark:text-ink leading-snug break-words">${esc(item.text)}</h3>
+            <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete video">${trashIcon}</button>
+          </div>
+          <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
+            <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${esc(item.videoId)}" frameborder="0" allowfullscreen loading="lazy"></iframe>
+          </div>`;
+      }
+      else if (key === 'links' && item.url) {
+        const favicon = faviconFor(item.url);
+        li.innerHTML = `
+          <div class="flex items-center justify-between w-full gap-3">
+            <a href="${esc(item.url)}" target="_blank" rel="noopener" class="flex items-center gap-2.5 min-w-0 text-sm font-medium text-slate-700 dark:text-ink hover:text-linkA transition-colors">
+              ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4 rounded-sm shrink-0" onerror="this.style.visibility='hidden'" alt="">` : ''}
+              <span class="truncate">${esc(item.text)}</span>
+            </a>
+            <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete link">${trashIcon}</button>
+          </div>`;
+      }
+      else {
+        li.innerHTML = `
+          <div class="flex items-center justify-between w-full gap-3">
+            <span class="flex items-center gap-2.5 min-w-0">
+              <span class="w-1.5 h-1.5 rounded-full bg-planA shrink-0"></span>
+              <span class="text-sm text-slate-700 dark:text-ink truncate">${esc(item.text)}</span>
+            </span>
+            <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete item">${trashIcon}</button>
+          </div>`;
+      }
+
+      li.querySelector('.delete-btn').addEventListener('click', () => deleteDoc(doc(db, collectionName, item.id)));
+      return li;
+    }
+
+    function visibleItems(key) {
+      let items = state[key];
+
+      if (searchTerm) items = items.filter(i => searchableText(key, i).includes(searchTerm));
+
+      if (key === 'tasks') {
+        items = items.filter(t => {
+          if (taskFilter === 'all') return true;
+          if (taskFilter === 'open') return !t.done;
+          if (taskFilter === 'done') return !!t.done;
+          return priorityOf(t) === taskFilter && !t.done;
+        });
+        // Open before done, then high to low. Array#sort is stable, so newest-first holds within ties.
+        items = items.slice().sort((a, b) => {
+          if (!!a.done !== !!b.done) return a.done ? 1 : -1;
+          return PRIORITIES[priorityOf(a)].rank - PRIORITIES[priorityOf(b)].rank;
+        });
+      }
+
+      return items;
+    }
+
+    function renderList(key) {
+      const listEl = config[key].el;
+      const items = visibleItems(key);
+      listEl.innerHTML = '';
+
+      if (!items.length) {
+        const li = document.createElement('li');
+        li.className = 'col-span-full text-sm text-slate-400 dark:text-inkMuted italic py-2';
+        li.textContent = searchTerm ? 'Nothing matches that search.' : emptyMessages[key];
+        listEl.appendChild(li);
+        return;
+      }
+
+      const frag = document.createDocumentFragment();
+      items.forEach(item => frag.appendChild(buildItem(key, item)));
+      listEl.appendChild(frag);
+    }
+
+    function updateStats() {
+      const open = state.tasks.filter(t => !t.done).length;
+      const done = state.tasks.length - open;
+      const high = state.tasks.filter(t => !t.done && priorityOf(t) === 'high').length;
+      const total = Object.values(state).reduce((sum, arr) => sum + arr.length, 0);
+
+      document.getElementById('statOpen').textContent = open;
+      document.getElementById('statHigh').textContent = high;
+      document.getElementById('statDone').textContent = done;
+      document.getElementById('statTotal').textContent = total + (total === 1 ? ' item tracked' : ' items tracked');
+      document.getElementById('taskCount').textContent = open;
+
+      if (searchTerm) {
+        const matches = Object.keys(state).reduce((n, k) => n + visibleItems(k).length, 0);
+        searchNotice.textContent = `${matches} ${matches === 1 ? 'match' : 'matches'}`;
+        searchNotice.classList.remove('hidden');
+        searchNotice.classList.add('flex');
+      } else {
+        searchNotice.classList.add('hidden');
+        searchNotice.classList.remove('flex');
+      }
+    }
+
+    function listen(key) {
+      const { collection: name, countId } = config[key];
+      const q = query(collection(db, name), orderBy('createdAt', 'desc'));
+
+      onSnapshot(q, (snapshot) => {
+        state[key] = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (key !== 'tasks') document.getElementById(countId).textContent = snapshot.size;
+        renderList(key);
+        updateStats();
+      });
+    }
+
+    // --- ADDING ---
+    async function addItem(collectionName, inputElement, type = 'text') {
+      const mainInputValue = inputElement.value.trim();
+      if (!mainInputValue) return;
+
+      const dataToSave = { createdAt: serverTimestamp() };
+
+      if (type === 'yt') {
+        const titleInput = document.getElementById('ytTitleInput');
+        const vidId = getYTVideoId(mainInputValue);
+        if (!vidId) { alert('That does not look like a YouTube link.'); return; }
+        dataToSave.text = titleInput.value.trim() || 'Untitled video';
+        dataToSave.videoId = vidId;
+        titleInput.value = '';
+      }
+      else if (type === 'link') {
+        const titleInput = document.getElementById('linkTitleInput');
+        const url = normalizeUrl(mainInputValue);
+        dataToSave.text = titleInput.value.trim() || hostOf(url);
+        dataToSave.url = url;
+        titleInput.value = '';
+      }
+      else if (type === 'task') {
+        dataToSave.text = mainInputValue;
+        dataToSave.priority = newTaskPriority;
+        dataToSave.done = false;
+        // Keep the new task visible if the current filter would hide it
+        if (taskFilter === 'done' || (PRIORITIES[taskFilter] && taskFilter !== newTaskPriority)) {
+          taskFilter = 'open';
+          localStorage.setItem('taskFilter', taskFilter);
+          renderFilters();
+        }
+      }
+      else {
+        dataToSave.text = mainInputValue;
+      }
+
+      await addDoc(collection(db, collectionName), dataToSave);
+      inputElement.value = '';
+    }
+
+    // --- NOTE COMPOSER ---
     let pendingNoteLinks = [];
     const noteLinkChips = document.getElementById('noteLinkChips');
 
     function renderNoteChips() {
       noteLinkChips.innerHTML = '';
-      if (!pendingNoteLinks.length) {
-        noteLinkChips.classList.add('hidden');
-        noteLinkChips.classList.remove('flex');
-        return;
-      }
-      noteLinkChips.classList.remove('hidden');
-      noteLinkChips.classList.add('flex');
+      const has = pendingNoteLinks.length > 0;
+      noteLinkChips.classList.toggle('hidden', !has);
+      noteLinkChips.classList.toggle('flex', has);
+      if (!has) return;
 
       pendingNoteLinks.forEach((link, index) => {
         const chip = document.createElement('span');
         chip.className = 'flex items-center gap-2 pl-2 pr-1.5 py-1 text-xs bg-noteA/10 text-slate-700 dark:text-ink border border-noteA/30 rounded-full';
         chip.innerHTML = `
           <span class="truncate max-w-[150px]">${esc(link.label || hostOf(link.url))}</span>
-          <button type="button" class="text-inkMuted hover:text-rose-500 transition-colors leading-none px-1" aria-label="Remove link">&times;</button>
-        `;
+          <button type="button" class="text-inkMuted hover:text-rose-500 transition-colors leading-none px-1" aria-label="Remove link">&times;</button>`;
         chip.querySelector('button').addEventListener('click', () => {
           pendingNoteLinks.splice(index, 1);
           renderNoteChips();
@@ -439,7 +811,6 @@
       const titleInput = document.getElementById('noteTitleInput');
       const bodyInput = document.getElementById('noteBodyInput');
 
-      // Pick up a link that was typed but not added yet
       if (document.getElementById('noteLinkInput').value.trim()) stageNoteLink();
 
       const title = titleInput.value.trim();
@@ -460,185 +831,21 @@
       titleInput.focus();
     }
 
-    // A note link renders as an interface: YouTube embeds, everything else as a link card
-    function renderNoteLink(link) {
-      if (!link || !link.url) return '';
-      const vidId = getYTVideoId(link.url);
-
-      if (vidId) {
-        return `
-          <div class="flex flex-col gap-2">
-            <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
-              <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${esc(vidId)}" title="${esc(link.label || 'YouTube video')}" frameborder="0" allowfullscreen loading="lazy"></iframe>
-            </div>
-            ${link.label ? `<span class="text-xs text-inkMuted truncate">${esc(link.label)}</span>` : ''}
-          </div>
-        `;
-      }
-
-      const host = hostOf(link.url);
-      const favicon = faviconFor(link.url);
-      return `
-        <a href="${esc(link.url)}" target="_blank" rel="noopener" class="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-panel border border-slate-200 dark:border-hairline hover:border-noteA/60 transition-colors group/link">
-          <span class="w-8 h-8 shrink-0 rounded-md bg-slate-100 dark:bg-panelHi border border-slate-200 dark:border-hairline flex items-center justify-center overflow-hidden">
-            ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4" onerror="this.style.visibility='hidden'" alt="">` : ''}
-          </span>
-          <span class="flex flex-col min-w-0 leading-tight">
-            <span class="text-sm font-medium text-slate-700 dark:text-ink truncate group-hover/link:text-noteA transition-colors">${esc(link.label || host)}</span>
-            <span class="text-xs font-mono text-inkMuted truncate">${esc(host)}</span>
-          </span>
-          <svg class="w-4 h-4 ml-auto shrink-0 text-inkMuted group-hover/link:text-noteA transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-        </a>
-      `;
-    }
-
-    // Consolidated add function for all types of data
-    async function addItem(collectionName, inputElement, type = 'text') {
-      const mainInputValue = inputElement.value.trim();
-      if (!mainInputValue) return;
-
-      let dataToSave = { createdAt: serverTimestamp() };
-
-      if (type === 'yt') {
-        const titleInput = document.getElementById('ytTitleInput');
-        dataToSave.text = titleInput.value.trim() || 'Untitled Video';
-        const vidId = getYTVideoId(mainInputValue);
-        if (!vidId) { alert('Invalid YouTube Link'); return; }
-        dataToSave.videoId = vidId;
-        titleInput.value = '';
-      }
-      else if (type === 'link') {
-        const titleInput = document.getElementById('linkTitleInput');
-        dataToSave.text = titleInput.value.trim() || 'Saved Link';
-        dataToSave.url = normalizeUrl(mainInputValue);
-        titleInput.value = '';
-      }
-      else {
-        dataToSave.text = mainInputValue;
-      }
-
-      await addDoc(collection(db, collectionName), dataToSave);
-      inputElement.value = '';
-    }
-
-    const emptyMessages = {
-      links: 'No links saved yet — add one above.',
-      tasks: 'Nothing on the list — add your first task.',
-      plans: 'No plans yet — sketch out what\'s next.',
-      yt: 'No videos saved yet — paste a link above.',
-      notes: 'No notes yet — write one on the left.'
-    };
-
-    function listenToCollection(collectionName, listElement, type, key, countId) {
-      const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
-
-      onSnapshot(q, (snapshot) => {
-        counts[key] = snapshot.size;
-        document.getElementById(countId).textContent = snapshot.size;
-        updateTotalCount();
-
-        listElement.innerHTML = '';
-
-        if (snapshot.empty) {
-          const li = document.createElement('li');
-          li.className = 'col-span-full text-sm text-slate-400 dark:text-inkMuted italic py-2';
-          li.textContent = emptyMessages[key];
-          listElement.appendChild(li);
-          return;
-        }
-
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          const li = document.createElement('li');
-          li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-lg border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
-
-          if (type === 'note') {
-            const links = Array.isArray(data.links) ? data.links : [];
-            li.className = 'group/item flex flex-col gap-3 p-4 bg-slate-50 dark:bg-panelAlt rounded-xl border border-slate-200 dark:border-hairline hover:border-noteA/50 transition-colors';
-            li.innerHTML = `
-              <div class="flex items-start justify-between gap-2">
-                <h3 class="font-display font-semibold text-base text-slate-900 dark:text-white leading-snug">${esc(data.text)}</h3>
-                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete note">
-                  ${trashIcon}
-                </button>
-              </div>
-              ${data.body ? `<p class="text-sm text-slate-600 dark:text-ink/80 leading-relaxed whitespace-pre-wrap">${esc(data.body)}</p>` : ''}
-              ${links.length ? `
-                <div class="flex flex-col gap-2 pt-3 border-t border-slate-200 dark:border-hairline">
-                  ${links.map(renderNoteLink).join('')}
-                </div>` : ''}
-            `;
-          }
-          else if (type === 'yt' && data.videoId) {
-            li.innerHTML = `
-              <div class="flex items-start justify-between gap-2">
-                <h3 class="font-medium text-sm text-slate-800 dark:text-ink leading-snug">${esc(data.text)}</h3>
-                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete video">
-                  ${trashIcon}
-                </button>
-              </div>
-              <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-md bg-black">
-                <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${esc(data.videoId)}" frameborder="0" allowfullscreen loading="lazy"></iframe>
-              </div>
-            `;
-          } else if (type === 'link' && data.url) {
-            const favicon = faviconFor(data.url);
-            li.innerHTML = `
-              <div class="flex items-center justify-between w-full gap-3">
-                <a href="${esc(data.url)}" target="_blank" rel="noopener" class="flex items-center gap-2.5 min-w-0 text-sm font-medium text-slate-700 dark:text-ink hover:text-linkA dark:hover:text-linkA transition-colors">
-                  ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4 rounded-sm shrink-0" onerror="this.style.visibility='hidden'" alt="">` : ''}
-                  <span class="truncate">${esc(data.text)}</span>
-                </a>
-                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete link">
-                  ${trashIcon}
-                </button>
-              </div>
-            `;
-          } else {
-            const dotColor = key === 'tasks' ? 'bg-taskA' : 'bg-planA';
-            li.innerHTML = `
-              <div class="flex items-center justify-between w-full gap-3">
-                <span class="flex items-center gap-2.5 min-w-0">
-                  <span class="w-1.5 h-1.5 rounded-full ${dotColor} shrink-0"></span>
-                  <span class="text-sm text-slate-700 dark:text-ink truncate">${esc(data.text)}</span>
-                </span>
-                <button class="delete-btn text-inkMuted hover:text-rose-500 transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100" aria-label="Delete item">
-                  ${trashIcon}
-                </button>
-              </div>
-            `;
-          }
-
-          li.querySelector('.delete-btn').addEventListener('click', async () => {
-            await deleteDoc(doc(db, collectionName, docSnap.id));
-          });
-
-          listElement.appendChild(li);
-        });
-      });
-    }
-
-    // Button Click Listeners
+    // --- WIRING ---
     document.getElementById('addLinkBtn').addEventListener('click', () => addItem('quickLinks', document.getElementById('linkUrlInput'), 'link'));
-    document.getElementById('addTaskBtn').addEventListener('click', () => addItem('tasks', document.getElementById('taskInput'), 'text'));
+    document.getElementById('addTaskBtn').addEventListener('click', () => addItem('tasks', document.getElementById('taskInput'), 'task'));
     document.getElementById('addPlanBtn').addEventListener('click', () => addItem('plans', document.getElementById('planInput'), 'text'));
     document.getElementById('addYtBtn').addEventListener('click', () => addItem('ytLinks', document.getElementById('ytInput'), 'yt'));
     document.getElementById('addNoteLinkBtn').addEventListener('click', stageNoteLink);
     document.getElementById('addNoteBtn').addEventListener('click', addNote);
 
-    // "Enter" Key Listeners
-    ['linkUrlInput', 'taskInput', 'planInput', 'ytInput'].forEach(id => {
-      document.getElementById(id).addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          let btnId = id.replace('Input', 'Btn');
-          if (id === 'linkUrlInput') btnId = 'addLinkBtn';
-          if (id === 'ytInput') btnId = 'addYtBtn';
-          document.getElementById(btnId).click();
-        }
+    const enterMap = { linkUrlInput: 'addLinkBtn', linkTitleInput: 'addLinkBtn', taskInput: 'addTaskBtn', planInput: 'addPlanBtn', ytInput: 'addYtBtn' };
+    Object.entries(enterMap).forEach(([inputId, btnId]) => {
+      document.getElementById(inputId).addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById(btnId).click(); }
       });
     });
 
-    // Note composer keys: Enter attaches a link, Ctrl/Cmd + Enter saves the note
     ['noteLinkInput', 'noteLinkLabelInput'].forEach(id => {
       document.getElementById(id).addEventListener('keypress', (e) => {
         if (e.key === 'Enter') { e.preventDefault(); stageNoteLink(); }
@@ -655,13 +862,19 @@
       if (e.key === 'Enter') { e.preventDefault(); document.getElementById('noteBodyInput').focus(); }
     });
 
-    // Start Listeners
-    listenToCollection('quickLinks', lists.links, 'link', 'links', 'linkCount');
-    listenToCollection('tasks', lists.tasks, 'text', 'tasks', 'taskCount');
-    listenToCollection('plans', lists.plans, 'text', 'plans', 'planCount');
-    listenToCollection('ytLinks', lists.yt, 'yt', 'yt', 'ytCount');
-    listenToCollection('notes', lists.notes, 'note', 'notes', 'noteCount');
+    // Change the priority of the next task with Alt + ArrowUp / ArrowDown
+    document.getElementById('taskInput').addEventListener('keydown', (e) => {
+      if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+      e.preventDefault();
+      const i = PRIORITY_ORDER.indexOf(newTaskPriority);
+      const next = e.key === 'ArrowUp' ? Math.max(0, i - 1) : Math.min(PRIORITY_ORDER.length - 1, i + 1);
+      newTaskPriority = PRIORITY_ORDER[next];
+      localStorage.setItem('newTaskPriority', newTaskPriority);
+      renderPrioritySelect();
+    });
 
+    // --- START ---
+    Object.keys(config).forEach(listen);
   </script>
 </body>
 </html>
