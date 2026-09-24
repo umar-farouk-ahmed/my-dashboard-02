@@ -17,368 +17,294 @@
       theme: {
         extend: {
           colors: {
-            graphite: '#0B0D12',
-            panel: '#141720',
-            panelAlt: '#1A1E29',
-            panelHi: '#202431',
-            hairline: '#2A2F40',
-            ink: '#F3F4F6',
-            inkMuted: '#9CA3AF',
-            linkA: '#00C4CC',
-            taskA: '#FF6161',
-            planA: '#00D084',
-            ytA: '#FF0033',
-            noteA: '#8B3DFF',
-            urgent: '#FF3366',
-            steady: '#00E6E6',
+            graphite: '#0D0F14',
+            panel: '#151822',
+            panelAlt: '#1B1F2A',
+            panelHi: '#20242F',
+            hairline: '#262B38',
+            ink: '#ECEAE4',
+            inkMuted: '#8B90A3',
+            linkA: '#7C9EFF',
+            taskA: '#FFB454',
+            planA: '#5FD9A4',
+            ytA: '#FF6F91',
+            noteA: '#A78BFA',
+            urgent: '#FF5C7A',
+            steady: '#63C8FF',
           },
           fontFamily: {
             display: ['"Space Grotesk"', 'sans-serif'],
             sans: ['Inter', 'sans-serif'],
             mono: ['"IBM Plex Mono"', 'monospace'],
           },
-          boxShadow: {
-            'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
-            'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
-            'glow': '0 0 20px rgba(139, 61, 255, 0.15)',
-          },
-          animation: {
-            'pop': 'popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'float': 'floating 3s ease-in-out infinite',
-          },
-          keyframes: {
-            popIn: {
-              '0%': { opacity: '0', transform: 'translateY(15px) scale(0.98)' },
-              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
-            },
-            floating: {
-              '0%, 100%': { transform: 'translateY(0)' },
-              '50%': { transform: 'translateY(-5px)' },
-            }
-          }
         },
       },
     };
   </script>
 
   <style>
-    body { 
-      font-family: 'Inter', sans-serif; 
-      transition: background-color .4s ease, color .4s ease;
-      background-image: radial-gradient(circle at top left, rgba(139, 61, 255, 0.03), transparent 40%),
-                        radial-gradient(circle at bottom right, rgba(0, 196, 204, 0.03), transparent 40%);
-    }
-    body.dark {
-      background-image: radial-gradient(circle at top left, rgba(139, 61, 255, 0.08), transparent 40%),
-                        radial-gradient(circle at bottom right, rgba(0, 196, 204, 0.08), transparent 40%);
-    }
+    body { font-family: 'Inter', sans-serif; transition: background-color .3s ease, color .3s ease; }
     body.modal-open { overflow: hidden; }
 
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    .dark ::-webkit-scrollbar-thumb { background: #374151; }
-    .dark ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
+    .dark ::-webkit-scrollbar-thumb { background: #2E3444; }
+    .dark ::-webkit-scrollbar-thumb:hover { background: #3B4255; }
 
-    /* Modern Glassmorphic Panels */
-    .panel {
-      backdrop-filter: blur(12px);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
-    }
-    .panel:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 35px -10px rgba(0,0,0,0.1);
-    }
-    .dark .panel:hover {
-      box-shadow: 0 15px 35px -10px rgba(0,0,0,0.4);
-    }
-
+    /* Height-animated collapse using the grid-template-rows trick (no JS height math) */
     .panel-body {
       display: grid;
       grid-template-rows: 1fr;
-      transition: grid-template-rows .4s cubic-bezier(0.4, 0, 0.2, 1), opacity .3s ease;
+      transition: grid-template-rows .35s ease, opacity .3s ease;
       opacity: 1;
     }
     .panel-body > div { overflow: hidden; min-height: 0; }
     .panel.collapsed .panel-body { grid-template-rows: 0fr; opacity: 0; }
 
-    /* Dynamic scrolling - grows to fit, scrolls when too long */
-    .scroll-area { 
-      overflow-y: auto; 
-      overscroll-behavior: contain; 
-      padding-right: 4px;
-    }
-    
+    .scroll-area { overflow-y: auto; scrollbar-gutter: stable; }
+    .list-short { max-height: 320px; }
+    .list-tall  { max-height: 460px; }
+
+    /* Clamp long text in the lists — the full text opens in the editor */
     .clamp-2, .clamp-3 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
     .clamp-2 { -webkit-line-clamp: 2; }
     .clamp-3 { -webkit-line-clamp: 3; }
 
-    .openable { cursor: pointer; transition: color 0.2s ease; }
-    .openable:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 2px; }
+    .openable { cursor: pointer; }
+    .openable:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 
-    /* Staggered entrance animation delays */
-    .stagger-1 { animation-delay: 0.1s; }
-    .stagger-2 { animation-delay: 0.2s; }
-    .stagger-3 { animation-delay: 0.3s; }
-    .stagger-4 { animation-delay: 0.4s; }
-    .stagger-5 { animation-delay: 0.5s; }
-    .opacity-0-init { opacity: 0; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .entrance { animation: fadeInUp .45s ease both; }
 
-    @keyframes modalIn { 
-      from { opacity: 0; transform: translateY(20px) scale(.95); } 
-      to { opacity: 1; transform: translateY(0) scale(1); } 
-    }
-    .modal-card { animation: modalIn .3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+    .modal-card { animation: modalIn .2s ease both; }
 
-    :focus-visible { outline: 2px solid #8B3DFF; outline-offset: 2px; border-radius: 6px; }
+    :focus-visible { outline: 2px solid #7C9EFF; outline-offset: 2px; border-radius: 4px; }
+
     textarea { resize: vertical; }
+
     .seg { border: 1px solid transparent; }
-    .done-text { text-decoration: line-through; opacity: 0.6;}
-    .group\/item { transition: all 0.2s ease; }
-    .group\/item:hover { transform: scale(1.01); }
+    .done-text { text-decoration: line-through; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
   </style>
 </head>
-<body class="bg-[#F9FAFB] dark:bg-graphite text-slate-800 dark:text-ink min-h-screen">
+<body class="bg-[#F7F6F2] dark:bg-graphite text-slate-800 dark:text-ink min-h-screen">
 
-  <!-- Command bar - Fully responsive for mobile -->
-  <header class="sticky top-2 md:top-4 z-30 mx-3 md:mx-8 mb-6 md:mb-8">
-    <div class="max-w-[1500px] mx-auto bg-white/70 dark:bg-panel/70 backdrop-blur-xl border border-white/50 dark:border-hairline rounded-2xl md:rounded-3xl shadow-soft dark:shadow-glass p-3 md:p-4 flex flex-col md:flex-row items-center gap-3 md:gap-4 transition-colors duration-300">
+  <!-- Command bar -->
+  <header class="sticky top-0 z-30 bg-[#F7F6F2]/85 dark:bg-graphite/85 backdrop-blur-md border-b border-slate-200 dark:border-hairline">
+    <div class="max-w-[1500px] mx-auto px-4 md:px-8 py-3 flex flex-wrap items-center gap-x-4 gap-y-3">
 
-      <div class="flex items-center gap-3 w-full md:w-auto mr-auto">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-noteA to-linkA border border-white/20 flex items-center justify-center font-display font-bold text-sm text-white shrink-0 shadow-glow animate-float">
+      <div class="flex items-center gap-3 mr-auto min-w-0">
+        <div class="w-9 h-9 rounded-lg bg-slate-900 dark:bg-panelAlt border border-slate-800 dark:border-hairline flex items-center justify-center font-display font-bold text-xs text-white dark:text-inkMuted shrink-0">
           UD
         </div>
         <div class="min-w-0">
-          <h1 id="greeting" class="font-display text-lg md:text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 leading-tight truncate">Umar's Dashboard</h1>
-          <p id="clockLine" class="text-[10px] md:text-xs font-mono text-inkMuted truncate font-medium"></p>
+          <h1 id="greeting" class="font-display text-lg md:text-xl font-semibold tracking-tight text-slate-900 dark:text-white leading-tight truncate">Umar's Dashboard</h1>
+          <p id="clockLine" class="text-[11px] font-mono text-inkMuted truncate"></p>
         </div>
       </div>
 
-      <div class="w-full md:flex-1 md:max-w-md relative group">
-        <div class="absolute inset-0 bg-gradient-to-r from-noteA to-linkA rounded-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur"></div>
+      <div class="order-last w-full lg:order-none lg:w-auto lg:flex-1 lg:max-w-md">
         <div class="relative">
-          <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-inkMuted pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"></path></svg>
-          <input type="search" id="searchInput" placeholder="Search everything..." aria-label="Search all panels"
-            class="w-full pl-10 pr-12 md:pr-16 py-2.5 text-sm font-medium bg-white/90 dark:bg-panelAlt/90 border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-transparent transition-all shadow-inner">
-          <kbd class="hidden sm:flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-inkMuted bg-slate-100 dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-[4px] px-1.5 py-0.5">/</kbd>
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-inkMuted pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"></path></svg>
+          <input type="search" id="searchInput" placeholder="Search everything" aria-label="Search all panels"
+            class="w-full pl-9 pr-16 py-2.5 text-sm bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA/40 transition-colors">
+          <kbd class="hidden sm:block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-inkMuted border border-slate-200 dark:border-hairline rounded px-1.5 py-0.5">/</kbd>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-        <button id="collapseAllBtn" class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline text-slate-600 dark:text-ink hover:bg-slate-100 dark:hover:bg-panelHi hover:border-slate-300 transition-all">
+      <div class="flex items-center gap-2">
+        <button id="collapseAllBtn" class="hidden md:inline-flex items-center gap-2 px-3 py-2.5 text-xs font-medium rounded-lg bg-white dark:bg-panel border border-slate-200 dark:border-hairline text-slate-600 dark:text-inkMuted hover:border-slate-300 dark:hover:border-inkMuted/50 transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
           <span id="collapseAllLabel">Collapse all</span>
         </button>
-        <button id="themeToggle" class="p-2.5 rounded-xl bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline hover:bg-slate-100 dark:hover:bg-panelHi hover:border-slate-300 transition-all shadow-sm shrink-0" title="Toggle theme" aria-label="Toggle color theme">
-          <span id="themeIcon" class="block transform transition-transform hover:rotate-12 text-lg">🌓</span>
+        <button id="themeToggle" class="p-2.5 rounded-lg bg-white dark:bg-panel border border-slate-200 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/50 transition-colors" title="Toggle theme" aria-label="Toggle color theme">
+          <span id="themeIcon">🌓</span>
         </button>
       </div>
     </div>
-    
+
     <!-- Live counters -->
-    <div class="max-w-[1460px] mx-auto px-2 mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] md:text-xs font-mono font-medium text-slate-500 dark:text-inkMuted opacity-0-init animate-pop stagger-1">
-      <span class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white dark:bg-panel border border-slate-200 dark:border-hairline shadow-sm"><span class="w-2 h-2 rounded-full bg-taskA shadow-[0_0_8px_rgba(255,97,97,0.6)]"></span><span id="statOpen" class="text-slate-800 dark:text-white">0</span> open</span>
-      <span class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white dark:bg-panel border border-slate-200 dark:border-hairline shadow-sm"><span class="w-2 h-2 rounded-full bg-urgent shadow-[0_0_8px_rgba(255,51,102,0.6)]"></span><span id="statHigh" class="text-slate-800 dark:text-white">0</span> high</span>
-      <span class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white dark:bg-panel border border-slate-200 dark:border-hairline shadow-sm"><span class="w-2 h-2 rounded-full bg-planA shadow-[0_0_8px_rgba(0,208,132,0.6)]"></span><span id="statDone" class="text-slate-800 dark:text-white">0</span> done</span>
-      <span id="statTotal" class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-panelAlt border border-slate-200 dark:border-hairline shadow-sm">0 items</span>
-      <span id="searchNotice" class="hidden items-center gap-1.5 text-linkA font-semibold px-2.5 py-1 bg-linkA/10 rounded-full border border-linkA/30"></span>
+    <div class="max-w-[1500px] mx-auto px-4 md:px-8 pb-3">
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs font-mono text-inkMuted">
+        <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-taskA"></span><span id="statOpen">0</span> open</span>
+        <span class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-hairline"></span>
+        <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-urgent"></span><span id="statHigh">0</span> high priority</span>
+        <span class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-hairline"></span>
+        <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-planA"></span><span id="statDone">0</span> done</span>
+        <span class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-hairline"></span>
+        <span id="statTotal">0 items tracked</span>
+        <span id="searchNotice" class="hidden items-center gap-1.5 text-linkA"></span>
+      </div>
     </div>
   </header>
 
-  <!-- IMPORTANT: items-start added here so panels don't stretch vertically creating dead space -->
-  <main class="max-w-[1500px] mx-auto px-3 md:px-8 pb-12">
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 md:gap-6 items-start">
+  <main class="max-w-[1500px] mx-auto px-4 md:px-8 py-6 entrance">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5">
 
       <!-- What To Do Next -->
-      <section class="panel md:col-span-2 xl:col-span-5 bg-white/80 dark:bg-panel/80 border border-slate-200/80 dark:border-hairline rounded-[24px] shadow-soft overflow-hidden opacity-0-init animate-pop stagger-2" data-panel="tasks">
-        <div class="h-1.5 bg-gradient-to-r from-taskA via-urgent to-taskA opacity-90"></div>
-        <!-- FIX: Using block button + inner flex div so headers don't disappear in Android webview -->
-        <button type="button" class="collapse-toggle w-full block text-left group focus:outline-none" aria-expanded="true">
-          <div class="flex items-center justify-between gap-3 px-4 md:px-6 py-4 md:py-5">
-            <span class="flex items-center gap-3 min-w-0">
-              <div class="p-2 bg-taskA/10 rounded-xl group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5 text-taskA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-              </div>
-              <span class="font-display font-bold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">What To Do Next</span>
-            </span>
-            <span class="flex items-center gap-3 shrink-0">
-              <span id="taskCount" class="text-xs font-mono font-bold text-taskA bg-taskA/10 border border-taskA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-              <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
-                <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-              </div>
-            </span>
-          </div>
+      <section class="panel md:col-span-2 xl:col-span-5 bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="tasks">
+        <div class="h-1 bg-taskA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
+          <span class="flex items-center gap-2.5 min-w-0">
+            <svg class="w-5 h-5 text-taskA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            <span class="font-display font-semibold text-lg truncate">What To Do Next</span>
+          </span>
+          <span class="flex items-center gap-3 shrink-0">
+            <span id="taskCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
         </button>
         <div class="panel-body">
           <div>
-            <div class="px-4 md:px-6 pb-4 md:pb-6">
-              <div class="flex gap-2.5 relative group">
-                <input type="text" id="taskInput" placeholder="What needs doing?" class="flex-1 min-w-0 px-3 md:px-4 py-2.5 md:py-3 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-taskA/50 focus:border-taskA transition-all shadow-inner">
-                <button id="addTaskBtn" class="bg-gradient-to-br from-taskA to-urgent text-white w-12 shrink-0 rounded-xl hover:shadow-lg hover:shadow-taskA/30 active:scale-95 transition-all font-bold text-lg flex items-center justify-center" aria-label="Add task">+</button>
+            <div class="px-5 pb-5">
+
+              <div class="flex gap-2">
+                <input type="text" id="taskInput" placeholder="What needs doing?" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-taskA/50 focus:border-taskA/40 transition-colors">
+                <button id="addTaskBtn" class="bg-taskA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Add task">+</button>
               </div>
 
-              <div class="flex items-center justify-between mt-4">
-                <div class="flex items-center gap-2">
-                  <span class="text-[9px] md:text-[10px] uppercase tracking-wider font-bold text-inkMuted shrink-0">Priority</span>
-                  <div id="prioritySelect" class="flex gap-1.5 flex-wrap" role="group" aria-label="Priority for new task"></div>
-                </div>
+              <div class="flex items-center gap-2 mt-2.5">
+                <span class="text-[11px] font-mono text-inkMuted shrink-0">priority</span>
+                <div id="prioritySelect" class="flex gap-1.5 flex-wrap" role="group" aria-label="Priority for new task"></div>
               </div>
 
-              <div class="flex items-center gap-2 mt-4 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide" id="taskFilters" role="group" aria-label="Filter tasks"></div>
+              <div class="flex items-center gap-1.5 mt-4 overflow-x-auto pb-1 -mx-1 px-1" id="taskFilters" role="group" aria-label="Filter tasks"></div>
 
-              <!-- Content grows up to 55vh, then scrolls natively -->
-              <ul id="taskList" class="scroll-area max-h-[55vh] lg:max-h-[500px] space-y-3 mt-2"></ul>
+              <ul id="taskList" class="scroll-area list-tall space-y-2 pr-1 mt-3"></ul>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Notes -->
-      <section class="panel md:col-span-2 xl:col-span-7 bg-white/80 dark:bg-panel/80 border border-slate-200/80 dark:border-hairline rounded-[24px] shadow-soft overflow-hidden opacity-0-init animate-pop stagger-3" data-panel="notes">
-        <div class="h-1.5 bg-gradient-to-r from-noteA to-blue-500 opacity-90"></div>
-        <button type="button" class="collapse-toggle w-full block text-left group focus:outline-none" aria-expanded="true">
-          <div class="flex items-center justify-between gap-3 px-4 md:px-6 py-4 md:py-5">
-            <span class="flex items-center gap-3 min-w-0">
-              <div class="p-2 bg-noteA/10 rounded-xl group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5 text-noteA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-              </div>
-              <span class="font-display font-bold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">Notes</span>
-            </span>
-            <span class="flex items-center gap-3 shrink-0">
-              <span id="noteCount" class="text-xs font-mono font-bold text-noteA bg-noteA/10 border border-noteA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-              <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
-                <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-              </div>
-            </span>
-          </div>
+      <section class="panel md:col-span-2 xl:col-span-7 bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="notes">
+        <div class="h-1 bg-noteA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
+          <span class="flex items-center gap-2.5 min-w-0">
+            <svg class="w-5 h-5 text-noteA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+            <span class="font-display font-semibold text-lg truncate">Notes</span>
+          </span>
+          <span class="flex items-center gap-3 shrink-0">
+            <span id="noteCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
         </button>
         <div class="panel-body">
           <div>
-            <div class="px-4 md:px-6 pb-4 md:pb-6 grid grid-cols-1 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] gap-6">
+            <div class="px-5 pb-5 grid grid-cols-1 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] gap-5">
 
-              <div class="flex flex-col gap-3 lg:border-r lg:border-slate-200 lg:dark:border-hairline lg:pr-6">
-                <input type="text" id="noteTitleInput" placeholder="Note title" class="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm font-semibold bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner">
-                <textarea id="noteBodyInput" rows="4" placeholder="Write the note here..." class="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm leading-relaxed bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner"></textarea>
+              <div class="flex flex-col gap-2.5 lg:border-r lg:border-slate-200 lg:dark:border-hairline lg:pr-5">
+                <input type="text" id="noteTitleInput" placeholder="Note title" class="w-full px-3.5 py-2.5 text-sm font-medium bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
+                <textarea id="noteBodyInput" rows="4" placeholder="Write the note here..." class="w-full px-3.5 py-2.5 text-sm leading-relaxed bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors"></textarea>
 
-                <div class="flex flex-col sm:flex-row gap-2 mt-1">
-                  <input type="text" id="noteLinkLabelInput" placeholder="Link name" class="w-full sm:w-[38%] min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner">
-                  <div class="flex gap-2 w-full sm:flex-1">
-                    <input type="text" id="noteLinkInput" placeholder="Paste a link" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner">
-                    <button id="addNoteLinkBtn" class="bg-slate-100 dark:bg-panelAlt text-slate-600 dark:text-ink border border-slate-200 dark:border-hairline w-11 shrink-0 rounded-lg hover:border-noteA hover:text-noteA hover:bg-noteA/5 active:scale-95 transition-all font-bold" aria-label="Attach link">+</button>
-                  </div>
+                <div class="flex gap-2">
+                  <input type="text" id="noteLinkLabelInput" placeholder="Link name" class="w-[38%] min-w-0 px-3 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
+                  <input type="text" id="noteLinkInput" placeholder="Paste a link" class="flex-1 min-w-0 px-3 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA/40 transition-colors">
+                  <button id="addNoteLinkBtn" class="bg-slate-100 dark:bg-panelAlt text-slate-600 dark:text-ink border border-slate-200 dark:border-hairline w-11 shrink-0 rounded-lg hover:border-noteA hover:text-noteA active:scale-95 transition-all font-bold" aria-label="Attach link">+</button>
                 </div>
 
-                <div id="noteLinkChips" class="hidden flex-wrap gap-2 mt-1"></div>
+                <div id="noteLinkChips" class="hidden flex-wrap gap-2"></div>
 
-                <button id="addNoteBtn" class="mt-2 w-full bg-gradient-to-r from-noteA to-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-noteA/30 active:scale-[.98] transition-all">Save Note</button>
-                <p class="text-[10px] font-mono text-center text-inkMuted mt-1">Ctrl + Enter saves · YT links embed directly</p>
+                <button id="addNoteBtn" class="mt-1 w-full bg-noteA text-white py-2.5 rounded-lg font-semibold text-sm hover:brightness-110 active:scale-[.98] transition-all">Save note</button>
+                <p class="text-[11px] font-mono text-inkMuted">Ctrl + Enter saves · YouTube links embed</p>
               </div>
 
-              <!-- Content grows up to 55vh, then scrolls natively -->
-              <ul id="noteList" class="scroll-area max-h-[55vh] lg:max-h-[500px] grid grid-cols-1 xl:grid-cols-2 gap-4 content-start"></ul>
+              <ul id="noteList" class="scroll-area list-tall grid grid-cols-1 xl:grid-cols-2 gap-4 pr-1 content-start"></ul>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Quick Links -->
-      <section class="panel xl:col-span-4 bg-white/80 dark:bg-panel/80 border border-slate-200/80 dark:border-hairline rounded-[24px] shadow-soft overflow-hidden opacity-0-init animate-pop stagger-4" data-panel="links">
-        <div class="h-1.5 bg-gradient-to-r from-linkA to-sky-400 opacity-90"></div>
-        <button type="button" class="collapse-toggle w-full block text-left group focus:outline-none" aria-expanded="true">
-          <div class="flex items-center justify-between gap-3 px-4 md:px-6 py-4 md:py-5">
-            <span class="flex items-center gap-3 min-w-0">
-              <div class="p-2 bg-linkA/10 rounded-xl group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5 text-linkA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-              </div>
-              <span class="font-display font-bold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">Quick Links</span>
-            </span>
-            <span class="flex items-center gap-3 shrink-0">
-              <span id="linkCount" class="text-xs font-mono font-bold text-linkA bg-linkA/10 border border-linkA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-              <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
-                <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-              </div>
-            </span>
-          </div>
+      <section class="panel xl:col-span-3 bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="links">
+        <div class="h-1 bg-linkA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
+          <span class="flex items-center gap-2.5 min-w-0">
+            <svg class="w-5 h-5 text-linkA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+            <span class="font-display font-semibold text-lg truncate">Quick Links</span>
+          </span>
+          <span class="flex items-center gap-3 shrink-0">
+            <span id="linkCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
         </button>
         <div class="panel-body">
           <div>
-            <div class="px-4 md:px-6 pb-4 md:pb-6">
-              <div class="flex flex-col gap-3 mb-5 p-3 md:p-4 bg-slate-50 dark:bg-panelAlt/50 rounded-2xl border border-slate-100 dark:border-hairline">
-                <input type="text" id="linkTitleInput" placeholder="Name (e.g. ChatGPT)" class="w-full px-3 md:px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA transition-colors shadow-sm">
+            <div class="px-5 pb-5">
+              <div class="flex flex-col gap-2.5 mb-4">
+                <input type="text" id="linkTitleInput" placeholder="Name (e.g. ChatGPT)" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA/40 transition-colors">
                 <div class="flex gap-2">
-                  <input type="text" id="linkUrlInput" placeholder="URL (e.g. chatgpt.com)" class="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA transition-colors shadow-sm">
-                  <button id="addLinkBtn" class="bg-gradient-to-br from-linkA to-sky-500 text-white w-12 shrink-0 rounded-lg hover:shadow-lg hover:shadow-linkA/30 active:scale-95 transition-all font-bold flex items-center justify-center" aria-label="Save link">+</button>
+                  <input type="text" id="linkUrlInput" placeholder="URL (e.g. chatgpt.com)" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA/40 transition-colors">
+                  <button id="addLinkBtn" class="bg-linkA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Save link">+</button>
                 </div>
               </div>
-              <ul id="linkList" class="scroll-area max-h-[55vh] lg:max-h-[500px] space-y-2.5"></ul>
+              <ul id="linkList" class="scroll-area list-short space-y-2 pr-1"></ul>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Long Term Plans -->
-      <section class="panel xl:col-span-4 bg-white/80 dark:bg-panel/80 border border-slate-200/80 dark:border-hairline rounded-[24px] shadow-soft overflow-hidden opacity-0-init animate-pop stagger-5" data-panel="plans">
-        <div class="h-1.5 bg-gradient-to-r from-planA to-emerald-400 opacity-90"></div>
-        <button type="button" class="collapse-toggle w-full block text-left group focus:outline-none" aria-expanded="true">
-          <div class="flex items-center justify-between gap-3 px-4 md:px-6 py-4 md:py-5">
-            <span class="flex items-center gap-3 min-w-0">
-              <div class="p-2 bg-planA/10 rounded-xl group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5 text-planA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22M21.75 12.75V7.5h-5.25"></path></svg>
-              </div>
-              <span class="font-display font-bold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">Long Term Plans</span>
-            </span>
-            <span class="flex items-center gap-3 shrink-0">
-              <span id="planCount" class="text-xs font-mono font-bold text-planA bg-planA/10 border border-planA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-              <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
-                <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-              </div>
-            </span>
-          </div>
+      <section class="panel xl:col-span-3 bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="plans">
+        <div class="h-1 bg-planA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
+          <span class="flex items-center gap-2.5 min-w-0">
+            <svg class="w-5 h-5 text-planA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22M21.75 12.75V7.5h-5.25"></path></svg>
+            <span class="font-display font-semibold text-lg truncate">Long Term Plans</span>
+          </span>
+          <span class="flex items-center gap-3 shrink-0">
+            <span id="planCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
         </button>
         <div class="panel-body">
           <div>
-            <div class="px-4 md:px-6 pb-4 md:pb-6">
-              <div class="flex gap-2.5 mb-5 relative group">
-                <input type="text" id="planInput" placeholder="Add a future plan..." class="flex-1 min-w-0 px-3 md:px-4 py-2.5 md:py-3 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-planA/50 focus:border-planA transition-all shadow-inner">
-                <button id="addPlanBtn" class="bg-gradient-to-br from-planA to-emerald-500 text-white w-12 shrink-0 rounded-xl hover:shadow-lg hover:shadow-planA/30 active:scale-95 transition-all font-bold text-lg flex items-center justify-center" aria-label="Add plan">+</button>
+            <div class="px-5 pb-5">
+              <div class="flex gap-2 mb-4">
+                <input type="text" id="planInput" placeholder="Add a future plan..." class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-planA/50 focus:border-planA/40 transition-colors">
+                <button id="addPlanBtn" class="bg-planA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Add plan">+</button>
               </div>
-              <ul id="planList" class="scroll-area max-h-[55vh] lg:max-h-[500px] space-y-3"></ul>
+              <ul id="planList" class="scroll-area list-short space-y-2 pr-1"></ul>
             </div>
           </div>
         </div>
       </section>
 
       <!-- YouTube -->
-      <section class="panel xl:col-span-4 bg-white/80 dark:bg-panel/80 border border-slate-200/80 dark:border-hairline rounded-[24px] shadow-soft overflow-hidden opacity-0-init animate-pop stagger-5" data-panel="yt">
-        <div class="h-1.5 bg-gradient-to-r from-ytA to-orange-500 opacity-90"></div>
-        <button type="button" class="collapse-toggle w-full block text-left group focus:outline-none" aria-expanded="true">
-          <div class="flex items-center justify-between gap-3 px-4 md:px-6 py-4 md:py-5">
-            <span class="flex items-center gap-3 min-w-0">
-              <div class="p-2 bg-ytA/10 rounded-xl group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5 text-ytA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              </div>
-              <span class="font-display font-bold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">YouTube Links</span>
-            </span>
-            <span class="flex items-center gap-3 shrink-0">
-              <span id="ytCount" class="text-xs font-mono font-bold text-ytA bg-ytA/10 border border-ytA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-              <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
-                <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-              </div>
-            </span>
-          </div>
+      <section class="panel md:col-span-2 xl:col-span-6 bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="yt">
+        <div class="h-1 bg-ytA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
+          <span class="flex items-center gap-2.5 min-w-0">
+            <svg class="w-5 h-5 text-ytA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="font-display font-semibold text-lg truncate">YouTube Links</span>
+          </span>
+          <span class="flex items-center gap-3 shrink-0">
+            <span id="ytCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
         </button>
         <div class="panel-body">
           <div>
-            <div class="px-4 md:px-6 pb-4 md:pb-6">
-              <div class="flex flex-col gap-3 mb-5 p-3 md:p-4 bg-slate-50 dark:bg-panelAlt/50 rounded-2xl border border-slate-100 dark:border-hairline">
-                <input type="text" id="ytTitleInput" placeholder="Video title (e.g. Learn Python)" class="w-full px-3 md:px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA transition-colors shadow-sm">
+            <div class="px-5 pb-5">
+              <div class="flex flex-col sm:flex-row gap-2.5 mb-4">
+                <input type="text" id="ytTitleInput" placeholder="Video title (e.g. Learn Python)" class="sm:w-[40%] min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA/40 transition-colors">
                 <div class="flex gap-2 flex-1">
-                  <input type="text" id="ytInput" placeholder="Paste YT link here..." class="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA transition-colors shadow-sm">
-                  <button id="addYtBtn" class="bg-gradient-to-br from-ytA to-orange-500 text-white w-12 shrink-0 rounded-lg hover:shadow-lg hover:shadow-ytA/30 active:scale-95 transition-all font-bold flex items-center justify-center" aria-label="Save video">+</button>
+                  <input type="text" id="ytInput" placeholder="Paste YT link here..." class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA/40 transition-colors">
+                  <button id="addYtBtn" class="bg-ytA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Save video">+</button>
                 </div>
               </div>
-              <ul id="ytList" class="scroll-area max-h-[55vh] lg:max-h-[500px] grid grid-cols-1 gap-5"></ul>
+              <ul id="ytList" class="scroll-area list-tall grid grid-cols-1 lg:grid-cols-2 gap-4 pr-1 content-start"></ul>
             </div>
           </div>
         </div>
@@ -388,28 +314,28 @@
   </main>
 
   <!-- Detail / edit dialog -->
-  <div id="editorOverlay" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6">
-    <div id="editorBackdrop" class="absolute inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-md"></div>
+  <div id="editorOverlay" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6">
+    <div id="editorBackdrop" class="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm"></div>
 
     <div role="dialog" aria-modal="true" aria-labelledby="editorTitle"
-         class="modal-card relative w-full max-w-2xl max-h-[88vh] flex flex-col bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-3xl shadow-2xl overflow-hidden">
-      <div id="editorAccent" class="h-2 bg-gradient-to-r from-taskA to-urgent"></div>
+         class="modal-card relative w-full max-w-2xl max-h-[88vh] flex flex-col bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-xl overflow-hidden">
+      <div id="editorAccent" class="h-1 bg-taskA"></div>
 
-      <div class="flex items-center justify-between gap-3 px-5 py-4 md:px-6 md:py-5 border-b border-slate-200 dark:border-hairline bg-slate-50/50 dark:bg-panelAlt/30">
-        <h2 id="editorTitle" class="font-display font-bold text-xl text-slate-900 dark:text-white">Edit</h2>
-        <button id="editorClose" class="p-2 rounded-xl text-slate-400 dark:text-inkMuted hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-panelHi transition-colors" aria-label="Close">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+      <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-200 dark:border-hairline">
+        <h2 id="editorTitle" class="font-display font-semibold text-lg text-slate-900 dark:text-white">Edit</h2>
+        <button id="editorClose" class="p-1.5 rounded-lg text-inkMuted hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-panelAlt transition-colors" aria-label="Close">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
 
-      <div id="editorFields" class="px-5 py-4 md:px-6 md:py-5 overflow-y-auto flex flex-col gap-5"></div>
+      <div id="editorFields" class="px-5 py-4 overflow-y-auto flex flex-col gap-4"></div>
 
-      <div class="flex items-center justify-between gap-3 px-5 py-4 md:px-6 md:py-5 border-t border-slate-200 dark:border-hairline bg-slate-50/50 dark:bg-panelAlt/30">
-        <button id="editorDelete" class="text-sm text-rose-500 hover:text-rose-600 font-bold transition-colors flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Delete</button>
-        <div class="flex items-center gap-3">
-          <span class="hidden sm:block text-[11px] font-mono text-inkMuted mr-2 font-medium">Ctrl + Enter</span>
-          <button id="editorCancel" class="px-4 md:px-5 py-2 md:py-2.5 text-sm font-semibold rounded-xl border border-slate-200 dark:border-hairline text-slate-600 dark:text-ink hover:bg-slate-100 dark:hover:bg-panelHi transition-colors">Cancel</button>
-          <button id="editorSave" class="px-5 md:px-6 py-2 md:py-2.5 text-sm font-bold rounded-xl bg-slate-900 dark:bg-ink text-white dark:text-graphite hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all">Save</button>
+      <div class="flex items-center justify-between gap-3 px-5 py-4 border-t border-slate-200 dark:border-hairline">
+        <button id="editorDelete" class="text-sm text-rose-500 hover:text-rose-600 font-medium transition-colors">Delete</button>
+        <div class="flex items-center gap-2">
+          <span class="hidden sm:block text-[11px] font-mono text-inkMuted mr-1">Ctrl + Enter</span>
+          <button id="editorCancel" class="px-4 py-2 text-sm rounded-lg border border-slate-200 dark:border-hairline text-slate-600 dark:text-inkMuted hover:border-slate-300 dark:hover:border-inkMuted/50 transition-colors">Cancel</button>
+          <button id="editorSave" class="px-4 py-2 text-sm font-semibold rounded-lg bg-slate-900 dark:bg-ink text-white dark:text-graphite hover:brightness-110 active:scale-95 transition-all">Save</button>
         </div>
       </div>
     </div>
@@ -460,20 +386,18 @@
 
       const setCollapsed = (collapsed, persist = true) => {
         panel.classList.toggle('collapsed', collapsed);
-        if(chevron) chevron.classList.toggle('-rotate-90', collapsed);
-        if(toggleBtn) toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+        chevron.classList.toggle('-rotate-90', collapsed);
+        toggleBtn.setAttribute('aria-expanded', String(!collapsed));
         if (persist) localStorage.setItem(key, String(collapsed));
       };
 
       panelApi.set(panel, setCollapsed);
       if (localStorage.getItem(key) === 'true') setCollapsed(true, false);
 
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-          setCollapsed(!panel.classList.contains('collapsed'));
-          syncCollapseAllLabel();
-        });
-      }
+      toggleBtn.addEventListener('click', () => {
+        setCollapsed(!panel.classList.contains('collapsed'));
+        syncCollapseAllLabel();
+      });
     });
 
     const collapseAllBtn = document.getElementById('collapseAllBtn');
@@ -533,15 +457,15 @@
     };
 
     const trashIcon = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
-    const editIcon  = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`;
+    const editIcon  = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`;
 
-    const iconBtn = 'text-inkMuted hover:text-slate-900 dark:hover:text-white transition-colors shrink-0 p-2 md:p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-panelHi opacity-100 md:opacity-0 group-hover/item:opacity-100 focus:opacity-100';
+    const iconBtn = 'text-inkMuted hover:text-slate-900 dark:hover:text-white transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100';
 
     // --- PRIORITIES ---
     const PRIORITIES = {
-      high:   { label: 'High',   rank: 0, dot: 'bg-urgent', chip: 'text-rose-600 dark:text-rose-300 bg-rose-500/10 border-rose-500/30', on: 'bg-urgent text-white border-urgent shadow-[0_0_12px_rgba(255,51,102,0.4)]' },
-      medium: { label: 'Medium', rank: 1, dot: 'bg-taskA',  chip: 'text-orange-600 dark:text-orange-300 bg-orange-500/10 border-orange-500/30', on: 'bg-taskA text-white border-taskA shadow-[0_0_12px_rgba(255,97,97,0.4)]' },
-      low:    { label: 'Low',    rank: 2, dot: 'bg-steady', chip: 'text-sky-600 dark:text-sky-300 bg-sky-500/10 border-sky-500/30', on: 'bg-steady text-white border-steady shadow-[0_0_12px_rgba(0,230,230,0.4)]' },
+      high:   { label: 'High',   rank: 0, dot: 'bg-urgent', chip: 'text-rose-600 dark:text-rose-300 bg-rose-500/10 border-rose-500/30', on: 'bg-urgent text-white border-urgent' },
+      medium: { label: 'Medium', rank: 1, dot: 'bg-taskA',  chip: 'text-amber-600 dark:text-amber-300 bg-amber-500/10 border-amber-500/30', on: 'bg-taskA text-white border-taskA' },
+      low:    { label: 'Low',    rank: 2, dot: 'bg-steady', chip: 'text-sky-600 dark:text-sky-300 bg-sky-500/10 border-sky-500/30', on: 'bg-steady text-white border-steady' },
     };
     const PRIORITY_ORDER = ['high', 'medium', 'low'];
     const priorityOf = (t) => PRIORITIES[t.priority] ? t.priority : 'medium';
@@ -558,9 +482,9 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.setAttribute('aria-pressed', String(active));
-        btn.className = 'seg flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] md:text-[11px] uppercase tracking-wide transition-all ' +
-          (active ? conf.on + ' font-bold' : 'bg-slate-100 dark:bg-panelAlt text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:border-slate-300 font-medium');
-        btn.innerHTML = `<span class="w-2 h-2 rounded-full ${active ? 'bg-white' : conf.dot}"></span>${conf.label}`;
+        btn.className = 'seg flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition-all ' +
+          (active ? conf.on + ' font-semibold' : 'bg-slate-100 dark:bg-panelAlt text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/40');
+        btn.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${active ? 'bg-white/80' : conf.dot}"></span>${conf.label}`;
         btn.addEventListener('click', () => {
           newTaskPriority = p;
           localStorage.setItem('newTaskPriority', p);
@@ -592,9 +516,9 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.setAttribute('aria-pressed', String(active));
-        btn.className = 'seg shrink-0 px-3 md:px-3.5 py-1.5 rounded-xl text-xs transition-colors ' +
-          (active ? 'bg-slate-800 dark:bg-ink text-white dark:text-graphite border-slate-800 dark:border-ink font-bold shadow-sm'
-                  : 'bg-transparent text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:bg-slate-100 dark:hover:bg-panelAlt font-medium');
+        btn.className = 'seg shrink-0 px-2.5 py-1 rounded-lg text-xs transition-colors ' +
+          (active ? 'bg-slate-900 dark:bg-ink text-white dark:text-graphite border-slate-900 dark:border-ink font-semibold'
+                  : 'bg-transparent text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/40');
         btn.textContent = f.label;
         btn.addEventListener('click', () => {
           taskFilter = f.id;
@@ -628,11 +552,11 @@
     const state = { tasks: [], notes: [], links: [], plans: [], yt: [] };
 
     const config = {
-      tasks: { collection: 'tasks',      el: document.getElementById('taskList'), countId: 'taskCount', accent: 'from-taskA to-urgent', title: 'Task' },
-      notes: { collection: 'notes',      el: document.getElementById('noteList'), countId: 'noteCount', accent: 'from-noteA to-blue-500', title: 'Note' },
-      links: { collection: 'quickLinks', el: document.getElementById('linkList'), countId: 'linkCount', accent: 'from-linkA to-sky-400', title: 'Link' },
-      plans: { collection: 'plans',      el: document.getElementById('planList'), countId: 'planCount', accent: 'from-planA to-emerald-400', title: 'Plan' },
-      yt:    { collection: 'ytLinks',    el: document.getElementById('ytList'),   countId: 'ytCount',   accent: 'from-ytA to-orange-500',   title: 'Video' },
+      tasks: { collection: 'tasks',      el: document.getElementById('taskList'), countId: 'taskCount', accent: 'bg-taskA', title: 'Task' },
+      notes: { collection: 'notes',      el: document.getElementById('noteList'), countId: 'noteCount', accent: 'bg-noteA', title: 'Note' },
+      links: { collection: 'quickLinks', el: document.getElementById('linkList'), countId: 'linkCount', accent: 'bg-linkA', title: 'Link' },
+      plans: { collection: 'plans',      el: document.getElementById('planList'), countId: 'planCount', accent: 'bg-planA', title: 'Plan' },
+      yt:    { collection: 'ytLinks',    el: document.getElementById('ytList'),   countId: 'ytCount',   accent: 'bg-ytA',   title: 'Video' },
     };
 
     const emptyMessages = {
@@ -652,18 +576,18 @@
     }
 
     /* ==========================================================
-        DETAIL / EDIT DIALOG
+       DETAIL / EDIT DIALOG
        ========================================================== */
     const overlay = document.getElementById('editorOverlay');
     const editorFields = document.getElementById('editorFields');
     const editorTitleEl = document.getElementById('editorTitle');
     const editorAccent = document.getElementById('editorAccent');
-    let editing = null;
-    let editPriority = 'medium';
+    let editing = null;          // { key, id }
+    let editPriority = 'medium'; // task priority inside the dialog
     let editDone = false;
 
-    const fieldInput = 'w-full px-4 py-3 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl focus:outline-none focus:ring-2 focus:ring-noteA/40 focus:border-noteA/40 transition-colors shadow-inner';
-    const fieldLabel = 'text-[11px] uppercase tracking-wider font-bold text-inkMuted mb-2 block';
+    const fieldInput = 'w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA/40 transition-colors';
+    const fieldLabel = 'text-[11px] font-mono text-inkMuted mb-1.5 block';
 
     function field(label, inner) {
       return `<label class="block"><span class="${fieldLabel}">${label}</span>${inner}</label>`;
@@ -671,12 +595,10 @@
 
     function linkRow(link = { label: '', url: '' }) {
       return `
-        <div class="ed-link-row flex flex-col sm:flex-row gap-2 sm:gap-3 items-center">
-          <input type="text" class="ed-link-label w-full sm:w-[34%] min-w-0 px-4 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl focus:outline-none focus:ring-2 focus:ring-noteA/40 shadow-inner" placeholder="Name" value="${esc(link.label || '')}">
-          <div class="flex gap-2 w-full sm:flex-1">
-            <input type="text" class="ed-link-url flex-1 min-w-0 px-4 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl focus:outline-none focus:ring-2 focus:ring-noteA/40 shadow-inner" placeholder="https://" value="${esc(link.url || '')}">
-            <button type="button" class="ed-link-remove w-11 h-11 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-slate-100 dark:bg-panelHi text-inkMuted hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors flex items-center justify-center" aria-label="Remove link"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-          </div>
+        <div class="ed-link-row flex gap-2 items-center">
+          <input type="text" class="ed-link-label w-[34%] min-w-0 px-3 py-2 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-noteA/40" placeholder="Name" value="${esc(link.label || '')}">
+          <input type="text" class="ed-link-url flex-1 min-w-0 px-3 py-2 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-noteA/40" placeholder="https://" value="${esc(link.url || '')}">
+          <button type="button" class="ed-link-remove w-9 h-9 shrink-0 rounded-lg border border-slate-200 dark:border-hairline text-inkMuted hover:text-rose-500 hover:border-rose-400 transition-colors" aria-label="Remove link">&times;</button>
         </div>`;
     }
 
@@ -688,11 +610,11 @@
           field('Task', `<textarea id="edText" rows="5" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
           `<div>
              <span class="${fieldLabel}">Priority</span>
-             <div id="edPriority" class="flex gap-2 flex-wrap"></div>
+             <div id="edPriority" class="flex gap-1.5 flex-wrap"></div>
            </div>
-           <label class="flex items-center gap-3 cursor-pointer select-none p-4 bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl hover:border-planA/50 transition-colors">
-             <input type="checkbox" id="edDone" ${editDone ? 'checked' : ''} class="w-6 h-6 sm:w-5 sm:h-5 accent-planA rounded">
-             <span class="text-sm font-medium text-slate-700 dark:text-ink">Mark as done</span>
+           <label class="flex items-center gap-2.5 cursor-pointer select-none">
+             <input type="checkbox" id="edDone" ${editDone ? 'checked' : ''} class="w-4 h-4 accent-planA">
+             <span class="text-sm text-slate-600 dark:text-inkMuted">Mark as done</span>
            </label>`;
         renderEditPriority();
       }
@@ -703,25 +625,25 @@
         editorFields.innerHTML =
           field('Name', `<input type="text" id="edText" class="${fieldInput}" value="${esc(item.text)}">`) +
           field('URL', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="${esc(item.url || '')}">`) +
-          `<a href="${esc(item.url || '#')}" target="_blank" rel="noopener" class="text-xs font-semibold text-linkA hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> Open this link in a new tab</a>`;
+          `<a href="${esc(item.url || '#')}" target="_blank" rel="noopener" class="text-xs text-linkA hover:underline">Open this link in a new tab</a>`;
       }
       else if (key === 'yt') {
         editorFields.innerHTML =
           field('Title', `<textarea id="edText" rows="3" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
           field('YouTube link', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="https://youtu.be/${esc(item.videoId || '')}">`) +
-          `<div class="relative pb-[56.25%] h-0 overflow-hidden rounded-xl bg-black shadow-inner border border-slate-200 dark:border-hairline">
+          `<div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
              <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${esc(item.videoId || '')}" frameborder="0" allowfullscreen loading="lazy"></iframe>
            </div>`;
       }
       else if (key === 'notes') {
         const links = Array.isArray(item.links) ? item.links : [];
         editorFields.innerHTML =
-          field('Title', `<input type="text" id="edText" class="${fieldInput} font-bold text-base" value="${esc(item.text)}">`) +
+          field('Title', `<input type="text" id="edText" class="${fieldInput} font-medium" value="${esc(item.text)}">`) +
           field('Note', `<textarea id="edBody" rows="8" class="${fieldInput} leading-relaxed">${esc(item.body || '')}</textarea>`) +
           `<div>
              <span class="${fieldLabel}">Links</span>
-             <div id="edLinks" class="flex flex-col gap-3">${links.map(linkRow).join('')}</div>
-             <button type="button" id="edAddLink" class="mt-3 w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm sm:text-xs font-bold text-noteA bg-noteA/10 rounded-lg hover:bg-noteA/20 transition-colors">+ Add another link</button>
+             <div id="edLinks" class="flex flex-col gap-2">${links.map(linkRow).join('')}</div>
+             <button type="button" id="edAddLink" class="mt-2 text-xs font-medium text-noteA hover:underline">+ Add another link</button>
            </div>`;
 
         document.getElementById('edAddLink').addEventListener('click', () => {
@@ -744,9 +666,9 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.setAttribute('aria-pressed', String(active));
-        btn.className = 'seg flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 px-4 py-2.5 sm:py-2 rounded-xl text-xs uppercase tracking-wide transition-all ' +
-          (active ? conf.on + ' font-bold' : 'bg-slate-100 dark:bg-panelAlt text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:bg-slate-200 dark:hover:bg-panelHi font-medium');
-        btn.innerHTML = `<span class="w-2 h-2 rounded-full ${active ? 'bg-white' : conf.dot}"></span>${conf.label}`;
+        btn.className = 'seg flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all ' +
+          (active ? conf.on + ' font-semibold' : 'bg-slate-100 dark:bg-panelAlt text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/40');
+        btn.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${active ? 'bg-white/80' : conf.dot}"></span>${conf.label}`;
         btn.addEventListener('click', () => { editPriority = p; renderEditPriority(); });
         box.appendChild(btn);
       });
@@ -755,7 +677,7 @@
     function openEditor(key, item) {
       editing = { key, id: item.id };
       editorTitleEl.textContent = config[key].title;
-      editorAccent.className = 'h-1.5 bg-gradient-to-r ' + config[key].accent;
+      editorAccent.className = 'h-1 ' + config[key].accent;
       buildEditorFields(key, item);
 
       overlay.classList.remove('hidden');
@@ -853,26 +775,26 @@
 
       if (vidId) {
         return `
-          <div class="flex flex-col gap-2 mt-2">
-            <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-xl bg-black border border-slate-200 dark:border-hairline shadow-sm">
+          <div class="flex flex-col gap-2">
+            <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
               <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${esc(vidId)}" title="${esc(link.label || 'YouTube video')}" frameborder="0" allowfullscreen loading="lazy"></iframe>
             </div>
-            ${link.label ? `<span class="text-xs font-semibold text-slate-500 dark:text-inkMuted truncate pl-1">${esc(link.label)}</span>` : ''}
+            ${link.label ? `<span class="text-xs text-inkMuted truncate">${esc(link.label)}</span>` : ''}
           </div>`;
       }
 
       const host = hostOf(link.url);
       const favicon = faviconFor(link.url);
       return `
-        <a href="${esc(link.url)}" target="_blank" rel="noopener" class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-panel border border-slate-200 dark:border-hairline hover:border-noteA hover:shadow-[0_4px_12px_rgba(139,61,255,0.1)] transition-all group/link mt-2">
-          <span class="w-9 h-9 shrink-0 rounded-lg bg-slate-50 dark:bg-panelHi border border-slate-100 dark:border-hairline flex items-center justify-center overflow-hidden shadow-sm">
-            ${favicon ? `<img src="${esc(favicon)}" class="w-5 h-5" onerror="this.style.visibility='hidden'" alt="">` : ''}
+        <a href="${esc(link.url)}" target="_blank" rel="noopener" class="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-panel border border-slate-200 dark:border-hairline hover:border-noteA/60 transition-colors group/link">
+          <span class="w-8 h-8 shrink-0 rounded-md bg-slate-100 dark:bg-panelHi border border-slate-200 dark:border-hairline flex items-center justify-center overflow-hidden">
+            ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4" onerror="this.style.visibility='hidden'" alt="">` : ''}
           </span>
           <span class="flex flex-col min-w-0 leading-tight">
-            <span class="text-sm font-bold text-slate-800 dark:text-ink truncate group-hover/link:text-noteA transition-colors">${esc(link.label || host)}</span>
-            <span class="text-xs font-mono text-inkMuted truncate mt-0.5">${esc(host)}</span>
+            <span class="text-sm font-medium text-slate-700 dark:text-ink truncate group-hover/link:text-noteA transition-colors">${esc(link.label || host)}</span>
+            <span class="text-xs font-mono text-inkMuted truncate">${esc(host)}</span>
           </span>
-          <svg class="w-5 h-5 ml-auto shrink-0 text-slate-300 dark:text-hairline group-hover/link:text-noteA transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          <svg class="w-4 h-4 ml-auto shrink-0 text-inkMuted group-hover/link:text-noteA transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
         </a>`;
     }
 
@@ -886,20 +808,20 @@
         const conf = PRIORITIES[p];
         const done = !!item.done;
 
-        li.className = 'group/item flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-white dark:bg-panelAlt/60 border border-slate-200 dark:border-hairline hover:border-taskA/50 hover:shadow-md transition-all' + (done ? ' opacity-50 grayscale-[0.5]' : '');
+        li.className = 'group/item flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-panelAlt border border-slate-200/70 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/30 transition-colors' + (done ? ' opacity-60' : '');
         li.innerHTML = `
-          <button class="toggle-btn mt-0.5 w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${done ? 'bg-planA border-planA text-white shadow-[0_0_10px_rgba(0,208,132,0.5)]' : 'border-slate-300 dark:border-inkMuted hover:border-planA hover:bg-planA/10'}" aria-label="${done ? 'Mark as not done' : 'Mark as done'}" aria-pressed="${done}">
-            ${done ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>` : ''}
+          <button class="toggle-btn mt-0.5 w-5 h-5 shrink-0 rounded-md border-2 flex items-center justify-center transition-colors ${done ? 'bg-planA border-planA text-white' : 'border-slate-300 dark:border-inkMuted/50 hover:border-planA'}" aria-label="${done ? 'Mark as not done' : 'Mark as done'}" aria-pressed="${done}">
+            ${done ? `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>` : ''}
           </button>
-          <div class="min-w-0 flex-1 pt-0.5">
-            <p class="open-target openable clamp-2 text-[15px] font-medium text-slate-800 dark:text-ink break-words ${done ? 'done-text' : ''}" title="Click to open">${esc(item.text)}</p>
-            <button class="priority-btn seg mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider ${conf.chip} hover:brightness-110 transition-all" title="Change priority">
-              <span class="w-2 h-2 rounded-full ${conf.dot}"></span>${conf.label}
+          <div class="min-w-0 flex-1">
+            <p class="open-target openable clamp-2 text-sm text-slate-700 dark:text-ink break-words ${done ? 'done-text' : ''}" title="Click to open">${esc(item.text)}</p>
+            <button class="priority-btn seg mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] ${conf.chip} hover:brightness-110 transition-all" title="Change priority">
+              <span class="w-1.5 h-1.5 rounded-full ${conf.dot}"></span>${conf.label}
             </button>
           </div>
-          <div class="flex items-center shrink-0 ml-1 md:ml-2">
+          <div class="flex items-center shrink-0">
             <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
-            <button class="delete-btn ${iconBtn} hover:!text-rose-500 hover:!bg-rose-50 dark:hover:!bg-rose-500/10" aria-label="Delete task">${trashIcon}</button>
+            <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete task">${trashIcon}</button>
           </div>`;
 
         li.querySelector('.toggle-btn').addEventListener('click', () =>
@@ -913,61 +835,61 @@
 
       else if (key === 'notes') {
         const links = Array.isArray(item.links) ? item.links : [];
-        li.className = 'group/item flex flex-col gap-3 p-4 md:p-5 bg-white dark:bg-panelAlt/60 rounded-[20px] border border-slate-200 dark:border-hairline hover:border-noteA hover:shadow-lg transition-all cursor-default';
+        li.className = 'group/item flex flex-col gap-3 p-4 bg-slate-50 dark:bg-panelAlt rounded-xl border border-slate-200 dark:border-hairline hover:border-noteA/50 transition-colors';
         li.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <h3 class="open-target openable font-display font-bold text-lg text-slate-900 dark:text-white leading-snug break-words clamp-2" title="Click to open">${esc(item.text)}</h3>
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="open-target openable font-display font-semibold text-base text-slate-900 dark:text-white leading-snug break-words clamp-2" title="Click to open">${esc(item.text)}</h3>
             <div class="flex items-center shrink-0">
               <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
-              <button class="delete-btn ${iconBtn} hover:!text-rose-500 hover:!bg-rose-50 dark:hover:!bg-rose-500/10" aria-label="Delete note">${trashIcon}</button>
+              <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete note">${trashIcon}</button>
             </div>
           </div>
-          ${item.body ? `<p class="open-target openable clamp-3 text-sm font-medium text-slate-500 dark:text-inkMuted leading-relaxed whitespace-pre-wrap break-words mt-1" title="Click to open">${esc(item.body)}</p>` : ''}
-          ${links.length ? `<div class="flex flex-col gap-2 pt-4 mt-1 border-t border-slate-100 dark:border-hairline">${links.map(renderNoteLink).join('')}</div>` : ''}`;
+          ${item.body ? `<p class="open-target openable clamp-3 text-sm text-slate-600 dark:text-ink/80 leading-relaxed whitespace-pre-wrap break-words" title="Click to open">${esc(item.body)}</p>` : ''}
+          ${links.length ? `<div class="flex flex-col gap-2 pt-3 border-t border-slate-200 dark:border-hairline">${links.map(renderNoteLink).join('')}</div>` : ''}`;
       }
 
       else if (key === 'yt' && item.videoId) {
-        li.className = 'group/item flex flex-col gap-3 p-4 bg-white dark:bg-panelAlt/60 rounded-[20px] border border-slate-200 dark:border-hairline hover:border-ytA hover:shadow-lg transition-all';
+        li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
         li.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <h3 class="open-target openable clamp-2 font-bold text-sm text-slate-900 dark:text-ink leading-snug break-words" title="Click to open">${esc(item.text)}</h3>
-            <div class="flex items-center shrink-0 -mt-1">
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="open-target openable clamp-2 font-medium text-sm text-slate-800 dark:text-ink leading-snug break-words" title="Click to open">${esc(item.text)}</h3>
+            <div class="flex items-center shrink-0">
               <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
-              <button class="delete-btn ${iconBtn} hover:!text-rose-500 hover:!bg-rose-50 dark:hover:!bg-rose-500/10" aria-label="Delete video">${trashIcon}</button>
+              <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete video">${trashIcon}</button>
             </div>
           </div>
-          <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-xl bg-black shadow-inner">
+          <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
             <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${esc(item.videoId)}" frameborder="0" allowfullscreen loading="lazy"></iframe>
           </div>`;
       }
 
       else if (key === 'links' && item.url) {
         const favicon = faviconFor(item.url);
-        li.className = 'group/item flex flex-col gap-2 p-3 md:p-4 bg-white dark:bg-panelAlt/60 rounded-2xl border border-slate-200 dark:border-hairline hover:border-linkA hover:shadow-md transition-all';
+        li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
         li.innerHTML = `
-          <div class="flex items-center justify-between w-full gap-3 md:gap-4">
-            <a href="${esc(item.url)}" target="_blank" rel="noopener" class="flex items-center gap-3 min-w-0 text-[15px] font-bold text-slate-800 dark:text-ink hover:text-linkA transition-colors">
-              ${favicon ? `<div class="p-1.5 bg-slate-100 dark:bg-panelHi rounded-lg shadow-sm"><img src="${esc(favicon)}" class="w-5 h-5 rounded-sm shrink-0" onerror="this.style.visibility='hidden'" alt=""></div>` : '<div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-panelHi shrink-0"></div>'}
+          <div class="flex items-center justify-between w-full gap-3">
+            <a href="${esc(item.url)}" target="_blank" rel="noopener" class="flex items-center gap-2.5 min-w-0 text-sm font-medium text-slate-700 dark:text-ink hover:text-linkA transition-colors">
+              ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4 rounded-sm shrink-0" onerror="this.style.visibility='hidden'" alt="">` : ''}
               <span class="truncate">${esc(item.text)}</span>
             </a>
             <div class="flex items-center shrink-0">
               <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
-              <button class="delete-btn ${iconBtn} hover:!text-rose-500 hover:!bg-rose-50 dark:hover:!bg-rose-500/10" aria-label="Delete link">${trashIcon}</button>
+              <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete link">${trashIcon}</button>
             </div>
           </div>`;
       }
 
       else {
-        li.className = 'group/item flex flex-col gap-2 p-3 md:p-4 bg-white dark:bg-panelAlt/60 rounded-2xl border border-slate-200 dark:border-hairline hover:border-planA hover:shadow-md transition-all';
+        li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
         li.innerHTML = `
           <div class="flex items-start justify-between w-full gap-3">
-            <span class="flex items-start gap-3 min-w-0 pt-0.5">
-              <span class="w-2.5 h-2.5 mt-1.5 rounded-full bg-planA shadow-[0_0_8px_rgba(0,208,132,0.5)] shrink-0"></span>
-              <span class="open-target openable clamp-2 text-[15px] font-medium text-slate-800 dark:text-ink break-words" title="Click to open">${esc(item.text)}</span>
+            <span class="flex items-start gap-2.5 min-w-0">
+              <span class="w-1.5 h-1.5 mt-1.5 rounded-full bg-planA shrink-0"></span>
+              <span class="open-target openable clamp-2 text-sm text-slate-700 dark:text-ink break-words" title="Click to open">${esc(item.text)}</span>
             </span>
-            <div class="flex items-center shrink-0 -mt-1">
+            <div class="flex items-center shrink-0">
               <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
-              <button class="delete-btn ${iconBtn} hover:!text-rose-500 hover:!bg-rose-50 dark:hover:!bg-rose-500/10" aria-label="Delete item">${trashIcon}</button>
+              <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete item">${trashIcon}</button>
             </div>
           </div>`;
       }
@@ -992,6 +914,7 @@
           if (taskFilter === 'done') return !!t.done;
           return priorityOf(t) === taskFilter && !t.done;
         });
+        // Open before done, then high to low. Array#sort is stable, so newest-first holds within ties.
         items = items.slice().sort((a, b) => {
           if (!!a.done !== !!b.done) return a.done ? 1 : -1;
           return PRIORITIES[priorityOf(a)].rank - PRIORITIES[priorityOf(b)].rank;
@@ -1008,7 +931,7 @@
 
       if (!items.length) {
         const li = document.createElement('li');
-        li.className = 'col-span-full text-sm font-medium text-slate-400 dark:text-inkMuted italic py-6 text-center bg-slate-50/50 dark:bg-panelAlt/30 rounded-xl border border-dashed border-slate-200 dark:border-hairline';
+        li.className = 'col-span-full text-sm text-slate-400 dark:text-inkMuted italic py-2';
         li.textContent = searchTerm ? 'Nothing matches that search.' : emptyMessages[key];
         listEl.appendChild(li);
         return;
@@ -1028,7 +951,7 @@
       document.getElementById('statOpen').textContent = open;
       document.getElementById('statHigh').textContent = high;
       document.getElementById('statDone').textContent = done;
-      document.getElementById('statTotal').textContent = total + (total === 1 ? ' item' : ' items');
+      document.getElementById('statTotal').textContent = total + (total === 1 ? ' item tracked' : ' items tracked');
       document.getElementById('taskCount').textContent = open;
 
       if (searchTerm) {
@@ -1080,6 +1003,7 @@
         dataToSave.text = mainInputValue;
         dataToSave.priority = newTaskPriority;
         dataToSave.done = false;
+        // Keep the new task visible if the current filter would hide it
         if (taskFilter === 'done' || (PRIORITIES[taskFilter] && taskFilter !== newTaskPriority)) {
           taskFilter = 'open';
           localStorage.setItem('taskFilter', taskFilter);
@@ -1107,10 +1031,10 @@
 
       pendingNoteLinks.forEach((link, index) => {
         const chip = document.createElement('span');
-        chip.className = 'flex items-center gap-2 pl-3 pr-2 py-1.5 text-xs font-medium bg-noteA/10 text-slate-800 dark:text-ink border border-noteA/30 rounded-lg';
+        chip.className = 'flex items-center gap-2 pl-2 pr-1.5 py-1 text-xs bg-noteA/10 text-slate-700 dark:text-ink border border-noteA/30 rounded-full';
         chip.innerHTML = `
           <span class="truncate max-w-[150px]">${esc(link.label || hostOf(link.url))}</span>
-          <button type="button" class="text-inkMuted hover:text-rose-500 bg-white dark:bg-panelAlt rounded-md transition-colors leading-none p-1 shadow-sm" aria-label="Remove link"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg></button>`;
+          <button type="button" class="text-inkMuted hover:text-rose-500 transition-colors leading-none px-1" aria-label="Remove link">&times;</button>`;
         chip.querySelector('button').addEventListener('click', () => {
           pendingNoteLinks.splice(index, 1);
           renderNoteChips();
@@ -1185,6 +1109,7 @@
       if (e.key === 'Enter') { e.preventDefault(); document.getElementById('noteBodyInput').focus(); }
     });
 
+    // Change the priority of the next task with Alt + ArrowUp / ArrowDown
     document.getElementById('taskInput').addEventListener('keydown', (e) => {
       if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
       e.preventDefault();
