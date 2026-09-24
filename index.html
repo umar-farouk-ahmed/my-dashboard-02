@@ -24,7 +24,6 @@
             hairline: '#2A2F40',
             ink: '#F3F4F6',
             inkMuted: '#9CA3AF',
-            // Vibrant Canva-inspired UI colors
             linkA: '#00C4CC',
             taskA: '#FF6161',
             planA: '#00D084',
@@ -49,7 +48,7 @@
           },
           keyframes: {
             popIn: {
-              '0%': { opacity: '0', transform: 'translateY(20px) scale(0.98)' },
+              '0%': { opacity: '0', transform: 'translateY(15px) scale(0.98)' },
               '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
             },
             floating: {
@@ -75,9 +74,9 @@
     }
     body.modal-open { overflow: hidden; }
 
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .dark ::-webkit-scrollbar-thumb { background: #374151; }
     .dark ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
@@ -85,14 +84,14 @@
     /* Modern Glassmorphic Panels */
     .panel {
       backdrop-filter: blur(12px);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
     }
     .panel:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px -10px rgba(0,0,0,0.1);
     }
     .dark .panel:hover {
-      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.4);
+      box-shadow: 0 15px 35px -10px rgba(0,0,0,0.4);
     }
 
     .panel-body {
@@ -104,10 +103,13 @@
     .panel-body > div { overflow: hidden; min-height: 0; }
     .panel.collapsed .panel-body { grid-template-rows: 0fr; opacity: 0; }
 
-    .scroll-area { overflow-y: auto; scrollbar-gutter: stable; padding-right: 4px;}
-    .list-short { max-height: 320px; }
-    .list-tall  { max-height: 460px; }
-
+    /* Dynamic scrolling - grows to fit, scrolls when too long */
+    .scroll-area { 
+      overflow-y: auto; 
+      overscroll-behavior: contain; 
+      padding-right: 4px;
+    }
+    
     .clamp-2, .clamp-3 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
     .clamp-2 { -webkit-line-clamp: 2; }
     .clamp-3 { -webkit-line-clamp: 3; }
@@ -130,110 +132,103 @@
     .modal-card { animation: modalIn .3s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
     :focus-visible { outline: 2px solid #8B3DFF; outline-offset: 2px; border-radius: 6px; }
-
     textarea { resize: vertical; }
-
     .seg { border: 1px solid transparent; }
     .done-text { text-decoration: line-through; opacity: 0.6;}
-
-    /* List item hover FX */
-    .group\/item {
-      transition: all 0.2s ease;
-    }
-    .group\/item:hover {
-      transform: scale(1.01);
-    }
+    .group\/item { transition: all 0.2s ease; }
+    .group\/item:hover { transform: scale(1.01); }
   </style>
 </head>
 <body class="bg-[#F9FAFB] dark:bg-graphite text-slate-800 dark:text-ink min-h-screen">
 
-  <!-- Command bar - Redesigned as a floating glass pill -->
-  <header class="sticky top-4 z-30 mx-4 md:mx-8 mb-8">
-    <div class="max-w-[1500px] mx-auto bg-white/70 dark:bg-panel/70 backdrop-blur-xl border border-white/50 dark:border-hairline rounded-3xl shadow-soft dark:shadow-glass px-4 md:px-6 py-3 flex flex-wrap items-center gap-x-4 gap-y-3 transition-colors duration-300">
+  <!-- Command bar - Fully responsive for mobile -->
+  <header class="sticky top-2 md:top-4 z-30 mx-3 md:mx-8 mb-6 md:mb-8">
+    <div class="max-w-[1500px] mx-auto bg-white/70 dark:bg-panel/70 backdrop-blur-xl border border-white/50 dark:border-hairline rounded-2xl md:rounded-3xl shadow-soft dark:shadow-glass p-3 md:p-4 flex flex-col md:flex-row items-center gap-3 md:gap-4 transition-colors duration-300">
 
-      <div class="flex items-center gap-4 mr-auto min-w-0">
+      <div class="flex items-center gap-3 w-full md:w-auto mr-auto">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-noteA to-linkA border border-white/20 flex items-center justify-center font-display font-bold text-sm text-white shrink-0 shadow-glow animate-float">
           UD
         </div>
         <div class="min-w-0">
-          <h1 id="greeting" class="font-display text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 leading-tight truncate">Umar's Dashboard</h1>
-          <p id="clockLine" class="text-xs font-mono text-inkMuted truncate font-medium"></p>
+          <h1 id="greeting" class="font-display text-lg md:text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 leading-tight truncate">Umar's Dashboard</h1>
+          <p id="clockLine" class="text-[10px] md:text-xs font-mono text-inkMuted truncate font-medium"></p>
         </div>
       </div>
 
-      <div class="order-last w-full lg:order-none lg:w-auto lg:flex-1 lg:max-w-md">
-        <div class="relative group">
-          <div class="absolute inset-0 bg-gradient-to-r from-noteA to-linkA rounded-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur"></div>
-          <div class="relative">
-            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-inkMuted pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"></path></svg>
-            <input type="search" id="searchInput" placeholder="Search everything..." aria-label="Search all panels"
-              class="w-full pl-10 pr-16 py-2.5 text-sm font-medium bg-white/90 dark:bg-panelAlt/90 border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-transparent transition-all shadow-inner">
-            <kbd class="hidden sm:flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-inkMuted bg-slate-100 dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-[4px] px-1.5 py-0.5">/</kbd>
-          </div>
+      <div class="w-full md:flex-1 md:max-w-md relative group">
+        <div class="absolute inset-0 bg-gradient-to-r from-noteA to-linkA rounded-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur"></div>
+        <div class="relative">
+          <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-inkMuted pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"></path></svg>
+          <input type="search" id="searchInput" placeholder="Search everything..." aria-label="Search all panels"
+            class="w-full pl-10 pr-12 md:pr-16 py-2.5 text-sm font-medium bg-white/90 dark:bg-panelAlt/90 border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-transparent transition-all shadow-inner">
+          <kbd class="hidden sm:flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-inkMuted bg-slate-100 dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-[4px] px-1.5 py-0.5">/</kbd>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <button id="collapseAllBtn" class="hidden md:inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline text-slate-600 dark:text-ink hover:bg-slate-100 dark:hover:bg-panelHi hover:border-slate-300 transition-all">
+      <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+        <button id="collapseAllBtn" class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline text-slate-600 dark:text-ink hover:bg-slate-100 dark:hover:bg-panelHi hover:border-slate-300 transition-all">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
           <span id="collapseAllLabel">Collapse all</span>
         </button>
-        <button id="themeToggle" class="p-2.5 rounded-xl bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline hover:bg-slate-100 dark:hover:bg-panelHi hover:border-slate-300 transition-all shadow-sm" title="Toggle theme" aria-label="Toggle color theme">
+        <button id="themeToggle" class="p-2.5 rounded-xl bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline hover:bg-slate-100 dark:hover:bg-panelHi hover:border-slate-300 transition-all shadow-sm shrink-0" title="Toggle theme" aria-label="Toggle color theme">
           <span id="themeIcon" class="block transform transition-transform hover:rotate-12 text-lg">🌓</span>
         </button>
       </div>
     </div>
     
-    <!-- Live counters moved directly below the floating pill -->
-    <div class="max-w-[1460px] mx-auto px-4 mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-mono font-medium text-slate-500 dark:text-inkMuted opacity-0-init animate-pop stagger-1">
-      <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-panel border border-slate-200 dark:border-hairline shadow-sm"><span class="w-2 h-2 rounded-full bg-taskA shadow-[0_0_8px_rgba(255,97,97,0.6)]"></span><span id="statOpen" class="text-slate-800 dark:text-white">0</span> open</span>
-      <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-panel border border-slate-200 dark:border-hairline shadow-sm"><span class="w-2 h-2 rounded-full bg-urgent shadow-[0_0_8px_rgba(255,51,102,0.6)]"></span><span id="statHigh" class="text-slate-800 dark:text-white">0</span> high priority</span>
-      <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-panel border border-slate-200 dark:border-hairline shadow-sm"><span class="w-2 h-2 rounded-full bg-planA shadow-[0_0_8px_rgba(0,208,132,0.6)]"></span><span id="statDone" class="text-slate-800 dark:text-white">0</span> done</span>
-      <span id="statTotal" class="px-3 py-1 rounded-full bg-slate-100 dark:bg-panelAlt border border-slate-200 dark:border-hairline shadow-sm">0 items tracked</span>
-      <span id="searchNotice" class="hidden items-center gap-1.5 text-linkA font-semibold px-3 py-1 bg-linkA/10 rounded-full border border-linkA/30"></span>
+    <!-- Live counters -->
+    <div class="max-w-[1460px] mx-auto px-2 mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] md:text-xs font-mono font-medium text-slate-500 dark:text-inkMuted opacity-0-init animate-pop stagger-1">
+      <span class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white dark:bg-panel border border-slate-200 dark:border-hairline shadow-sm"><span class="w-2 h-2 rounded-full bg-taskA shadow-[0_0_8px_rgba(255,97,97,0.6)]"></span><span id="statOpen" class="text-slate-800 dark:text-white">0</span> open</span>
+      <span class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white dark:bg-panel border border-slate-200 dark:border-hairline shadow-sm"><span class="w-2 h-2 rounded-full bg-urgent shadow-[0_0_8px_rgba(255,51,102,0.6)]"></span><span id="statHigh" class="text-slate-800 dark:text-white">0</span> high</span>
+      <span class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white dark:bg-panel border border-slate-200 dark:border-hairline shadow-sm"><span class="w-2 h-2 rounded-full bg-planA shadow-[0_0_8px_rgba(0,208,132,0.6)]"></span><span id="statDone" class="text-slate-800 dark:text-white">0</span> done</span>
+      <span id="statTotal" class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-panelAlt border border-slate-200 dark:border-hairline shadow-sm">0 items</span>
+      <span id="searchNotice" class="hidden items-center gap-1.5 text-linkA font-semibold px-2.5 py-1 bg-linkA/10 rounded-full border border-linkA/30"></span>
     </div>
   </header>
 
-  <main class="max-w-[1500px] mx-auto px-4 md:px-8 pb-12">
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-6">
+  <!-- IMPORTANT: items-start added here so panels don't stretch vertically creating dead space -->
+  <main class="max-w-[1500px] mx-auto px-3 md:px-8 pb-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 md:gap-6 items-start">
 
       <!-- What To Do Next -->
       <section class="panel md:col-span-2 xl:col-span-5 bg-white/80 dark:bg-panel/80 border border-slate-200/80 dark:border-hairline rounded-[24px] shadow-soft overflow-hidden opacity-0-init animate-pop stagger-2" data-panel="tasks">
-        <!-- Replaced flat bar with gradient glow line -->
         <div class="h-1.5 bg-gradient-to-r from-taskA via-urgent to-taskA opacity-90"></div>
-        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-6 py-5 text-left group" aria-expanded="true">
-          <span class="flex items-center gap-3 min-w-0">
-            <div class="p-2 bg-taskA/10 rounded-xl group-hover:scale-110 transition-transform">
-              <svg class="w-5 h-5 text-taskA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-            </div>
-            <span class="font-display font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">What To Do Next</span>
-          </span>
-          <span class="flex items-center gap-3 shrink-0">
-            <span id="taskCount" class="text-xs font-mono font-bold text-taskA bg-taskA/10 border border-taskA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-            <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
-              <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-          </span>
+        <!-- FIX: Using block button + inner flex div so headers don't disappear in Android webview -->
+        <button type="button" class="collapse-toggle w-full block text-left group focus:outline-none" aria-expanded="true">
+          <div class="flex items-center justify-between gap-3 px-4 md:px-6 py-4 md:py-5">
+            <span class="flex items-center gap-3 min-w-0">
+              <div class="p-2 bg-taskA/10 rounded-xl group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5 text-taskA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+              </div>
+              <span class="font-display font-bold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">What To Do Next</span>
+            </span>
+            <span class="flex items-center gap-3 shrink-0">
+              <span id="taskCount" class="text-xs font-mono font-bold text-taskA bg-taskA/10 border border-taskA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
+              <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
+                <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </span>
+          </div>
         </button>
         <div class="panel-body">
           <div>
-            <div class="px-6 pb-6">
-
+            <div class="px-4 md:px-6 pb-4 md:pb-6">
               <div class="flex gap-2.5 relative group">
-                <input type="text" id="taskInput" placeholder="What needs doing?" class="flex-1 min-w-0 px-4 py-3 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-taskA/50 focus:border-taskA transition-all shadow-inner">
+                <input type="text" id="taskInput" placeholder="What needs doing?" class="flex-1 min-w-0 px-3 md:px-4 py-2.5 md:py-3 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-taskA/50 focus:border-taskA transition-all shadow-inner">
                 <button id="addTaskBtn" class="bg-gradient-to-br from-taskA to-urgent text-white w-12 shrink-0 rounded-xl hover:shadow-lg hover:shadow-taskA/30 active:scale-95 transition-all font-bold text-lg flex items-center justify-center" aria-label="Add task">+</button>
               </div>
 
               <div class="flex items-center justify-between mt-4">
                 <div class="flex items-center gap-2">
-                  <span class="text-[10px] uppercase tracking-wider font-bold text-inkMuted shrink-0">Priority</span>
+                  <span class="text-[9px] md:text-[10px] uppercase tracking-wider font-bold text-inkMuted shrink-0">Priority</span>
                   <div id="prioritySelect" class="flex gap-1.5 flex-wrap" role="group" aria-label="Priority for new task"></div>
                 </div>
               </div>
 
-              <div class="flex items-center gap-2 mt-5 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide" id="taskFilters" role="group" aria-label="Filter tasks"></div>
+              <div class="flex items-center gap-2 mt-4 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide" id="taskFilters" role="group" aria-label="Filter tasks"></div>
 
-              <ul id="taskList" class="scroll-area list-tall space-y-3 mt-2"></ul>
+              <!-- Content grows up to 55vh, then scrolls natively -->
+              <ul id="taskList" class="scroll-area max-h-[55vh] lg:max-h-[500px] space-y-3 mt-2"></ul>
             </div>
           </div>
         </div>
@@ -242,41 +237,46 @@
       <!-- Notes -->
       <section class="panel md:col-span-2 xl:col-span-7 bg-white/80 dark:bg-panel/80 border border-slate-200/80 dark:border-hairline rounded-[24px] shadow-soft overflow-hidden opacity-0-init animate-pop stagger-3" data-panel="notes">
         <div class="h-1.5 bg-gradient-to-r from-noteA to-blue-500 opacity-90"></div>
-        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-6 py-5 text-left group" aria-expanded="true">
-          <span class="flex items-center gap-3 min-w-0">
-            <div class="p-2 bg-noteA/10 rounded-xl group-hover:scale-110 transition-transform">
-              <svg class="w-5 h-5 text-noteA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-            </div>
-            <span class="font-display font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">Notes</span>
-          </span>
-          <span class="flex items-center gap-3 shrink-0">
-            <span id="noteCount" class="text-xs font-mono font-bold text-noteA bg-noteA/10 border border-noteA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-            <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
-              <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-          </span>
+        <button type="button" class="collapse-toggle w-full block text-left group focus:outline-none" aria-expanded="true">
+          <div class="flex items-center justify-between gap-3 px-4 md:px-6 py-4 md:py-5">
+            <span class="flex items-center gap-3 min-w-0">
+              <div class="p-2 bg-noteA/10 rounded-xl group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5 text-noteA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+              </div>
+              <span class="font-display font-bold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">Notes</span>
+            </span>
+            <span class="flex items-center gap-3 shrink-0">
+              <span id="noteCount" class="text-xs font-mono font-bold text-noteA bg-noteA/10 border border-noteA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
+              <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
+                <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </span>
+          </div>
         </button>
         <div class="panel-body">
           <div>
-            <div class="px-6 pb-6 grid grid-cols-1 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] gap-6">
+            <div class="px-4 md:px-6 pb-4 md:pb-6 grid grid-cols-1 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] gap-6">
 
               <div class="flex flex-col gap-3 lg:border-r lg:border-slate-200 lg:dark:border-hairline lg:pr-6">
-                <input type="text" id="noteTitleInput" placeholder="Note title" class="w-full px-4 py-3 text-sm font-semibold bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner">
-                <textarea id="noteBodyInput" rows="4" placeholder="Write the note here..." class="w-full px-4 py-3 text-sm leading-relaxed bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner"></textarea>
+                <input type="text" id="noteTitleInput" placeholder="Note title" class="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm font-semibold bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner">
+                <textarea id="noteBodyInput" rows="4" placeholder="Write the note here..." class="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm leading-relaxed bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner"></textarea>
 
-                <div class="flex gap-2 mt-1">
-                  <input type="text" id="noteLinkLabelInput" placeholder="Link name" class="w-[38%] min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner">
-                  <input type="text" id="noteLinkInput" placeholder="Paste a link" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner">
-                  <button id="addNoteLinkBtn" class="bg-slate-100 dark:bg-panelAlt text-slate-600 dark:text-ink border border-slate-200 dark:border-hairline w-11 shrink-0 rounded-lg hover:border-noteA hover:text-noteA hover:bg-noteA/5 active:scale-95 transition-all font-bold" aria-label="Attach link">+</button>
+                <div class="flex flex-col sm:flex-row gap-2 mt-1">
+                  <input type="text" id="noteLinkLabelInput" placeholder="Link name" class="w-full sm:w-[38%] min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner">
+                  <div class="flex gap-2 w-full sm:flex-1">
+                    <input type="text" id="noteLinkInput" placeholder="Paste a link" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/50 focus:border-noteA transition-colors shadow-inner">
+                    <button id="addNoteLinkBtn" class="bg-slate-100 dark:bg-panelAlt text-slate-600 dark:text-ink border border-slate-200 dark:border-hairline w-11 shrink-0 rounded-lg hover:border-noteA hover:text-noteA hover:bg-noteA/5 active:scale-95 transition-all font-bold" aria-label="Attach link">+</button>
+                  </div>
                 </div>
 
                 <div id="noteLinkChips" class="hidden flex-wrap gap-2 mt-1"></div>
 
-                <button id="addNoteBtn" class="mt-3 w-full bg-gradient-to-r from-noteA to-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-noteA/30 active:scale-[.98] transition-all">Save Note</button>
-                <p class="text-[10px] font-mono text-center text-inkMuted mt-1">Ctrl + Enter saves · YouTube links embed automatically</p>
+                <button id="addNoteBtn" class="mt-2 w-full bg-gradient-to-r from-noteA to-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-noteA/30 active:scale-[.98] transition-all">Save Note</button>
+                <p class="text-[10px] font-mono text-center text-inkMuted mt-1">Ctrl + Enter saves · YT links embed directly</p>
               </div>
 
-              <ul id="noteList" class="scroll-area list-tall grid grid-cols-1 xl:grid-cols-2 gap-4 content-start -mt-1"></ul>
+              <!-- Content grows up to 55vh, then scrolls natively -->
+              <ul id="noteList" class="scroll-area max-h-[55vh] lg:max-h-[500px] grid grid-cols-1 xl:grid-cols-2 gap-4 content-start"></ul>
             </div>
           </div>
         </div>
@@ -285,31 +285,33 @@
       <!-- Quick Links -->
       <section class="panel xl:col-span-4 bg-white/80 dark:bg-panel/80 border border-slate-200/80 dark:border-hairline rounded-[24px] shadow-soft overflow-hidden opacity-0-init animate-pop stagger-4" data-panel="links">
         <div class="h-1.5 bg-gradient-to-r from-linkA to-sky-400 opacity-90"></div>
-        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-6 py-5 text-left group" aria-expanded="true">
-          <span class="flex items-center gap-3 min-w-0">
-            <div class="p-2 bg-linkA/10 rounded-xl group-hover:scale-110 transition-transform">
-              <svg class="w-5 h-5 text-linkA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-            </div>
-            <span class="font-display font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">Quick Links</span>
-          </span>
-          <span class="flex items-center gap-3 shrink-0">
-            <span id="linkCount" class="text-xs font-mono font-bold text-linkA bg-linkA/10 border border-linkA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-            <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
-              <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-          </span>
+        <button type="button" class="collapse-toggle w-full block text-left group focus:outline-none" aria-expanded="true">
+          <div class="flex items-center justify-between gap-3 px-4 md:px-6 py-4 md:py-5">
+            <span class="flex items-center gap-3 min-w-0">
+              <div class="p-2 bg-linkA/10 rounded-xl group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5 text-linkA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+              </div>
+              <span class="font-display font-bold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">Quick Links</span>
+            </span>
+            <span class="flex items-center gap-3 shrink-0">
+              <span id="linkCount" class="text-xs font-mono font-bold text-linkA bg-linkA/10 border border-linkA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
+              <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
+                <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </span>
+          </div>
         </button>
         <div class="panel-body">
           <div>
-            <div class="px-6 pb-6">
-              <div class="flex flex-col gap-3 mb-5 p-4 bg-slate-50 dark:bg-panelAlt/50 rounded-2xl border border-slate-100 dark:border-hairline">
-                <input type="text" id="linkTitleInput" placeholder="Name (e.g. ChatGPT)" class="w-full px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA transition-colors shadow-sm">
+            <div class="px-4 md:px-6 pb-4 md:pb-6">
+              <div class="flex flex-col gap-3 mb-5 p-3 md:p-4 bg-slate-50 dark:bg-panelAlt/50 rounded-2xl border border-slate-100 dark:border-hairline">
+                <input type="text" id="linkTitleInput" placeholder="Name (e.g. ChatGPT)" class="w-full px-3 md:px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA transition-colors shadow-sm">
                 <div class="flex gap-2">
-                  <input type="text" id="linkUrlInput" placeholder="URL (e.g. chatgpt.com)" class="flex-1 min-w-0 px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA transition-colors shadow-sm">
-                  <button id="addLinkBtn" class="bg-gradient-to-br from-linkA to-sky-500 text-white w-11 shrink-0 rounded-lg hover:shadow-lg hover:shadow-linkA/30 active:scale-95 transition-all font-bold flex items-center justify-center" aria-label="Save link">+</button>
+                  <input type="text" id="linkUrlInput" placeholder="URL (e.g. chatgpt.com)" class="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/50 focus:border-linkA transition-colors shadow-sm">
+                  <button id="addLinkBtn" class="bg-gradient-to-br from-linkA to-sky-500 text-white w-12 shrink-0 rounded-lg hover:shadow-lg hover:shadow-linkA/30 active:scale-95 transition-all font-bold flex items-center justify-center" aria-label="Save link">+</button>
                 </div>
               </div>
-              <ul id="linkList" class="scroll-area list-short space-y-2.5"></ul>
+              <ul id="linkList" class="scroll-area max-h-[55vh] lg:max-h-[500px] space-y-2.5"></ul>
             </div>
           </div>
         </div>
@@ -318,28 +320,30 @@
       <!-- Long Term Plans -->
       <section class="panel xl:col-span-4 bg-white/80 dark:bg-panel/80 border border-slate-200/80 dark:border-hairline rounded-[24px] shadow-soft overflow-hidden opacity-0-init animate-pop stagger-5" data-panel="plans">
         <div class="h-1.5 bg-gradient-to-r from-planA to-emerald-400 opacity-90"></div>
-        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-6 py-5 text-left group" aria-expanded="true">
-          <span class="flex items-center gap-3 min-w-0">
-            <div class="p-2 bg-planA/10 rounded-xl group-hover:scale-110 transition-transform">
-              <svg class="w-5 h-5 text-planA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22M21.75 12.75V7.5h-5.25"></path></svg>
-            </div>
-            <span class="font-display font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">Long Term Plans</span>
-          </span>
-          <span class="flex items-center gap-3 shrink-0">
-            <span id="planCount" class="text-xs font-mono font-bold text-planA bg-planA/10 border border-planA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-            <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
-              <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-          </span>
+        <button type="button" class="collapse-toggle w-full block text-left group focus:outline-none" aria-expanded="true">
+          <div class="flex items-center justify-between gap-3 px-4 md:px-6 py-4 md:py-5">
+            <span class="flex items-center gap-3 min-w-0">
+              <div class="p-2 bg-planA/10 rounded-xl group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5 text-planA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22M21.75 12.75V7.5h-5.25"></path></svg>
+              </div>
+              <span class="font-display font-bold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">Long Term Plans</span>
+            </span>
+            <span class="flex items-center gap-3 shrink-0">
+              <span id="planCount" class="text-xs font-mono font-bold text-planA bg-planA/10 border border-planA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
+              <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
+                <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </span>
+          </div>
         </button>
         <div class="panel-body">
           <div>
-            <div class="px-6 pb-6">
+            <div class="px-4 md:px-6 pb-4 md:pb-6">
               <div class="flex gap-2.5 mb-5 relative group">
-                <input type="text" id="planInput" placeholder="Add a future plan..." class="flex-1 min-w-0 px-4 py-3 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-planA/50 focus:border-planA transition-all shadow-inner">
+                <input type="text" id="planInput" placeholder="Add a future plan..." class="flex-1 min-w-0 px-3 md:px-4 py-2.5 md:py-3 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-planA/50 focus:border-planA transition-all shadow-inner">
                 <button id="addPlanBtn" class="bg-gradient-to-br from-planA to-emerald-500 text-white w-12 shrink-0 rounded-xl hover:shadow-lg hover:shadow-planA/30 active:scale-95 transition-all font-bold text-lg flex items-center justify-center" aria-label="Add plan">+</button>
               </div>
-              <ul id="planList" class="scroll-area list-short space-y-3"></ul>
+              <ul id="planList" class="scroll-area max-h-[55vh] lg:max-h-[500px] space-y-3"></ul>
             </div>
           </div>
         </div>
@@ -348,31 +352,33 @@
       <!-- YouTube -->
       <section class="panel xl:col-span-4 bg-white/80 dark:bg-panel/80 border border-slate-200/80 dark:border-hairline rounded-[24px] shadow-soft overflow-hidden opacity-0-init animate-pop stagger-5" data-panel="yt">
         <div class="h-1.5 bg-gradient-to-r from-ytA to-orange-500 opacity-90"></div>
-        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-6 py-5 text-left group" aria-expanded="true">
-          <span class="flex items-center gap-3 min-w-0">
-            <div class="p-2 bg-ytA/10 rounded-xl group-hover:scale-110 transition-transform">
-              <svg class="w-5 h-5 text-ytA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-            <span class="font-display font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">YouTube Links</span>
-          </span>
-          <span class="flex items-center gap-3 shrink-0">
-            <span id="ytCount" class="text-xs font-mono font-bold text-ytA bg-ytA/10 border border-ytA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-            <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
-              <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-          </span>
+        <button type="button" class="collapse-toggle w-full block text-left group focus:outline-none" aria-expanded="true">
+          <div class="flex items-center justify-between gap-3 px-4 md:px-6 py-4 md:py-5">
+            <span class="flex items-center gap-3 min-w-0">
+              <div class="p-2 bg-ytA/10 rounded-xl group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5 text-ytA shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <span class="font-display font-bold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 truncate">YouTube Links</span>
+            </span>
+            <span class="flex items-center gap-3 shrink-0">
+              <span id="ytCount" class="text-xs font-mono font-bold text-ytA bg-ytA/10 border border-ytA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
+              <div class="p-1.5 rounded-full bg-slate-100 dark:bg-panelAlt group-hover:bg-slate-200 dark:group-hover:bg-panelHi transition-colors">
+                <svg class="chevron w-4 h-4 text-slate-500 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </span>
+          </div>
         </button>
         <div class="panel-body">
           <div>
-            <div class="px-6 pb-6">
-              <div class="flex flex-col gap-3 mb-5 p-4 bg-slate-50 dark:bg-panelAlt/50 rounded-2xl border border-slate-100 dark:border-hairline">
-                <input type="text" id="ytTitleInput" placeholder="Video title (e.g. Learn Python)" class="w-full px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA transition-colors shadow-sm">
+            <div class="px-4 md:px-6 pb-4 md:pb-6">
+              <div class="flex flex-col gap-3 mb-5 p-3 md:p-4 bg-slate-50 dark:bg-panelAlt/50 rounded-2xl border border-slate-100 dark:border-hairline">
+                <input type="text" id="ytTitleInput" placeholder="Video title (e.g. Learn Python)" class="w-full px-3 md:px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA transition-colors shadow-sm">
                 <div class="flex gap-2 flex-1">
-                  <input type="text" id="ytInput" placeholder="Paste YT link here..." class="flex-1 min-w-0 px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA transition-colors shadow-sm">
-                  <button id="addYtBtn" class="bg-gradient-to-br from-ytA to-orange-500 text-white w-11 shrink-0 rounded-lg hover:shadow-lg hover:shadow-ytA/30 active:scale-95 transition-all font-bold flex items-center justify-center" aria-label="Save video">+</button>
+                  <input type="text" id="ytInput" placeholder="Paste YT link here..." class="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-white dark:bg-panelHi border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/50 focus:border-ytA transition-colors shadow-sm">
+                  <button id="addYtBtn" class="bg-gradient-to-br from-ytA to-orange-500 text-white w-12 shrink-0 rounded-lg hover:shadow-lg hover:shadow-ytA/30 active:scale-95 transition-all font-bold flex items-center justify-center" aria-label="Save video">+</button>
                 </div>
               </div>
-              <ul id="ytList" class="scroll-area list-tall grid grid-cols-1 gap-5"></ul>
+              <ul id="ytList" class="scroll-area max-h-[55vh] lg:max-h-[500px] grid grid-cols-1 gap-5"></ul>
             </div>
           </div>
         </div>
@@ -389,21 +395,21 @@
          class="modal-card relative w-full max-w-2xl max-h-[88vh] flex flex-col bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-3xl shadow-2xl overflow-hidden">
       <div id="editorAccent" class="h-2 bg-gradient-to-r from-taskA to-urgent"></div>
 
-      <div class="flex items-center justify-between gap-3 px-6 py-5 border-b border-slate-200 dark:border-hairline bg-slate-50/50 dark:bg-panelAlt/30">
+      <div class="flex items-center justify-between gap-3 px-5 py-4 md:px-6 md:py-5 border-b border-slate-200 dark:border-hairline bg-slate-50/50 dark:bg-panelAlt/30">
         <h2 id="editorTitle" class="font-display font-bold text-xl text-slate-900 dark:text-white">Edit</h2>
         <button id="editorClose" class="p-2 rounded-xl text-slate-400 dark:text-inkMuted hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-panelHi transition-colors" aria-label="Close">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
 
-      <div id="editorFields" class="px-6 py-5 overflow-y-auto flex flex-col gap-5"></div>
+      <div id="editorFields" class="px-5 py-4 md:px-6 md:py-5 overflow-y-auto flex flex-col gap-5"></div>
 
-      <div class="flex items-center justify-between gap-3 px-6 py-5 border-t border-slate-200 dark:border-hairline bg-slate-50/50 dark:bg-panelAlt/30">
+      <div class="flex items-center justify-between gap-3 px-5 py-4 md:px-6 md:py-5 border-t border-slate-200 dark:border-hairline bg-slate-50/50 dark:bg-panelAlt/30">
         <button id="editorDelete" class="text-sm text-rose-500 hover:text-rose-600 font-bold transition-colors flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Delete</button>
         <div class="flex items-center gap-3">
           <span class="hidden sm:block text-[11px] font-mono text-inkMuted mr-2 font-medium">Ctrl + Enter</span>
-          <button id="editorCancel" class="px-5 py-2.5 text-sm font-semibold rounded-xl border border-slate-200 dark:border-hairline text-slate-600 dark:text-ink hover:bg-slate-100 dark:hover:bg-panelHi transition-colors">Cancel</button>
-          <button id="editorSave" class="px-6 py-2.5 text-sm font-bold rounded-xl bg-slate-900 dark:bg-ink text-white dark:text-graphite hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all">Save Changes</button>
+          <button id="editorCancel" class="px-4 md:px-5 py-2 md:py-2.5 text-sm font-semibold rounded-xl border border-slate-200 dark:border-hairline text-slate-600 dark:text-ink hover:bg-slate-100 dark:hover:bg-panelHi transition-colors">Cancel</button>
+          <button id="editorSave" class="px-5 md:px-6 py-2 md:py-2.5 text-sm font-bold rounded-xl bg-slate-900 dark:bg-ink text-white dark:text-graphite hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all">Save</button>
         </div>
       </div>
     </div>
@@ -454,18 +460,20 @@
 
       const setCollapsed = (collapsed, persist = true) => {
         panel.classList.toggle('collapsed', collapsed);
-        chevron.classList.toggle('-rotate-90', collapsed);
-        toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+        if(chevron) chevron.classList.toggle('-rotate-90', collapsed);
+        if(toggleBtn) toggleBtn.setAttribute('aria-expanded', String(!collapsed));
         if (persist) localStorage.setItem(key, String(collapsed));
       };
 
       panelApi.set(panel, setCollapsed);
       if (localStorage.getItem(key) === 'true') setCollapsed(true, false);
 
-      toggleBtn.addEventListener('click', () => {
-        setCollapsed(!panel.classList.contains('collapsed'));
-        syncCollapseAllLabel();
-      });
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          setCollapsed(!panel.classList.contains('collapsed'));
+          syncCollapseAllLabel();
+        });
+      }
     });
 
     const collapseAllBtn = document.getElementById('collapseAllBtn');
@@ -527,7 +535,7 @@
     const trashIcon = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
     const editIcon  = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`;
 
-    const iconBtn = 'text-inkMuted hover:text-slate-900 dark:hover:text-white transition-colors shrink-0 p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-panelHi opacity-0 group-hover/item:opacity-100 focus:opacity-100';
+    const iconBtn = 'text-inkMuted hover:text-slate-900 dark:hover:text-white transition-colors shrink-0 p-2 md:p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-panelHi opacity-100 md:opacity-0 group-hover/item:opacity-100 focus:opacity-100';
 
     // --- PRIORITIES ---
     const PRIORITIES = {
@@ -550,7 +558,7 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.setAttribute('aria-pressed', String(active));
-        btn.className = 'seg flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] uppercase tracking-wide transition-all ' +
+        btn.className = 'seg flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] md:text-[11px] uppercase tracking-wide transition-all ' +
           (active ? conf.on + ' font-bold' : 'bg-slate-100 dark:bg-panelAlt text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:border-slate-300 font-medium');
         btn.innerHTML = `<span class="w-2 h-2 rounded-full ${active ? 'bg-white' : conf.dot}"></span>${conf.label}`;
         btn.addEventListener('click', () => {
@@ -584,7 +592,7 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.setAttribute('aria-pressed', String(active));
-        btn.className = 'seg shrink-0 px-3.5 py-1.5 rounded-xl text-xs transition-colors ' +
+        btn.className = 'seg shrink-0 px-3 md:px-3.5 py-1.5 rounded-xl text-xs transition-colors ' +
           (active ? 'bg-slate-800 dark:bg-ink text-white dark:text-graphite border-slate-800 dark:border-ink font-bold shadow-sm'
                   : 'bg-transparent text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:bg-slate-100 dark:hover:bg-panelAlt font-medium');
         btn.textContent = f.label;
@@ -650,8 +658,8 @@
     const editorFields = document.getElementById('editorFields');
     const editorTitleEl = document.getElementById('editorTitle');
     const editorAccent = document.getElementById('editorAccent');
-    let editing = null;          // { key, id }
-    let editPriority = 'medium'; // task priority inside the dialog
+    let editing = null;
+    let editPriority = 'medium';
     let editDone = false;
 
     const fieldInput = 'w-full px-4 py-3 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl focus:outline-none focus:ring-2 focus:ring-noteA/40 focus:border-noteA/40 transition-colors shadow-inner';
@@ -663,10 +671,12 @@
 
     function linkRow(link = { label: '', url: '' }) {
       return `
-        <div class="ed-link-row flex gap-3 items-center">
-          <input type="text" class="ed-link-label w-[34%] min-w-0 px-4 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl focus:outline-none focus:ring-2 focus:ring-noteA/40 shadow-inner" placeholder="Name" value="${esc(link.label || '')}">
-          <input type="text" class="ed-link-url flex-1 min-w-0 px-4 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl focus:outline-none focus:ring-2 focus:ring-noteA/40 shadow-inner" placeholder="https://" value="${esc(link.url || '')}">
-          <button type="button" class="ed-link-remove w-10 h-10 shrink-0 rounded-xl bg-slate-100 dark:bg-panelHi text-inkMuted hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors flex items-center justify-center" aria-label="Remove link"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+        <div class="ed-link-row flex flex-col sm:flex-row gap-2 sm:gap-3 items-center">
+          <input type="text" class="ed-link-label w-full sm:w-[34%] min-w-0 px-4 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl focus:outline-none focus:ring-2 focus:ring-noteA/40 shadow-inner" placeholder="Name" value="${esc(link.label || '')}">
+          <div class="flex gap-2 w-full sm:flex-1">
+            <input type="text" class="ed-link-url flex-1 min-w-0 px-4 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl focus:outline-none focus:ring-2 focus:ring-noteA/40 shadow-inner" placeholder="https://" value="${esc(link.url || '')}">
+            <button type="button" class="ed-link-remove w-11 h-11 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-slate-100 dark:bg-panelHi text-inkMuted hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors flex items-center justify-center" aria-label="Remove link"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+          </div>
         </div>`;
     }
 
@@ -681,7 +691,7 @@
              <div id="edPriority" class="flex gap-2 flex-wrap"></div>
            </div>
            <label class="flex items-center gap-3 cursor-pointer select-none p-4 bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl hover:border-planA/50 transition-colors">
-             <input type="checkbox" id="edDone" ${editDone ? 'checked' : ''} class="w-5 h-5 accent-planA rounded">
+             <input type="checkbox" id="edDone" ${editDone ? 'checked' : ''} class="w-6 h-6 sm:w-5 sm:h-5 accent-planA rounded">
              <span class="text-sm font-medium text-slate-700 dark:text-ink">Mark as done</span>
            </label>`;
         renderEditPriority();
@@ -711,7 +721,7 @@
           `<div>
              <span class="${fieldLabel}">Links</span>
              <div id="edLinks" class="flex flex-col gap-3">${links.map(linkRow).join('')}</div>
-             <button type="button" id="edAddLink" class="mt-3 px-4 py-2 text-xs font-bold text-noteA bg-noteA/10 rounded-lg hover:bg-noteA/20 transition-colors">+ Add another link</button>
+             <button type="button" id="edAddLink" class="mt-3 w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm sm:text-xs font-bold text-noteA bg-noteA/10 rounded-lg hover:bg-noteA/20 transition-colors">+ Add another link</button>
            </div>`;
 
         document.getElementById('edAddLink').addEventListener('click', () => {
@@ -734,7 +744,7 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.setAttribute('aria-pressed', String(active));
-        btn.className = 'seg flex items-center gap-2 px-4 py-2 rounded-xl text-xs uppercase tracking-wide transition-all ' +
+        btn.className = 'seg flex flex-1 sm:flex-none items-center justify-center sm:justify-start gap-2 px-4 py-2.5 sm:py-2 rounded-xl text-xs uppercase tracking-wide transition-all ' +
           (active ? conf.on + ' font-bold' : 'bg-slate-100 dark:bg-panelAlt text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:bg-slate-200 dark:hover:bg-panelHi font-medium');
         btn.innerHTML = `<span class="w-2 h-2 rounded-full ${active ? 'bg-white' : conf.dot}"></span>${conf.label}`;
         btn.addEventListener('click', () => { editPriority = p; renderEditPriority(); });
@@ -876,7 +886,7 @@
         const conf = PRIORITIES[p];
         const done = !!item.done;
 
-        li.className = 'group/item flex items-start gap-4 p-4 rounded-2xl bg-white dark:bg-panelAlt/60 border border-slate-200 dark:border-hairline hover:border-taskA/50 hover:shadow-md transition-all' + (done ? ' opacity-50 grayscale-[0.5]' : '');
+        li.className = 'group/item flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-white dark:bg-panelAlt/60 border border-slate-200 dark:border-hairline hover:border-taskA/50 hover:shadow-md transition-all' + (done ? ' opacity-50 grayscale-[0.5]' : '');
         li.innerHTML = `
           <button class="toggle-btn mt-0.5 w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${done ? 'bg-planA border-planA text-white shadow-[0_0_10px_rgba(0,208,132,0.5)]' : 'border-slate-300 dark:border-inkMuted hover:border-planA hover:bg-planA/10'}" aria-label="${done ? 'Mark as not done' : 'Mark as done'}" aria-pressed="${done}">
             ${done ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>` : ''}
@@ -887,7 +897,7 @@
               <span class="w-2 h-2 rounded-full ${conf.dot}"></span>${conf.label}
             </button>
           </div>
-          <div class="flex items-center shrink-0 ml-2">
+          <div class="flex items-center shrink-0 ml-1 md:ml-2">
             <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
             <button class="delete-btn ${iconBtn} hover:!text-rose-500 hover:!bg-rose-50 dark:hover:!bg-rose-500/10" aria-label="Delete task">${trashIcon}</button>
           </div>`;
@@ -903,7 +913,7 @@
 
       else if (key === 'notes') {
         const links = Array.isArray(item.links) ? item.links : [];
-        li.className = 'group/item flex flex-col gap-3 p-5 bg-white dark:bg-panelAlt/60 rounded-[20px] border border-slate-200 dark:border-hairline hover:border-noteA hover:shadow-lg transition-all cursor-default';
+        li.className = 'group/item flex flex-col gap-3 p-4 md:p-5 bg-white dark:bg-panelAlt/60 rounded-[20px] border border-slate-200 dark:border-hairline hover:border-noteA hover:shadow-lg transition-all cursor-default';
         li.innerHTML = `
           <div class="flex items-start justify-between gap-3">
             <h3 class="open-target openable font-display font-bold text-lg text-slate-900 dark:text-white leading-snug break-words clamp-2" title="Click to open">${esc(item.text)}</h3>
@@ -933,9 +943,9 @@
 
       else if (key === 'links' && item.url) {
         const favicon = faviconFor(item.url);
-        li.className = 'group/item flex flex-col gap-2 p-4 bg-white dark:bg-panelAlt/60 rounded-2xl border border-slate-200 dark:border-hairline hover:border-linkA hover:shadow-md transition-all';
+        li.className = 'group/item flex flex-col gap-2 p-3 md:p-4 bg-white dark:bg-panelAlt/60 rounded-2xl border border-slate-200 dark:border-hairline hover:border-linkA hover:shadow-md transition-all';
         li.innerHTML = `
-          <div class="flex items-center justify-between w-full gap-4">
+          <div class="flex items-center justify-between w-full gap-3 md:gap-4">
             <a href="${esc(item.url)}" target="_blank" rel="noopener" class="flex items-center gap-3 min-w-0 text-[15px] font-bold text-slate-800 dark:text-ink hover:text-linkA transition-colors">
               ${favicon ? `<div class="p-1.5 bg-slate-100 dark:bg-panelHi rounded-lg shadow-sm"><img src="${esc(favicon)}" class="w-5 h-5 rounded-sm shrink-0" onerror="this.style.visibility='hidden'" alt=""></div>` : '<div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-panelHi shrink-0"></div>'}
               <span class="truncate">${esc(item.text)}</span>
@@ -948,7 +958,7 @@
       }
 
       else {
-        li.className = 'group/item flex flex-col gap-2 p-4 bg-white dark:bg-panelAlt/60 rounded-2xl border border-slate-200 dark:border-hairline hover:border-planA hover:shadow-md transition-all';
+        li.className = 'group/item flex flex-col gap-2 p-3 md:p-4 bg-white dark:bg-panelAlt/60 rounded-2xl border border-slate-200 dark:border-hairline hover:border-planA hover:shadow-md transition-all';
         li.innerHTML = `
           <div class="flex items-start justify-between w-full gap-3">
             <span class="flex items-start gap-3 min-w-0 pt-0.5">
@@ -1018,7 +1028,7 @@
       document.getElementById('statOpen').textContent = open;
       document.getElementById('statHigh').textContent = high;
       document.getElementById('statDone').textContent = done;
-      document.getElementById('statTotal').textContent = total + (total === 1 ? ' item tracked' : ' items tracked');
+      document.getElementById('statTotal').textContent = total + (total === 1 ? ' item' : ' items');
       document.getElementById('taskCount').textContent = open;
 
       if (searchTerm) {
