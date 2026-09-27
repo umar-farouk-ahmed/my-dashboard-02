@@ -28,6 +28,7 @@
             taskA: '#FFB454',
             planA: '#5FD9A4',
             ytA: '#FF6F91',
+            fbA: '#1877F2', /* Added Facebook blue accent */
             noteA: '#A78BFA',
             urgent: '#FF5C7A',
             steady: '#63C8FF',
@@ -312,6 +313,35 @@
         </div>
       </section>
 
+      <!-- Facebook Links -->
+      <section class="panel bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-2xl shadow-sm dark:shadow-none overflow-hidden" data-panel="fb">
+        <div class="h-1 bg-fbA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
+          <span class="flex items-center gap-2.5 min-w-0">
+            <svg class="w-5 h-5 text-fbA shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path></svg>
+            <span class="font-display font-semibold text-lg truncate">Facebook Links</span>
+          </span>
+          <span class="flex items-center gap-3 shrink-0">
+            <span id="fbCount" class="text-xs font-mono text-inkMuted bg-slate-100 dark:bg-panelAlt px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
+        </button>
+        <div class="panel-body">
+          <div>
+            <div class="px-5 pb-5">
+              <div class="flex flex-col sm:flex-row gap-2.5 mb-4">
+                <input type="text" id="fbTitleInput" placeholder="Title or Note" class="sm:w-[40%] min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-fbA/50 focus:border-fbA/40 transition-colors">
+                <div class="flex gap-2 flex-1">
+                  <input type="text" id="fbInput" placeholder="Paste Facebook link here..." class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-fbA/50 focus:border-fbA/40 transition-colors">
+                  <button id="addFbBtn" class="bg-fbA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Save Facebook link">+</button>
+                </div>
+              </div>
+              <ul id="fbList" class="scroll-area list-tall grid grid-cols-1 lg:grid-cols-2 gap-4 pr-1 content-start"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   </main>
 
@@ -551,7 +581,7 @@
     });
 
     // --- STATE ---
-    const state = { tasks: [], notes: [], links: [], plans: [], yt: [] };
+    const state = { tasks: [], notes: [], links: [], plans: [], yt: [], fb: [] };
 
     const config = {
       tasks: { collection: 'tasks',      el: document.getElementById('taskList'), countId: 'taskCount', accent: 'bg-taskA', title: 'Task' },
@@ -559,6 +589,7 @@
       links: { collection: 'quickLinks', el: document.getElementById('linkList'), countId: 'linkCount', accent: 'bg-linkA', title: 'Link' },
       plans: { collection: 'plans',      el: document.getElementById('planList'), countId: 'planCount', accent: 'bg-planA', title: 'Plan' },
       yt:    { collection: 'ytLinks',    el: document.getElementById('ytList'),   countId: 'ytCount',   accent: 'bg-ytA',   title: 'Video' },
+      fb:    { collection: 'fbLinks',    el: document.getElementById('fbList'),   countId: 'fbCount',   accent: 'bg-fbA',   title: 'Facebook Link' },
     };
 
     const emptyMessages = {
@@ -566,7 +597,8 @@
       notes: 'No notes yet — write one on the left.',
       links: 'No links saved yet — add one above.',
       plans: 'No plans yet — sketch out what\'s next.',
-      yt: 'No videos saved yet — paste a link above.'
+      yt: 'No videos saved yet — paste a link above.',
+      fb: 'No Facebook links saved yet — paste a link above.'
     };
 
     function searchableText(key, item) {
@@ -635,6 +667,14 @@
           field('YouTube link', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="https://youtu.be/${esc(item.videoId || '')}">`) +
           `<div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
              <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${esc(item.videoId || '')}" frameborder="0" allowfullscreen loading="lazy"></iframe>
+           </div>`;
+      }
+      else if (key === 'fb') {
+        editorFields.innerHTML =
+          field('Title', `<textarea id="edText" rows="3" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
+          field('Facebook link', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="${esc(item.url || '')}">`) +
+          `<div class="relative w-full rounded-lg overflow-hidden bg-white dark:bg-panel border border-slate-200 dark:border-hairline mt-2" style="min-height: 200px;">
+             <iframe class="w-full h-full min-h-[220px]" src="https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(item.url)}&show_text=true&width=500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
            </div>`;
       }
       else if (key === 'notes') {
@@ -728,6 +768,11 @@
         const vidId = getYTVideoId(document.getElementById('edUrl').value.trim());
         if (!vidId) { alert('That does not look like a YouTube link.'); return; }
         patch = { text: text || 'Untitled video', videoId: vidId };
+      }
+      else if (key === 'fb') {
+        const url = normalizeUrl(document.getElementById('edUrl').value.trim());
+        if (!url || !url.includes('facebook')) { alert('Please enter a valid Facebook link.'); return; }
+        patch = { text: text || 'Untitled Facebook link', url: url };
       }
       else if (key === 'notes') {
         const body = document.getElementById('edBody').value.trim();
@@ -865,6 +910,21 @@
           </div>`;
       }
 
+      else if (key === 'fb' && item.url) {
+        li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
+        li.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="open-target openable clamp-2 font-medium text-sm text-slate-800 dark:text-ink leading-snug break-words" title="Click to open">${esc(item.text)}</h3>
+            <div class="flex items-center shrink-0">
+              <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
+              <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete Facebook link">${trashIcon}</button>
+            </div>
+          </div>
+          <div class="relative w-full rounded-lg overflow-hidden bg-white dark:bg-panel border border-slate-200 dark:border-hairline" style="min-height: 200px;">
+            <iframe class="w-full h-full min-h-[200px]" src="https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(item.url)}&show_text=true&width=500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+          </div>`;
+      }
+
       else if (key === 'links' && item.url) {
         const favicon = faviconFor(item.url);
         li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
@@ -994,6 +1054,14 @@
         dataToSave.videoId = vidId;
         titleInput.value = '';
       }
+      else if (type === 'fb') {
+        const titleInput = document.getElementById('fbTitleInput');
+        const url = normalizeUrl(mainInputValue);
+        if (!url || !url.includes('facebook')) { alert('Please enter a valid Facebook link.'); return; }
+        dataToSave.text = titleInput.value.trim() || 'Untitled Facebook link';
+        dataToSave.url = url;
+        titleInput.value = '';
+      }
       else if (type === 'link') {
         const titleInput = document.getElementById('linkTitleInput');
         const url = normalizeUrl(mainInputValue);
@@ -1085,10 +1153,11 @@
     document.getElementById('addTaskBtn').addEventListener('click', () => addItem('tasks', document.getElementById('taskInput'), 'task'));
     document.getElementById('addPlanBtn').addEventListener('click', () => addItem('plans', document.getElementById('planInput'), 'text'));
     document.getElementById('addYtBtn').addEventListener('click', () => addItem('ytLinks', document.getElementById('ytInput'), 'yt'));
+    document.getElementById('addFbBtn').addEventListener('click', () => addItem('fbLinks', document.getElementById('fbInput'), 'fb'));
     document.getElementById('addNoteLinkBtn').addEventListener('click', stageNoteLink);
     document.getElementById('addNoteBtn').addEventListener('click', addNote);
 
-    const enterMap = { linkUrlInput: 'addLinkBtn', linkTitleInput: 'addLinkBtn', taskInput: 'addTaskBtn', planInput: 'addPlanBtn', ytInput: 'addYtBtn' };
+    const enterMap = { linkUrlInput: 'addLinkBtn', linkTitleInput: 'addLinkBtn', taskInput: 'addTaskBtn', planInput: 'addPlanBtn', ytInput: 'addYtBtn', fbInput: 'addFbBtn' };
     Object.entries(enterMap).forEach(([inputId, btnId]) => {
       document.getElementById(inputId).addEventListener('keypress', (e) => {
         if (e.key === 'Enter') { e.preventDefault(); document.getElementById(btnId).click(); }
