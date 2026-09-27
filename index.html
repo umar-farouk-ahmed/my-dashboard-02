@@ -28,7 +28,7 @@
             taskA: '#FFB454',
             planA: '#5FD9A4',
             ytA: '#FF6F91',
-            fbA: '#1877F2', /* Added Facebook blue accent */
+            fbA: '#1877F2', /* Facebook blue accent */
             noteA: '#A78BFA',
             urgent: '#FF5C7A',
             steady: '#63C8FF',
@@ -673,9 +673,10 @@
         editorFields.innerHTML =
           field('Title', `<textarea id="edText" rows="3" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
           field('Facebook link', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="${esc(item.url || '')}">`) +
-          `<div class="relative w-full rounded-lg overflow-hidden bg-white dark:bg-panel border border-slate-200 dark:border-hairline mt-2" style="min-height: 200px;">
-             <iframe class="w-full h-full min-h-[220px]" src="https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(item.url)}&show_text=true&width=500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-           </div>`;
+          `<a href="${esc(item.url || '#')}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-fbA hover:underline mt-2">
+             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path></svg>
+             Open on Facebook
+           </a>`;
       }
       else if (key === 'notes') {
         const links = Array.isArray(item.links) ? item.links : [];
@@ -911,17 +912,27 @@
       }
 
       else if (key === 'fb' && item.url) {
-        li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
+        li.className = 'group/item flex flex-col gap-3 p-4 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-fbA/40 transition-colors';
         li.innerHTML = `
           <div class="flex items-start justify-between gap-2">
-            <h3 class="open-target openable clamp-2 font-medium text-sm text-slate-800 dark:text-ink leading-snug break-words" title="Click to open">${esc(item.text)}</h3>
+            <div class="flex items-start gap-3 min-w-0">
+              <div class="w-10 h-10 shrink-0 rounded-full bg-[#1877F2]/10 flex items-center justify-center text-[#1877F2]">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path></svg>
+              </div>
+              <div class="flex flex-col min-w-0">
+                <h3 class="open-target openable clamp-2 font-medium text-sm text-slate-800 dark:text-ink leading-snug break-words" title="Click to edit">${esc(item.text)}</h3>
+                <a href="${esc(item.url)}" target="_blank" rel="noopener" class="text-[11px] font-mono text-inkMuted hover:text-fbA truncate mt-1 transition-colors">
+                  ${esc(item.url)}
+                </a>
+              </div>
+            </div>
             <div class="flex items-center shrink-0">
+              <a href="${esc(item.url)}" target="_blank" rel="noopener" class="p-1.5 text-inkMuted hover:text-fbA transition-colors" aria-label="Open Link">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              </a>
               <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
               <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete Facebook link">${trashIcon}</button>
             </div>
-          </div>
-          <div class="relative w-full rounded-lg overflow-hidden bg-white dark:bg-panel border border-slate-200 dark:border-hairline" style="min-height: 200px;">
-            <iframe class="w-full h-full min-h-[200px]" src="https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(item.url)}&show_text=true&width=500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
           </div>`;
       }
 
