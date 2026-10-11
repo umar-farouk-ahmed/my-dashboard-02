@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0D0F14">
   <title>Umar's Dashboard</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -89,6 +90,16 @@
 
     .seg { border: 1px solid transparent; }
     .done-text { text-decoration: line-through; }
+    .media-preview { aspect-ratio: 16 / 9; }
+    .media-preview button { touch-action: manipulation; }
+    .media-player { width: 100%; height: 100%; border: 0; }
+    /* Let the page scroll naturally on phones, without nested scroll traps. */
+    @media (max-width: 767px) {
+      .list-short, .list-tall { height: auto; max-height: none; }
+      .scroll-area { overflow-y: visible; }
+    }
+    /* Touchscreen tablets have no hover; never hide edit/delete there. */
+    @media (hover: none) { .edit-btn, .delete-btn { opacity: 1 !important; } }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -146,6 +157,12 @@
         <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-planA"></span><span id="statDone">0</span> done</span>
         <span class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-hairline"></span>
         <span id="statTotal">0 items tracked</span>
+        <span class="hidden sm:block w-px h-3 bg-slate-200 dark:bg-hairline"></span>
+        <span id="statMedia">0/0 watched</span>
+        <span class="ml-auto inline-flex items-center gap-1.5" id="syncIndicator" title="Firestore synchronization status" role="status" aria-live="polite">
+          <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+          <span id="syncText">Connecting…</span>
+        </span>
         <span id="searchNotice" class="hidden items-center gap-1.5 text-linkA"></span>
       </div>
     </div>
@@ -305,7 +322,7 @@
                   <button id="addYtBtn" class="bg-ytA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Save video">+</button>
                 </div>
               </div>
-              <!-- Changed to lg:grid-cols-3 to show 3 videos side by side -->
+              <div id="ytFilters" class="flex flex-wrap gap-1.5 mb-3" role="group" aria-label="Filter YouTube videos"></div>
               <ul id="ytList" class="scroll-area list-tall grid grid-cols-1 lg:grid-cols-3 gap-4 pr-1 content-start"></ul>
             </div>
           </div>
@@ -335,6 +352,7 @@
                   <button id="addFbBtn" class="bg-fbA text-white w-11 shrink-0 rounded-lg hover:brightness-110 active:scale-95 transition-all font-bold" aria-label="Save Facebook link">+</button>
                 </div>
               </div>
+              <div id="fbFilters" class="flex flex-wrap gap-1.5 mb-3" role="group" aria-label="Filter Facebook links"></div>
               <ul id="fbList" class="scroll-area list-tall grid grid-cols-1 lg:grid-cols-2 gap-4 pr-1 content-start"></ul>
             </div>
           </div>
@@ -343,6 +361,8 @@
 
     </div>
   </main>
+
+  <div id="toast" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md hidden z-[80] rounded-xl shadow-lg px-4 py-3 text-sm bg-slate-900 text-white dark:bg-ink dark:text-graphite" role="status" aria-live="polite"></div>
 
   <!-- Detail / edit dialog -->
   <div id="editorOverlay" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6">
@@ -446,7 +466,7 @@
 
     // --- FIREBASE ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA4IOS2Kr2jBDnt37_b7YGqTbieNgtpCfU",
@@ -459,7 +479,46 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    // Multi-tab IndexedDB cache makes revisiting the dashboard and offline use faster.
+    // Only enable this on devices you trust; cached data may remain on the device.
+    let db;
+    try {
+      db = initializeFirestore(app, {
+        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+      });
+    } catch (err) {
+      console.warn('Persistent cache unavailable; using memory-only Firestore.', err);
+      db = getFirestore(app);
+    }
+
+    let toastTimeout;
+    function toast(message) {
+      const el = document.getElementById('toast');
+      el.textContent = message;
+      el.classList.remove('hidden');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => el.classList.add('hidden'), 5500);
+    }
+    function reportError(error, action = 'save your changes') {
+      console.error('Firestore:', error);
+      toast(`Could not ${action}. ${error?.code === 'permission-denied' ? 'Check your Firestore security rules.' : 'Please check your connection and try again.'}`);
+    }
+
+    const connection = {};
+    function renderSyncStatus() {
+      const dot = document.getElementById('syncDot');
+      const label = document.getElementById('syncText');
+      const statuses = Object.values(connection);
+      const isOffline = !navigator.onLine;
+      const pending = statuses.some(s => s.pending);
+      const cached = statuses.some(s => s.cached);
+      const failed = statuses.some(s => s.failed);
+      let message = failed ? 'Sync error' : isOffline ? 'Offline · saved locally' : pending ? 'Syncing…' : cached || statuses.length < 6 ? 'Checking sync…' : 'Synced';
+      label.textContent = message;
+      dot.className = 'w-1.5 h-1.5 rounded-full ' + (failed ? 'bg-rose-500' : isOffline || cached ? 'bg-amber-400' : pending ? 'bg-blue-400' : 'bg-planA');
+    }
+    window.addEventListener('online', renderSyncStatus);
+    window.addEventListener('offline', renderSyncStatus);
 
     // --- HELPERS ---
     function esc(value) {
@@ -468,18 +527,84 @@
       })[c]);
     }
 
-    const normalizeUrl = (url) => {
-      const t = url.trim();
-      if (!t) return '';
-      return /^https?:\/\//i.test(t) ? t : 'https://' + t;
+    // Reject javascript:, data:, malformed URLs, and non-web protocols.
+    const normalizeUrl = (value) => {
+      const raw = String(value || '').trim();
+      if (!raw || /^(?:javascript|data|file|vbscript):/i.test(raw)) return '';
+      try {
+        const parsed = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+        return ['https:', 'http:'].includes(parsed.protocol) && parsed.hostname ? parsed.href : '';
+      } catch { return ''; }
+    };
+
+    const isFacebookUrl = (url) => {
+      try {
+        const host = new URL(url).hostname.toLowerCase();
+        return host === 'facebook.com' || host.endsWith('.facebook.com') || host === 'fb.watch' || host === 'fb.com' || host.endsWith('.fb.com');
+      } catch { return false; }
     };
 
     const hostOf = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; } };
 
-    function getYTVideoId(url) {
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
+    function getYTVideoId(input) {
+      try {
+        const url = new URL(normalizeUrl(input));
+        const host = url.hostname.toLowerCase();
+        let id = null;
+        if (host === 'youtu.be' || host === 'www.youtu.be') {
+          id = url.pathname.split('/').filter(Boolean)[0];
+        } else if (['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com'].includes(host)) {
+          const parts = url.pathname.split('/').filter(Boolean);
+          id = parts[0] === 'watch' ? url.searchParams.get('v') :
+            ['shorts', 'embed', 'live', 'v'].includes(parts[0]) ? parts[1] : null;
+        }
+        return /^[a-zA-Z0-9_-]{11}$/.test(id || '') ? id : null;
+      } catch { return null; }
+    }
+
+    const checkIcon = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4L19 6"/></svg>';
+    function completedLabel(item) {
+      if (!item.done || !item.completedAt) return '';
+      try {
+        const date = typeof item.completedAt.toDate === 'function'
+          ? item.completedAt.toDate()
+          : new Date(item.completedAt.seconds * 1000);
+        return Number.isNaN(date.getTime()) ? '' : `Completed ${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      } catch { return ''; }
+    }
+
+    const mediaCheckButton = (item, label) => {
+      const done = !!item.done;
+      return `<button type="button" class="toggle-btn inline-flex items-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold min-h-10 transition-colors ${done ? 'bg-planA/15 border border-planA/70 text-green-700 dark:text-planA' : 'bg-white dark:bg-panel border border-slate-200 dark:border-hairline text-slate-600 dark:text-inkMuted hover:border-planA'}" aria-pressed="${done}" aria-label="${done ? `Mark ${label} as not watched` : `Mark ${label} as watched`}">
+        <span class="w-4 h-4 rounded border ${done ? 'bg-planA border-planA text-white' : 'border-current'} flex items-center justify-center">${done ? checkIcon : ''}</span>
+        ${done ? 'Watched' : 'Mark watched'}</button>`;
+    };
+    function mediaPreview(videoId, title) {
+      const safeId = esc(videoId);
+      return `<div class="media-preview relative overflow-hidden rounded-lg bg-slate-900">
+        <button type="button" class="play-video w-full h-full relative group/play" data-video="${safeId}" aria-label="Play ${esc(title)}">
+          <img src="https://i.ytimg.com/vi/${safeId}/hqdefault.jpg" loading="lazy" decoding="async" alt="" class="w-full h-full object-cover" width="480" height="360">
+          <span class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover/play:bg-black/25 transition-colors">
+            <span class="rounded-full bg-red-600 text-white px-4 py-2 shadow-lg font-semibold text-xs">▶ Play video</span>
+          </span>
+        </button></div>`;
+    }
+    // Creating a player only after tapping Play avoids N YouTube iframes on page load.
+    function mountMediaPlayers(root) {
+      root.querySelectorAll('.play-video').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.video;
+          if (!/^[a-zA-Z0-9_-]{11}$/.test(id)) return;
+          const iframe = document.createElement('iframe');
+          iframe.className = 'media-player absolute inset-0';
+          iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1`;
+          iframe.title = 'YouTube video player';
+          iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+          iframe.allowFullscreen = true;
+          btn.parentElement.replaceChildren(iframe);
+        });
+      });
     }
 
     const faviconFor = (url) => {
@@ -490,7 +615,7 @@
     const trashIcon = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
     const editIcon  = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`;
 
-    const iconBtn = 'text-inkMuted hover:text-slate-900 dark:hover:text-white transition-colors shrink-0 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100';
+    const iconBtn = 'text-inkMuted hover:text-slate-900 dark:hover:text-white transition-colors shrink-0 p-2 min-w-9 min-h-9 inline-flex items-center justify-center opacity-100 md:opacity-0 md:group-hover/item:opacity-100 md:focus:opacity-100';
 
     // --- PRIORITIES ---
     const PRIORITIES = {
@@ -565,10 +690,14 @@
 
     const searchInput = document.getElementById('searchInput');
     const searchNotice = document.getElementById('searchNotice');
+    let searchTimer;
     searchInput.addEventListener('input', () => {
       searchTerm = searchInput.value.trim().toLowerCase();
-      Object.keys(state).forEach(renderList);
-      updateStats();
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        Object.keys(config).forEach(key => { visibleLimits[key] = PAGE_SIZE; renderList(key); });
+        updateStats();
+      }, 140);
     });
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { searchInput.value = ''; searchInput.dispatchEvent(new Event('input')); searchInput.blur(); }
@@ -581,6 +710,39 @@
 
     // --- STATE ---
     const state = { tasks: [], notes: [], links: [], plans: [], yt: [], fb: [] };
+    const PAGE_SIZE = 48;
+    const visibleLimits = { tasks: PAGE_SIZE, notes: PAGE_SIZE, links: PAGE_SIZE, plans: PAGE_SIZE, yt: PAGE_SIZE, fb: PAGE_SIZE };
+    const mediaFilters = {
+      yt: localStorage.getItem('ytFilter') || 'queued',
+      fb: localStorage.getItem('fbFilter') || 'queued'
+    };
+    for (const key of ['yt', 'fb']) {
+      if (!['queued', 'watched', 'all'].includes(mediaFilters[key])) mediaFilters[key] = 'queued';
+    }
+    function renderMediaFilters(key) {
+      const container = document.getElementById(`${key}Filters`);
+      container.replaceChildren();
+      [['queued', 'To watch'], ['watched', 'Watched'], ['all', 'All']].forEach(([value, label]) => {
+        const btn = document.createElement('button');
+        const active = mediaFilters[key] === value;
+        btn.type = 'button';
+        btn.setAttribute('aria-pressed', String(active));
+        btn.className = 'seg rounded-lg px-3 py-1.5 min-h-9 text-xs transition-colors ' +
+          (active ? 'bg-slate-900 dark:bg-ink text-white dark:text-graphite font-semibold' : 'border border-slate-200 dark:border-hairline text-slate-500 dark:text-inkMuted hover:border-slate-400');
+        btn.textContent = label;
+        btn.addEventListener('click', () => {
+          mediaFilters[key] = value;
+          localStorage.setItem(`${key}Filter`, value);
+          visibleLimits[key] = PAGE_SIZE;
+          renderMediaFilters(key);
+          renderList(key);
+          updateStats();
+        });
+        container.append(btn);
+      });
+    }
+    renderMediaFilters('yt');
+    renderMediaFilters('fb');
 
     const config = {
       tasks: { collection: 'tasks',      el: document.getElementById('taskList'), countId: 'taskCount', accent: 'bg-taskA', title: 'Task' },
@@ -605,7 +767,7 @@
         const linkText = (item.links || []).map(l => `${l.label || ''} ${l.url || ''}`).join(' ');
         return `${item.text || ''} ${item.body || ''} ${linkText}`.toLowerCase();
       }
-      return `${item.text || ''} ${item.url || ''}`.toLowerCase();
+      return `${item.text || ''} ${item.url || ''} ${item.reflection || ''}`.toLowerCase();
     }
 
     /* ==========================================================
@@ -664,24 +826,29 @@
         editorFields.innerHTML =
           field('Name', `<input type="text" id="edText" class="${fieldInput}" value="${esc(item.text)}">`) +
           field('URL', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="${esc(item.url || '')}">`) +
-          `<a href="${esc(item.url || '#')}" target="_blank" rel="noopener" class="text-xs text-linkA hover:underline">Open this link in a new tab</a>`;
+          `<a href="${esc(normalizeUrl(item.url) || '#')}" target="_blank" rel="noopener" class="text-xs text-linkA hover:underline">Open this link in a new tab</a>`;
       }
       else if (key === 'yt') {
         editorFields.innerHTML =
           field('Title', `<textarea id="edText" rows="3" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
           field('YouTube link', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="https://youtu.be/${esc(item.videoId || '')}">`) +
-          `<div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
-             <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${esc(item.videoId || '')}" frameborder="0" allowfullscreen loading="lazy"></iframe>
-           </div>`;
+          `<label class="flex items-center gap-2.5 cursor-pointer select-none">
+            <input type="checkbox" id="edDone" ${item.done ? 'checked' : ''} class="w-5 h-5 accent-green-500">
+            <span class="text-sm text-slate-700 dark:text-ink">Finished watching</span>
+          </label>` +
+          field('My learning / thoughts', `<textarea id="edReflection" rows="5" maxlength="20000" placeholder="What did you learn? What will you try next?" class="${fieldInput} leading-relaxed">${esc(item.reflection || '')}</textarea>`) +
+          `<a class="text-sm text-ytA font-semibold hover:underline" target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=${esc(item.videoId || '')}">Open video on YouTube ↗</a>`;
       }
       else if (key === 'fb') {
         editorFields.innerHTML =
           field('Title', `<textarea id="edText" rows="3" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
           field('Facebook link', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="${esc(item.url || '')}">`) +
-          `<a href="${esc(item.url || '#')}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-fbA hover:underline mt-2">
-             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path></svg>
-             Open on Facebook
-           </a>`;
+          `<label class="flex items-center gap-2.5 cursor-pointer select-none">
+            <input type="checkbox" id="edDone" ${item.done ? 'checked' : ''} class="w-5 h-5 accent-green-500">
+            <span class="text-sm text-slate-700 dark:text-ink">Finished viewing / reading</span>
+          </label>` +
+          field('My learning / thoughts', `<textarea id="edReflection" rows="5" maxlength="20000" placeholder="Key idea, reaction, or next action…" class="${fieldInput} leading-relaxed">${esc(item.reflection || '')}</textarea>`) +
+          `<a href="${esc(normalizeUrl(item.url) || '#')}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-fbA hover:underline mt-2">Open on Facebook ↗</a>`;
       }
       else if (key === 'notes') {
         const links = Array.isArray(item.links) ? item.links : [];
@@ -697,10 +864,10 @@
         document.getElementById('edAddLink').addEventListener('click', () => {
           document.getElementById('edLinks').insertAdjacentHTML('beforeend', linkRow());
         });
-        editorFields.addEventListener('click', (e) => {
+        editorFields.onclick = (e) => {
           const btn = e.target.closest('.ed-link-remove');
           if (btn) btn.closest('.ed-link-row').remove();
-        });
+        };
       }
     }
 
@@ -723,6 +890,7 @@
     }
 
     function openEditor(key, item) {
+      previousFocus = document.activeElement;
       editing = { key, id: item.id };
       editorTitleEl.textContent = config[key].title;
       editorAccent.className = 'h-1 ' + config[key].accent;
@@ -742,12 +910,15 @@
       }
     }
 
+    let previousFocus = null;
     function closeEditor() {
       editing = null;
       overlay.classList.add('hidden');
       overlay.classList.remove('flex');
       document.body.classList.remove('modal-open');
       editorFields.innerHTML = '';
+      if (previousFocus?.isConnected) previousFocus.focus();
+      previousFocus = null;
     }
 
     async function saveEditor() {
@@ -767,18 +938,22 @@
       }
       else if (key === 'links') {
         const url = normalizeUrl(document.getElementById('edUrl').value);
-        if (!url) { alert('A URL is required.'); return; }
+        if (!url) { toast('Please enter a valid http(s) link.'); return; }
         patch = { text: text || hostOf(url), url };
       }
-      else if (key === 'yt') {
-        const vidId = getYTVideoId(document.getElementById('edUrl').value.trim());
-        if (!vidId) { alert('That does not look like a YouTube link.'); return; }
-        patch = { text: text || 'Untitled video', videoId: vidId };
-      }
-      else if (key === 'fb') {
-        const url = normalizeUrl(document.getElementById('edUrl').value.trim());
-        if (!url || !url.includes('facebook')) { alert('Please enter a valid Facebook link.'); return; }
-        patch = { text: text || 'Untitled Facebook link', url: url };
+      else if (key === 'yt' || key === 'fb') {
+        const url = normalizeUrl(document.getElementById('edUrl').value);
+        if (key === 'yt' && !getYTVideoId(url)) { toast('Please enter a valid YouTube video link.'); return; }
+        if (key === 'fb' && !isFacebookUrl(url)) { toast('Please enter a valid Facebook link.'); return; }
+        const oldItem = state[key].find(x => x.id === id);
+        const done = document.getElementById('edDone').checked;
+        patch = {
+          text: text || (key === 'yt' ? 'Untitled video' : 'Untitled Facebook link'),
+          reflection: document.getElementById('edReflection').value.trim(),
+          done,
+          completedAt: done ? (oldItem?.done && oldItem.completedAt || serverTimestamp()) : null,
+          ...(key === 'yt' ? { videoId: getYTVideoId(url) } : { url })
+        };
       }
       else if (key === 'notes') {
         const body = document.getElementById('edBody').value.trim();
@@ -792,20 +967,16 @@
         patch = { text: text || 'Untitled note', body, links };
       }
 
-      try {
-        await updateDoc(ref, patch);
-        closeEditor();
-      } catch (err) {
-        console.error(err);
-        alert('Could not save — the item may have been deleted.');
-      }
+      // Firestore applies local writes immediately; don't block this dialog while offline.
+      updateDoc(ref, patch).catch(err => reportError(err));
+      closeEditor();
     }
 
     async function deleteFromEditor() {
       if (!editing) return;
       const { key, id } = editing;
       if (!confirm('Delete this permanently?')) return;
-      try { await deleteDoc(doc(db, config[key].collection, id)); } catch (err) { console.error(err); }
+      deleteDoc(doc(db, config[key].collection, id)).catch(err => reportError(err, 'delete this item'));
       closeEditor();
     }
 
@@ -824,22 +995,22 @@
     // --- RENDERERS ---
     function renderNoteLink(link) {
       if (!link || !link.url) return '';
-      const vidId = getYTVideoId(link.url);
+      const safeUrl = normalizeUrl(link.url);
+      if (!safeUrl) return '';
+      const vidId = getYTVideoId(safeUrl);
 
       if (vidId) {
         return `
           <div class="flex flex-col gap-2">
-            <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
-              <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${esc(vidId)}" title="${esc(link.label || 'YouTube video')}" frameborder="0" allowfullscreen loading="lazy"></iframe>
-            </div>
+            ${mediaPreview(vidId, link.label || 'YouTube video')}
             ${link.label ? `<span class="text-xs text-inkMuted truncate">${esc(link.label)}</span>` : ''}
           </div>`;
       }
 
-      const host = hostOf(link.url);
-      const favicon = faviconFor(link.url);
+      const host = hostOf(safeUrl);
+      const favicon = faviconFor(safeUrl);
       return `
-        <a href="${esc(link.url)}" target="_blank" rel="noopener" class="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-panel border border-slate-200 dark:border-hairline hover:border-noteA/60 transition-colors group/link">
+        <a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-panel border border-slate-200 dark:border-hairline hover:border-noteA/60 transition-colors group/link">
           <span class="w-8 h-8 shrink-0 rounded-md bg-slate-100 dark:bg-panelHi border border-slate-200 dark:border-hairline flex items-center justify-center overflow-hidden">
             ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4" onerror="this.style.visibility='hidden'" alt="">` : ''}
           </span>
@@ -863,8 +1034,8 @@
 
         li.className = 'group/item flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-panelAlt border border-slate-200/70 dark:border-hairline hover:border-slate-300 dark:hover:border-inkMuted/30 transition-colors' + (done ? ' opacity-60' : '');
         li.innerHTML = `
-          <button class="toggle-btn mt-0.5 w-5 h-5 shrink-0 rounded-md border-2 flex items-center justify-center transition-colors ${done ? 'bg-planA border-planA text-white' : 'border-slate-300 dark:border-inkMuted/50 hover:border-planA'}" aria-label="${done ? 'Mark as not done' : 'Mark as done'}" aria-pressed="${done}">
-            ${done ? `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>` : ''}
+          <button class="toggle-btn mt-0.5 w-10 h-10 shrink-0 rounded-lg border-2 flex items-center justify-center transition-colors ${done ? 'bg-planA border-planA text-white' : 'border-slate-300 dark:border-inkMuted/50 hover:border-planA'}" aria-label="${done ? 'Mark as not done' : 'Mark as done'}" aria-pressed="${done}">
+            ${done ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>` : ''}
           </button>
           <div class="min-w-0 flex-1">
             <p class="open-target openable clamp-2 text-sm text-slate-700 dark:text-ink break-words ${done ? 'done-text' : ''}" title="Click to open">${esc(item.text)}</p>
@@ -878,11 +1049,11 @@
           </div>`;
 
         li.querySelector('.toggle-btn').addEventListener('click', () =>
-          updateDoc(doc(db, collectionName, item.id), { done: !done })
+          updateDoc(doc(db, collectionName, item.id), { done: !done }).catch(err => reportError(err, 'update completion'))
         );
         li.querySelector('.priority-btn').addEventListener('click', () => {
           const next = PRIORITY_ORDER[(PRIORITY_ORDER.indexOf(p) + 1) % PRIORITY_ORDER.length];
-          updateDoc(doc(db, collectionName, item.id), { priority: next });
+          updateDoc(doc(db, collectionName, item.id), { priority: next }).catch(err => reportError(err, 'update priority'));
         });
       }
 
@@ -902,22 +1073,27 @@
       }
 
       else if (key === 'yt' && item.videoId) {
-        li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
+        const done = !!item.done;
+        li.className = 'group/item flex flex-col gap-2.5 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors' + (done ? ' border-planA/30' : '');
         li.innerHTML = `
           <div class="flex items-start justify-between gap-2">
-            <h3 class="open-target openable clamp-2 font-medium text-sm text-slate-800 dark:text-ink leading-snug break-words" title="Click to open">${esc(item.text)}</h3>
-            <div class="flex items-center shrink-0">
-              <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
+            <h3 class="open-target openable clamp-2 font-medium text-sm text-slate-800 dark:text-ink leading-snug break-words" title="Click to edit">${esc(item.text)}</h3>
+            <div class="flex shrink-0">
+              <button class="edit-btn ${iconBtn}" aria-label="Edit video and learning notes">${editIcon}</button>
               <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete video">${trashIcon}</button>
             </div>
           </div>
-          <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg bg-black">
-            <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${esc(item.videoId)}" frameborder="0" allowfullscreen loading="lazy"></iframe>
-          </div>`;
+          ${mediaPreview(item.videoId, item.text || 'video')}
+          <div class="flex flex-wrap items-center gap-2 justify-between">
+            ${mediaCheckButton(item, 'video')}
+            <button class="reflection-btn py-2 px-2 text-xs font-semibold min-h-10 text-ytA hover:underline">${item.reflection ? '✎ Edit learning' : '+ Add learning'}</button>
+          </div>
+          ${completedLabel(item) ? `<p class="text-[10px] font-mono text-inkMuted">${completedLabel(item)}</p>` : ''}
+          ${item.reflection ? `<p class="open-target openable text-xs leading-relaxed whitespace-pre-wrap break-words text-slate-600 dark:text-inkMuted rounded-md bg-white/60 dark:bg-panel/70 p-2.5 clamp-3">${esc(item.reflection)}</p>` : ''}`;
       }
 
-      else if (key === 'fb' && item.url) {
-        li.className = 'group/item flex flex-col gap-3 p-4 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-fbA/40 transition-colors';
+      else if (key === 'fb' && normalizeUrl(item.url)) {
+        li.className = 'group/item flex flex-col gap-3 p-4 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-fbA/40 transition-colors' + (item.done ? ' border-planA/40' : '');
         li.innerHTML = `
           <div class="flex items-start justify-between gap-2">
             <div class="flex items-start gap-3 min-w-0">
@@ -938,10 +1114,16 @@
               <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
               <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete Facebook link">${trashIcon}</button>
             </div>
-          </div>`;
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 dark:border-hairline pt-2">
+            ${mediaCheckButton(item, 'post')}
+            <button class="reflection-btn py-2 px-2 min-h-10 text-xs font-semibold text-fbA hover:underline">${item.reflection ? '✎ Edit thoughts' : '+ Add thoughts'}</button>
+          </div>
+          ${completedLabel(item) ? `<p class="text-[10px] font-mono text-inkMuted">${completedLabel(item)}</p>` : ''}
+          ${item.reflection ? `<p class="open-target openable text-xs leading-relaxed whitespace-pre-wrap break-words text-slate-600 dark:text-inkMuted rounded-md bg-white/60 dark:bg-panel/70 p-2.5 clamp-3">${esc(item.reflection)}</p>` : ''}`;
       }
 
-      else if (key === 'links' && item.url) {
+      else if (key === 'links' && normalizeUrl(item.url)) {
         const favicon = faviconFor(item.url);
         li.className = 'group/item flex flex-col gap-2 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors';
         li.innerHTML = `
@@ -961,8 +1143,8 @@
         const done = !!item.done;
         li.className = 'group/item flex items-start gap-3 p-3.5 bg-slate-50 dark:bg-panelAlt rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-hairline transition-colors' + (done ? ' opacity-70' : '');
         li.innerHTML = `
-          <button class="toggle-btn mt-0.5 w-5 h-5 shrink-0 rounded-md border-2 flex items-center justify-center transition-all ${done ? 'bg-planA border-planA text-white shadow-[0_0_10px_#5FD9A4]' : 'border-slate-300 dark:border-inkMuted/50 hover:border-planA'}" aria-label="${done ? 'Mark as not done' : 'Mark as done'}" aria-pressed="${done}">
-            ${done ? `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>` : ''}
+          <button class="toggle-btn mt-0.5 w-10 h-10 shrink-0 rounded-lg border-2 flex items-center justify-center transition-all ${done ? 'bg-planA border-planA text-white shadow-[0_0_10px_#5FD9A4]' : 'border-slate-300 dark:border-inkMuted/50 hover:border-planA'}" aria-label="${done ? 'Mark as not done' : 'Mark as done'}" aria-pressed="${done}">
+            ${done ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>` : ''}
           </button>
           <div class="flex-1 min-w-0">
             <span class="open-target openable clamp-2 text-sm text-slate-700 dark:text-ink break-words ${done ? 'done-text' : ''}" title="Click to open">${esc(item.text)}</span>
@@ -973,7 +1155,7 @@
           </div>`;
 
         li.querySelector('.toggle-btn').addEventListener('click', () =>
-          updateDoc(doc(db, collectionName, item.id), { done: !done })
+          updateDoc(doc(db, collectionName, item.id), { done: !done }).catch(err => reportError(err, 'update completion'))
         );
       }
 
@@ -995,7 +1177,24 @@
       li.querySelectorAll('.open-target').forEach(el => el.addEventListener('click', open));
       const editBtn = li.querySelector('.edit-btn');
       if (editBtn) editBtn.addEventListener('click', open);
-      li.querySelector('.delete-btn').addEventListener('click', () => deleteDoc(doc(db, collectionName, item.id)));
+      const reflectionBtn = li.querySelector('.reflection-btn');
+      if (reflectionBtn) reflectionBtn.addEventListener('click', () => {
+        open();
+        document.getElementById('edReflection')?.focus();
+      });
+      if (key === 'yt' || key === 'fb') {
+        li.querySelector('.toggle-btn')?.addEventListener('click', () => {
+          updateDoc(doc(db, collectionName, item.id), {
+            done: !item.done,
+            completedAt: !item.done ? serverTimestamp() : null
+          }).catch(err => reportError(err, 'update watched status'));
+        });
+      }
+      mountMediaPlayers(li);
+      li.querySelector('.delete-btn').addEventListener('click', () => {
+        if (!confirm('Delete this item permanently?')) return;
+        deleteDoc(doc(db, collectionName, item.id)).catch(err => reportError(err, 'delete this item'));
+      });
 
       return li;
     }
@@ -1005,6 +1204,10 @@
 
       if (searchTerm) items = items.filter(i => searchableText(key, i).includes(searchTerm));
 
+      if (key === 'yt' || key === 'fb') {
+        if (mediaFilters[key] === 'queued') items = items.filter(x => !x.done);
+        if (mediaFilters[key] === 'watched') items = items.filter(x => !!x.done);
+      }
       if (key === 'tasks') {
         items = items.filter(t => {
           if (taskFilter === 'all') return true;
@@ -1036,7 +1239,18 @@
       }
 
       const frag = document.createDocumentFragment();
-      items.forEach(item => frag.appendChild(buildItem(key, item)));
+      items.slice(0, visibleLimits[key]).forEach(item => frag.appendChild(buildItem(key, item)));
+      if (items.length > visibleLimits[key]) {
+        const more = document.createElement('li');
+        more.className = 'col-span-full';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-full py-3 px-4 text-xs font-semibold text-linkA border border-slate-200 dark:border-hairline rounded-lg hover:bg-slate-100 dark:hover:bg-panelAlt';
+        btn.textContent = `Show more (${items.length - visibleLimits[key]} remaining)`;
+        btn.addEventListener('click', () => { visibleLimits[key] += PAGE_SIZE; renderList(key); });
+        more.append(btn);
+        frag.append(more);
+      }
       listEl.appendChild(frag);
     }
 
@@ -1050,6 +1264,8 @@
       document.getElementById('statHigh').textContent = high;
       document.getElementById('statDone').textContent = done;
       document.getElementById('statTotal').textContent = total + (total === 1 ? ' item tracked' : ' items tracked');
+      const mediaItems = [...state.yt, ...state.fb];
+      document.getElementById('statMedia').textContent = `${mediaItems.filter(x => x.done).length}/${mediaItems.length} watched`;
       document.getElementById('taskCount').textContent = open;
 
       if (searchTerm) {
@@ -1067,11 +1283,23 @@
       const { collection: name, countId } = config[key];
       const q = query(collection(db, name), orderBy('createdAt', 'desc'));
 
-      onSnapshot(q, (snapshot) => {
+      onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+        connection[key] = {
+          cached: snapshot.metadata.fromCache,
+          pending: snapshot.metadata.hasPendingWrites,
+          failed: false
+        };
+        renderSyncStatus();
+        // Metadata-only updates should not rebuild all cards and interrupt playback.
+        if (snapshot.docChanges({ includeMetadataChanges: false }).length === 0 && state[key].length > 0) return;
         state[key] = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         if (key !== 'tasks') document.getElementById(countId).textContent = snapshot.size;
         renderList(key);
         updateStats();
+      }, (err) => {
+        connection[key] = { cached: false, pending: false, failed: true };
+        renderSyncStatus();
+        reportError(err, `load ${key}`);
       });
     }
 
@@ -1088,19 +1316,24 @@
         if (!vidId) { alert('That does not look like a YouTube link.'); return; }
         dataToSave.text = titleInput.value.trim() || 'Untitled video';
         dataToSave.videoId = vidId;
+        dataToSave.done = false;
+        dataToSave.reflection = '';
         titleInput.value = '';
       }
       else if (type === 'fb') {
         const titleInput = document.getElementById('fbTitleInput');
         const url = normalizeUrl(mainInputValue);
-        if (!url || !url.includes('facebook')) { alert('Please enter a valid Facebook link.'); return; }
+        if (!isFacebookUrl(url)) { toast('Please enter a valid Facebook link.'); return; }
         dataToSave.text = titleInput.value.trim() || 'Untitled Facebook link';
         dataToSave.url = url;
+        dataToSave.done = false;
+        dataToSave.reflection = '';
         titleInput.value = '';
       }
       else if (type === 'link') {
         const titleInput = document.getElementById('linkTitleInput');
         const url = normalizeUrl(mainInputValue);
+        if (!url) { toast('Please enter a valid website URL.'); return; }
         dataToSave.text = titleInput.value.trim() || hostOf(url);
         dataToSave.url = url;
         titleInput.value = '';
@@ -1120,7 +1353,11 @@
         dataToSave.text = mainInputValue;
       }
 
-      await addDoc(collection(db, collectionName), dataToSave);
+      // Queue locally and clear the input immediately (works even when disconnected).
+      addDoc(collection(db, collectionName), dataToSave).catch(err => {
+        reportError(err);
+        if (!inputElement.value) inputElement.value = mainInputValue;
+      });
       inputElement.value = '';
     }
 
@@ -1170,11 +1407,15 @@
       const body = bodyInput.value.trim();
       if (!title && !body && !pendingNoteLinks.length) return;
 
-      await addDoc(collection(db, 'notes'), {
+      addDoc(collection(db, 'notes'), {
         text: title || 'Untitled note',
         body,
-        links: pendingNoteLinks,
+        links: [...pendingNoteLinks],
         createdAt: serverTimestamp()
+      }).catch(err => {
+        reportError(err);
+        if (!titleInput.value) titleInput.value = title;
+        if (!bodyInput.value) bodyInput.value = body;
       });
 
       titleInput.value = '';
@@ -1229,6 +1470,7 @@
 
     // --- START ---
     Object.keys(config).forEach(listen);
+    renderSyncStatus();
   </script>
 </body>
 </html>
