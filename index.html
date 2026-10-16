@@ -9,7 +9,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -31,6 +31,8 @@
             ytA: '#F43F5E',
             fbA: '#3B82F6',
             noteA: '#A78BFA',
+            mindA: '#06B6D4',
+            habitA: '#F97316',
             urgent: '#EF4444',
             steady: '#38BDF8',
           },
@@ -59,7 +61,6 @@
     .dark ::-webkit-scrollbar-thumb { background: #262E42; }
     .dark ::-webkit-scrollbar-thumb:hover { background: #37415C; }
 
-    /* Smooth accordion collapse */
     .panel-body {
       display: grid;
       grid-template-rows: 1fr;
@@ -70,10 +71,9 @@
     .panel.collapsed .panel-body { grid-template-rows: 0fr; opacity: 0; }
 
     .scroll-area { overflow-y: auto; scrollbar-gutter: stable; }
-    .list-short { max-height: 360px; }
-    .list-tall  { max-height: 520px; }
+    .list-short { max-height: 380px; }
+    .list-tall  { max-height: 540px; }
 
-    /* In focused tab mode, let lists expand comfortably */
     body[data-view]:not([data-view="all"]) .list-short,
     body[data-view]:not([data-view="all"]) .list-tall {
       max-height: none;
@@ -111,11 +111,16 @@
     .media-preview button { touch-action: manipulation; }
     .media-player { width: 100%; height: 100%; border: 0; }
 
+    .pinned-card {
+      border-color: rgba(245, 158, 11, 0.45) !important;
+      background-image: linear-gradient(to right, rgba(245, 158, 11, 0.04), transparent);
+    }
+
     @media (max-width: 767px) {
       .list-short, .list-tall { max-height: none; }
       .scroll-area { overflow-y: visible; }
     }
-    @media (hover: none) { .edit-btn, .delete-btn { opacity: 1 !important; } }
+    @media (hover: none) { .action-btn { opacity: 1 !important; } }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: .01ms !important;
@@ -155,7 +160,7 @@
         <div class="order-last w-full lg:order-none lg:w-auto lg:flex-1 lg:max-w-md mx-auto">
           <div class="relative">
             <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-inkMuted pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"></path></svg>
-            <input type="search" id="searchInput" placeholder="Search tasks, notes, links, videos…" aria-label="Search all panels"
+            <input type="search" id="searchInput" placeholder="Search blueprints, tasks, notes, links…" aria-label="Search all panels"
               class="w-full pl-10 pr-20 py-2 text-sm bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-xl shadow-sm placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA transition-all">
             <span id="searchNotice" class="hidden absolute right-9 top-1/2 -translate-y-1/2 text-[11px] font-mono font-medium text-linkA bg-linkA/10 px-2 py-0.5 rounded-md"></span>
             <kbd class="hidden sm:inline-block absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400 dark:text-inkMuted bg-slate-100 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded px-1.5 py-0.5">/</kbd>
@@ -180,12 +185,14 @@
         </div>
       </div>
 
-      <!-- Second Row: View Switcher Tabs + Quick Metrics -->
+      <!-- Second Row: View Switcher Tabs + Live Metrics -->
       <div class="flex flex-wrap items-center justify-between gap-3 mt-3 pt-2.5 border-t border-slate-200/60 dark:border-hairline/70">
-        <!-- View Mode Tabs -->
         <nav id="viewTabs" class="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1" aria-label="Workspace view">
           <button type="button" data-view-target="all" class="view-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white dark:bg-ink dark:text-graphite transition-all shrink-0">
             All Panels
+          </button>
+          <button type="button" data-view-target="blueprint" class="view-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-inkMuted hover:bg-slate-200/60 dark:hover:bg-panelAlt transition-all shrink-0">
+            🧠 Understanding &amp; Strategy
           </button>
           <button type="button" data-view-target="focus" class="view-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-inkMuted hover:bg-slate-200/60 dark:hover:bg-panelAlt transition-all shrink-0">
             Tasks &amp; Plans
@@ -201,8 +208,11 @@
           </button>
         </nav>
 
-        <!-- Live KPI Pills -->
         <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-panel border border-slate-200/80 dark:border-hairline text-slate-700 dark:text-ink">
+            <span class="w-2 h-2 rounded-full bg-habitA"></span>
+            <strong id="statHabits" class="font-semibold">0/0</strong> habits
+          </span>
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-panel border border-slate-200/80 dark:border-hairline text-slate-700 dark:text-ink">
             <span class="w-2 h-2 rounded-full bg-taskA"></span>
             <strong id="statOpen" class="font-semibold">0</strong> open
@@ -219,7 +229,7 @@
             0/0 watched
           </span>
           <span class="hidden xl:inline-flex items-center px-2.5 py-1 rounded-lg text-slate-400 dark:text-inkMuted" id="statTotal">
-            0 items tracked
+            0 items
           </span>
         </div>
       </div>
@@ -227,9 +237,108 @@
     </div>
   </header>
 
-  <!-- Main Workspace Bento Grid -->
-  <main class="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-8 py-6 entrance">
+  <!-- Main Workspace -->
+  <main class="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-8 py-6 entrance space-y-6">
+
+    <!-- RECURRING DAILY HABITS STRIP -->
+    <section id="habitsStrip" class="bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm p-4 sm:px-5 transition-all">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-7 h-7 rounded-lg bg-habitA/15 text-habitA flex items-center justify-center font-bold text-sm">🔥</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-display font-semibold text-sm sm:text-base text-slate-900 dark:text-white">Daily Habits &amp; Consistency</h2>
+              <span id="habitProgressText" class="text-[11px] font-mono font-semibold text-habitA bg-habitA/10 px-2 py-0.5 rounded-full">0% today</span>
+            </div>
+            <p class="text-[11px] text-slate-400 dark:text-inkMuted">Resets automatically each morning · Click a habit to check off today</p>
+          </div>
+        </div>
+
+        <!-- Add Habit Inline -->
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <input type="text" id="habitInput" placeholder="New daily habit (e.g. System Design 30m)…" class="flex-1 sm:w-64 px-3 py-1.5 text-xs bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-habitA/40 focus:border-habitA">
+          <button id="addHabitBtn" class="bg-habitA text-white font-semibold px-3 py-1.5 rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all shrink-0">+ Habit</button>
+        </div>
+      </div>
+
+      <!-- Daily Habits Progress Bar -->
+      <div class="w-full h-1.5 bg-slate-100 dark:bg-panelAlt rounded-full overflow-hidden mb-3.5">
+        <div id="habitProgressBar" class="h-full bg-gradient-to-r from-habitA to-planA transition-all duration-500" style="width: 0%"></div>
+      </div>
+
+      <!-- Habits Pills List -->
+      <div id="habitList" class="flex flex-wrap items-center gap-2"></div>
+    </section>
+
+    <!-- MAIN BENTO GRID -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- 0. OVERALL UNDERSTANDING & ACTION BLUEPRINTS (Full 12 cols) -->
+      <section class="panel lg:col-span-12 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="playbooks" data-group="blueprint">
+        <div class="h-1.5 bg-gradient-to-r from-mindA via-linkA to-noteA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
+          <span class="flex items-center gap-3 min-w-0">
+            <span class="w-9 h-9 rounded-xl bg-mindA/10 text-mindA flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+            </span>
+            <div>
+              <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Overall Understanding &amp; Action Blueprints</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">Synthesize how things work (mental models) and map out exact step-by-step execution plans</span>
+            </div>
+          </span>
+          <span class="flex items-center gap-2.5 shrink-0">
+            <span id="playbookOverallPct" class="hidden sm:inline-block text-xs font-mono text-mindA bg-mindA/10 px-2.5 py-0.5 rounded-full">0% avg</span>
+            <span id="playbookCount" class="text-xs font-mono font-semibold text-mindA bg-mindA/10 border border-mindA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-slate-400 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
+        </button>
+
+        <div class="panel-body">
+          <div>
+            <div class="px-5 pb-5 pt-1">
+              <!-- Overall Blueprint Progress Bar -->
+              <div class="w-full h-1.5 bg-slate-100 dark:bg-panelAlt rounded-full overflow-hidden mb-5">
+                <div id="playbookMasterBar" class="h-full bg-gradient-to-r from-mindA to-planA transition-all duration-500" style="width: 0%"></div>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-[360px_minmax(0,1fr)] gap-6">
+                <!-- Blueprint Composer -->
+                <div class="flex flex-col gap-3 bg-slate-50/80 dark:bg-panelAlt/50 p-4 rounded-xl border border-slate-200/80 dark:border-hairline self-start">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono uppercase tracking-wider text-mindA font-semibold">New Blueprint / Guide</span>
+                    <select id="pbCategoryInput" class="text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg px-2.5 py-1 text-slate-700 dark:text-ink focus:outline-none focus:ring-2 focus:ring-mindA/40">
+                      <option value="System Design">System Design</option>
+                      <option value="Cloud & DevOps">Cloud &amp; DevOps</option>
+                      <option value="Backend / SWE">Backend / SWE</option>
+                      <option value="AI & ML">AI &amp; ML</option>
+                      <option value="Career & Abroad">Career &amp; Abroad</option>
+                      <option value="University">University</option>
+                      <option value="General Strategy">General Strategy</option>
+                    </select>
+                  </div>
+
+                  <input type="text" id="pbTitleInput" placeholder="Topic / Goal (e.g. Distributed Caching & Redis)" class="w-full px-3.5 py-2.5 text-sm font-semibold bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-mindA/40 focus:border-mindA transition-colors">
+
+                  <div>
+                    <label class="text-[11px] font-mono text-slate-500 dark:text-inkMuted mb-1 block">🧠 Overall Understanding &amp; Mental Model</label>
+                    <textarea id="pbUnderstandingInput" rows="4" placeholder="How does this work overall? Key principles, architecture summary, or core mental model…" class="w-full px-3.5 py-2 text-sm leading-relaxed bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-mindA/40 focus:border-mindA transition-colors"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="text-[11px] font-mono text-slate-500 dark:text-inkMuted mb-1 block">🎯 Action Steps ("What To Do" — one per line)</label>
+                    <textarea id="pbStepsInput" rows="3" placeholder="Read DDIA Chapter 5&#10;Build local Redis prototype&#10;Practice 2 system design problems" class="w-full px-3.5 py-2 text-xs font-mono leading-relaxed bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-mindA/40 focus:border-mindA transition-colors"></textarea>
+                  </div>
+
+                  <button id="addPlaybookBtn" class="w-full bg-mindA text-slate-950 py-2.5 rounded-xl font-semibold text-sm hover:brightness-105 active:scale-[.99] transition-all shadow-sm">Save Blueprint</button>
+                </div>
+
+                <!-- Blueprints Grid -->
+                <ul id="playbookList" class="scroll-area list-tall grid grid-cols-1 xl:grid-cols-2 gap-4 pr-1 content-start"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- 1. WHAT TO DO NEXT (7 cols on desktop) -->
       <section class="panel lg:col-span-7 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="tasks" data-group="focus">
@@ -241,10 +350,11 @@
             </span>
             <div>
               <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">What To Do Next</span>
-              <span class="text-xs text-slate-400 dark:text-inkMuted">Actionable tasks prioritized by urgency</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">Actionable tasks · Pin (`📌`) or add subtasks in editor</span>
             </div>
           </span>
           <span class="flex items-center gap-2.5 shrink-0">
+            <span id="taskPctBadge" class="text-[11px] font-mono text-slate-400 dark:text-inkMuted">0%</span>
             <span id="taskCount" class="text-xs font-mono font-semibold text-taskA bg-taskA/10 border border-taskA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
             <svg class="chevron w-4 h-4 text-slate-400 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
           </span>
@@ -253,13 +363,16 @@
         <div class="panel-body">
           <div>
             <div class="px-5 pb-5 pt-1">
-              <!-- Task Input Row -->
+              <!-- Tasks Completion Bar -->
+              <div class="w-full h-1.5 bg-slate-100 dark:bg-panelAlt rounded-full overflow-hidden mb-3.5">
+                <div id="taskMasterBar" class="h-full bg-gradient-to-r from-taskA to-planA transition-all duration-500" style="width: 0%"></div>
+              </div>
+
               <div class="flex gap-2">
-                <input type="text" id="taskInput" placeholder="Add a new task… (Alt + ↑/↓ changes priority)" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-taskA/40 focus:border-taskA transition-colors">
+                <input type="text" id="taskInput" placeholder="What needs doing? (Alt + ↑/↓ changes priority)" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-taskA/40 focus:border-taskA transition-colors">
                 <button id="addTaskBtn" class="bg-taskA text-slate-950 font-semibold px-4 shrink-0 rounded-xl hover:brightness-105 active:scale-95 transition-all text-sm shadow-sm" aria-label="Add task">Add</button>
               </div>
 
-              <!-- Priority & Filter Bar -->
               <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pb-3 border-b border-slate-100 dark:border-hairline">
                 <div class="flex items-center gap-2">
                   <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 dark:text-inkMuted">Priority:</span>
@@ -287,10 +400,11 @@
               </span>
               <div>
                 <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Long Term Plans</span>
-                <span class="text-xs text-slate-400 dark:text-inkMuted">Milestones, goals &amp; roadmap items</span>
+                <span class="text-xs text-slate-400 dark:text-inkMuted">Milestones &amp; multi-step progress bars</span>
               </div>
             </span>
             <span class="flex items-center gap-2.5 shrink-0">
+              <span id="planPctBadge" class="text-[11px] font-mono text-slate-400 dark:text-inkMuted">0%</span>
               <span id="planCount" class="text-xs font-mono font-semibold text-planA bg-planA/10 border border-planA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
               <svg class="chevron w-4 h-4 text-slate-400 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </span>
@@ -298,11 +412,16 @@
           <div class="panel-body">
             <div>
               <div class="px-5 pb-5 pt-1">
+                <!-- Plans Progress Bar -->
+                <div class="w-full h-1.5 bg-slate-100 dark:bg-panelAlt rounded-full overflow-hidden mb-3.5">
+                  <div id="planMasterBar" class="h-full bg-planA transition-all duration-500" style="width: 0%"></div>
+                </div>
+
                 <div class="flex gap-2 mb-3.5">
-                  <input type="text" id="planInput" placeholder="Add a milestone or future goal…" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-planA/40 focus:border-planA transition-colors">
+                  <input type="text" id="planInput" placeholder="Add a future plan or milestone…" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-planA/40 focus:border-planA transition-colors">
                   <button id="addPlanBtn" class="bg-planA text-slate-950 font-semibold px-4 shrink-0 rounded-xl hover:brightness-105 active:scale-95 transition-all text-sm shadow-sm" aria-label="Add plan">Add</button>
                 </div>
-                <ul id="planList" class="scroll-area list-short space-y-2 pr-1"></ul>
+                <ul id="planList" class="scroll-area list-short space-y-2.5 pr-1"></ul>
               </div>
             </div>
           </div>
@@ -318,7 +437,7 @@
               </span>
               <div>
                 <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Quick Links</span>
-                <span class="text-xs text-slate-400 dark:text-inkMuted">Frequent tools, portals &amp; bookmarks</span>
+                <span class="text-xs text-slate-400 dark:text-inkMuted">1-click copy URL or pin top bookmarks</span>
               </div>
             </span>
             <span class="flex items-center gap-2.5 shrink-0">
@@ -330,7 +449,7 @@
             <div>
               <div class="px-5 pb-5 pt-1">
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 mb-3.5">
-                  <input type="text" id="linkTitleInput" placeholder="Label (e.g. GitHub)" class="sm:col-span-5 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA transition-colors">
+                  <input type="text" id="linkTitleInput" placeholder="Name (e.g. GitHub)" class="sm:col-span-5 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA transition-colors">
                   <div class="sm:col-span-7 flex gap-2">
                     <input type="text" id="linkUrlInput" placeholder="URL (e.g. github.com)" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA transition-colors">
                     <button id="addLinkBtn" class="bg-linkA text-slate-950 font-semibold px-4 shrink-0 rounded-xl hover:brightness-105 active:scale-95 transition-all text-sm shadow-sm" aria-label="Save link">Add</button>
@@ -353,8 +472,8 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
             </span>
             <div>
-              <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Notes &amp; Knowledge Base</span>
-              <span class="text-xs text-slate-400 dark:text-inkMuted">Click any note card to read in full or edit</span>
+              <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Notes &amp; Reference Scratchpad</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">Pin (`📌`) important notes to top · Click any note to read in full</span>
             </div>
           </span>
           <span class="flex items-center gap-2.5 shrink-0">
@@ -366,11 +485,10 @@
           <div>
             <div class="px-5 pb-5 pt-1 grid grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)] gap-6">
 
-              <!-- Note Composer -->
               <div class="flex flex-col gap-2.5 bg-slate-50/70 dark:bg-panelAlt/50 p-4 rounded-xl border border-slate-200/70 dark:border-hairline self-start">
                 <span class="text-xs font-mono uppercase tracking-wider text-slate-400 dark:text-inkMuted">New Note</span>
                 <input type="text" id="noteTitleInput" placeholder="Note title…" class="w-full px-3.5 py-2.5 text-sm font-medium bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/40 focus:border-noteA transition-colors">
-                <textarea id="noteBodyInput" rows="5" placeholder="Write your thoughts, code snippets, or summary…" class="w-full px-3.5 py-2.5 text-sm leading-relaxed bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/40 focus:border-noteA transition-colors"></textarea>
+                <textarea id="noteBodyInput" rows="5" placeholder="Write the note here…" class="w-full px-3.5 py-2.5 text-sm leading-relaxed bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/40 focus:border-noteA transition-colors"></textarea>
 
                 <div class="flex gap-2">
                   <input type="text" id="noteLinkLabelInput" placeholder="Link label" class="w-[38%] min-w-0 px-3 py-2 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-noteA/40">
@@ -381,10 +499,9 @@
                 <div id="noteLinkChips" class="hidden flex-wrap gap-1.5 pt-1"></div>
 
                 <button id="addNoteBtn" class="mt-1 w-full bg-noteA text-slate-950 py-2.5 rounded-xl font-semibold text-sm hover:brightness-105 active:scale-[.99] transition-all shadow-sm">Save Note</button>
-                <p class="text-[11px] font-mono text-slate-400 dark:text-inkMuted text-center">Ctrl + Enter to save · YouTube URLs embed automatically</p>
+                <p class="text-[11px] font-mono text-slate-400 dark:text-inkMuted text-center">Ctrl + Enter saves · YouTube links embed</p>
               </div>
 
-              <!-- Notes Grid -->
               <ul id="noteList" class="scroll-area list-tall grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pr-1 content-start"></ul>
             </div>
           </div>
@@ -400,8 +517,8 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </span>
             <div>
-              <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">YouTube Watch Queue</span>
-              <span class="text-xs text-slate-400 dark:text-inkMuted">Tutorials, talks &amp; learning notes</span>
+              <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">YouTube Links</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">Tutorials, lectures &amp; learning takeaways</span>
             </div>
           </span>
           <span class="flex items-center gap-2.5 shrink-0">
@@ -413,9 +530,9 @@
           <div>
             <div class="px-5 pb-5 pt-1">
               <div class="flex flex-col sm:flex-row gap-2 mb-3">
-                <input type="text" id="ytTitleInput" placeholder="Video title (e.g. System Design Lecture)" class="sm:w-[42%] min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/40 focus:border-ytA transition-colors">
+                <input type="text" id="ytTitleInput" placeholder="Video title (e.g. Learn Python)" class="sm:w-[42%] min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/40 focus:border-ytA transition-colors">
                 <div class="flex gap-2 flex-1">
-                  <input type="text" id="ytInput" placeholder="Paste YouTube link…" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/40 focus:border-ytA transition-colors">
+                  <input type="text" id="ytInput" placeholder="Paste YT link here…" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-ytA/40 focus:border-ytA transition-colors">
                   <button id="addYtBtn" class="bg-ytA text-white font-semibold px-4 shrink-0 rounded-xl hover:brightness-110 active:scale-95 transition-all text-sm shadow-sm" aria-label="Save video">Add</button>
                 </div>
               </div>
@@ -435,8 +552,8 @@
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path></svg>
             </span>
             <div>
-              <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Facebook Saved Posts</span>
-              <span class="text-xs text-slate-400 dark:text-inkMuted">Saved threads, videos &amp; takeaways</span>
+              <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Facebook Links</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">1-click copy link · Saved posts &amp; thoughts</span>
             </div>
           </span>
           <span class="flex items-center gap-2.5 shrink-0">
@@ -448,9 +565,9 @@
           <div>
             <div class="px-5 pb-5 pt-1">
               <div class="flex flex-col gap-2 mb-3">
-                <input type="text" id="fbTitleInput" placeholder="Post topic or title…" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-fbA/40 focus:border-fbA transition-colors">
+                <input type="text" id="fbTitleInput" placeholder="Title or Note" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-fbA/40 focus:border-fbA transition-colors">
                 <div class="flex gap-2">
-                  <input type="text" id="fbInput" placeholder="Paste Facebook link…" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-fbA/40 focus:border-fbA transition-colors">
+                  <input type="text" id="fbInput" placeholder="Paste Facebook link here…" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-fbA/40 focus:border-fbA transition-colors">
                   <button id="addFbBtn" class="bg-fbA text-white font-semibold px-4 shrink-0 rounded-xl hover:brightness-110 active:scale-95 transition-all text-sm shadow-sm" aria-label="Save Facebook link">Add</button>
                 </div>
               </div>
@@ -467,7 +584,7 @@
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md hidden z-[80] rounded-xl shadow-xl px-4 py-3 text-sm font-medium bg-slate-900 text-white dark:bg-ink dark:text-graphite border border-slate-700 dark:border-slate-300" role="status" aria-live="polite"></div>
 
-  <!-- Reader / Editor Modal -->
+  <!-- Detail / Edit Modal -->
   <div id="editorOverlay" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6">
     <div id="editorBackdrop" class="absolute inset-0 bg-slate-950/50 dark:bg-black/70 backdrop-blur-sm"></div>
 
@@ -476,7 +593,7 @@
       <div id="editorAccent" class="h-1.5 bg-taskA"></div>
 
       <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-200 dark:border-hairline">
-        <h2 id="editorTitle" class="font-display font-semibold text-lg text-slate-900 dark:text-white">Details &amp; Edit</h2>
+        <h2 id="editorTitle" class="font-display font-semibold text-lg text-slate-900 dark:text-white">Edit</h2>
         <button id="editorClose" class="p-1.5 rounded-lg text-slate-400 dark:text-inkMuted hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-panelAlt transition-colors" aria-label="Close">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
@@ -485,7 +602,7 @@
       <div id="editorFields" class="px-6 py-5 overflow-y-auto flex flex-col gap-4"></div>
 
       <div class="flex items-center justify-between gap-3 px-6 py-4 bg-slate-50/60 dark:bg-panelAlt/40 border-t border-slate-200 dark:border-hairline">
-        <button id="editorDelete" class="px-3 py-2 rounded-lg text-sm text-rose-500 hover:bg-rose-500/10 font-medium transition-colors">Delete Item</button>
+        <button id="editorDelete" class="px-3 py-2 rounded-lg text-sm text-rose-500 hover:bg-rose-500/10 font-medium transition-colors">Delete</button>
         <div class="flex items-center gap-2.5">
           <span class="hidden sm:block text-[11px] font-mono text-slate-400 dark:text-inkMuted mr-1">Ctrl + Enter</span>
           <button id="editorCancel" class="px-4 py-2 text-sm font-medium rounded-xl border border-slate-200 dark:border-hairline text-slate-600 dark:text-inkMuted hover:bg-slate-100 dark:hover:bg-panelAlt transition-colors">Cancel</button>
@@ -516,7 +633,22 @@
       themeIcon.textContent = dark ? '☀️' : '🌙';
     });
 
-    // --- CLOCK + GREETING ---
+    // --- DATE & CLOCK HELPERS ---
+    function localDateKey(d = new Date()) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function yesterdayDateKey() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return localDateKey(d);
+    }
+
+    let currentDayKey = localDateKey();
+
     function updateClock() {
       const now = new Date();
       const hour = now.getHours();
@@ -525,6 +657,14 @@
       document.getElementById('clockLine').textContent =
         now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) +
         ' · ' + now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+      // Automatically reset daily habits view when midnight passes
+      const newDayKey = localDateKey(now);
+      if (newDayKey !== currentDayKey) {
+        currentDayKey = newDayKey;
+        renderHabits();
+        updateStats();
+      }
     }
     updateClock();
     setInterval(updateClock, 30000);
@@ -551,7 +691,7 @@
           p.classList.remove('hidden', 'lg:col-span-12');
           if (['tasks', 'yt'].includes(p.dataset.panel)) p.classList.add('lg:col-span-7');
           if (p.dataset.panel === 'fb') p.classList.add('lg:col-span-5');
-          if (p.dataset.panel === 'notes') p.classList.add('lg:col-span-12');
+          if (['notes', 'playbooks'].includes(p.dataset.panel)) p.classList.add('lg:col-span-12');
         });
       } else {
         rightStack.className = (viewName === 'focus' || viewName === 'links') ? 'lg:col-span-12 flex flex-col gap-6' : 'hidden';
@@ -637,7 +777,7 @@
       el.textContent = message;
       el.classList.remove('hidden');
       clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => el.classList.add('hidden'), 5000);
+      toastTimeout = setTimeout(() => el.classList.add('hidden'), 4000);
     }
     function reportError(error, action = 'save your changes') {
       console.error('Firestore:', error);
@@ -660,7 +800,7 @@
     window.addEventListener('online', renderSyncStatus);
     window.addEventListener('offline', renderSyncStatus);
 
-    // --- HELPERS ---
+    // --- HELPERS & ICONS ---
     function esc(value) {
       return String(value ?? '').replace(/[&<>"']/g, (c) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -709,7 +849,51 @@
       } catch { return ''; }
     }
 
+    // Calculate item progress percentage from checklist steps or manual progress or done state
+    function itemProgress(item) {
+      const steps = Array.isArray(item.steps) ? item.steps : [];
+      if (steps.length > 0) {
+        const doneCount = steps.filter(s => s.done).length;
+        return Math.round((doneCount / steps.length) * 100);
+      }
+      if (typeof item.progress === 'number' && !Number.isNaN(item.progress)) {
+        return Math.max(0, Math.min(100, Math.round(item.progress)));
+      }
+      return item.done ? 100 : 0;
+    }
+
+    async function copyToClipboard(text, btnEl) {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        toast('Copied URL to clipboard!');
+        if (btnEl) {
+          const original = btnEl.innerHTML;
+          btnEl.innerHTML = checkIcon;
+          btnEl.classList.add('!text-planA');
+          setTimeout(() => {
+            btnEl.innerHTML = original;
+            btnEl.classList.remove('!text-planA');
+          }, 1400);
+        }
+      } catch {
+        toast('Could not copy automatically.');
+      }
+    }
+
     const checkIcon = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4L19 6"/></svg>';
+    const copyIcon  = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>';
+    const pinIcon   = '<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>';
+    const trashIcon = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
+    const editIcon  = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`;
+
+    const iconBtn = 'action-btn text-slate-400 dark:text-inkMuted hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-panel rounded-lg transition-all shrink-0 p-1.5 inline-flex items-center justify-center opacity-100 md:opacity-0 md:group-hover/item:opacity-100 md:focus:opacity-100';
+
+    function pinButtonHtml(item) {
+      const pinned = !!item.pinned;
+      return `<button type="button" class="pin-btn ${pinned ? 'text-amber-500 opacity-100 bg-amber-500/10' : iconBtn}" title="${pinned ? 'Unpin from top' : 'Pin to top'}" aria-label="${pinned ? 'Unpin from top' : 'Pin to top'}" aria-pressed="${pinned}">${pinIcon}</button>`;
+    }
+
     function completedLabel(item) {
       if (!item.done || !item.completedAt) return '';
       const formatted = formatTimestamp(item.completedAt);
@@ -755,11 +939,6 @@
       try { return `https://www.google.com/s2/favicons?sz=32&domain=${new URL(url).hostname}`; }
       catch { return ''; }
     };
-
-    const trashIcon = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
-    const editIcon  = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`;
-
-    const iconBtn = 'text-slate-400 dark:text-inkMuted hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-panel rounded-lg transition-all shrink-0 p-1.5 inline-flex items-center justify-center opacity-100 md:opacity-0 md:group-hover/item:opacity-100 md:focus:opacity-100';
 
     // --- PRIORITIES ---
     const PRIORITIES = {
@@ -848,14 +1027,14 @@
     });
     document.addEventListener('keydown', (e) => {
       const tag = document.activeElement && document.activeElement.tagName;
-      const typing = tag === 'INPUT' || tag === 'TEXTAREA';
+      const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
       if (e.key === '/' && !typing && !editing) { e.preventDefault(); searchInput.focus(); }
     });
 
     // --- STATE ---
-    const state = { tasks: [], notes: [], links: [], plans: [], yt: [], fb: [] };
+    const state = { playbooks: [], tasks: [], notes: [], links: [], plans: [], yt: [], fb: [], habits: [] };
     const PAGE_SIZE = 48;
-    const visibleLimits = { tasks: PAGE_SIZE, notes: PAGE_SIZE, links: PAGE_SIZE, plans: PAGE_SIZE, yt: PAGE_SIZE, fb: PAGE_SIZE };
+    const visibleLimits = { playbooks: PAGE_SIZE, tasks: PAGE_SIZE, notes: PAGE_SIZE, links: PAGE_SIZE, plans: PAGE_SIZE, yt: PAGE_SIZE, fb: PAGE_SIZE };
     const mediaFilters = {
       yt: localStorage.getItem('ytFilter') || 'queued',
       fb: localStorage.getItem('fbFilter') || 'queued'
@@ -889,15 +1068,17 @@
     renderMediaFilters('fb');
 
     const config = {
-      tasks: { collection: 'tasks',      el: document.getElementById('taskList'), countId: 'taskCount', accent: 'bg-taskA', title: 'Task' },
-      notes: { collection: 'notes',      el: document.getElementById('noteList'), countId: 'noteCount', accent: 'bg-noteA', title: 'Note' },
-      links: { collection: 'quickLinks', el: document.getElementById('linkList'), countId: 'linkCount', accent: 'bg-linkA', title: 'Quick Link' },
-      plans: { collection: 'plans',      el: document.getElementById('planList'), countId: 'planCount', accent: 'bg-planA', title: 'Long Term Plan' },
-      yt:    { collection: 'ytLinks',    el: document.getElementById('ytList'),   countId: 'ytCount',   accent: 'bg-ytA',   title: 'YouTube Video' },
-      fb:    { collection: 'fbLinks',    el: document.getElementById('fbList'),   countId: 'fbCount',   accent: 'bg-fbA',   title: 'Facebook Link' },
+      playbooks: { collection: 'playbooks',  el: document.getElementById('playbookList'), countId: 'playbookCount', accent: 'bg-mindA', title: 'Understanding & Action Blueprint' },
+      tasks:     { collection: 'tasks',      el: document.getElementById('taskList'),     countId: 'taskCount',     accent: 'bg-taskA', title: 'Task' },
+      notes:     { collection: 'notes',      el: document.getElementById('noteList'),     countId: 'noteCount',     accent: 'bg-noteA', title: 'Note' },
+      links:     { collection: 'quickLinks', el: document.getElementById('linkList'),     countId: 'linkCount',     accent: 'bg-linkA', title: 'Quick Link' },
+      plans:     { collection: 'plans',      el: document.getElementById('planList'),     countId: 'planCount',     accent: 'bg-planA', title: 'Long Term Plan' },
+      yt:        { collection: 'ytLinks',    el: document.getElementById('ytList'),       countId: 'ytCount',       accent: 'bg-ytA',   title: 'YouTube Video' },
+      fb:        { collection: 'fbLinks',    el: document.getElementById('fbList'),       countId: 'fbCount',       accent: 'bg-fbA',   title: 'Facebook Link' },
     };
 
     const emptyMessages = {
+      playbooks: 'No blueprints yet — create your first Overall Understanding & Action Plan on the left.',
       tasks: 'No tasks match this filter — add one above or switch filters.',
       notes: 'No notes saved yet — write one in the composer.',
       links: 'No quick links saved yet — add a bookmark above.',
@@ -907,12 +1088,112 @@
     };
 
     function searchableText(key, item) {
+      if (key === 'playbooks') {
+        const stepText = (item.steps || []).map(s => s.text || '').join(' ');
+        return `${item.text || ''} ${item.category || ''} ${item.understanding || ''} ${stepText}`.toLowerCase();
+      }
       if (key === 'notes') {
         const linkText = (item.links || []).map(l => `${l.label || ''} ${l.url || ''}`).join(' ');
         return `${item.text || ''} ${item.body || ''} ${linkText}`.toLowerCase();
       }
-      return `${item.text || ''} ${item.url || ''} ${item.reflection || ''}`.toLowerCase();
+      const stepText = (item.steps || []).map(s => s.text || '').join(' ');
+      return `${item.text || ''} ${item.url || ''} ${item.reflection || ''} ${stepText}`.toLowerCase();
     }
+
+    // --- RECURRING DAILY HABITS LOGIC ---
+    function isHabitDoneToday(habit) {
+      return habit.lastCompletedDate === localDateKey();
+    }
+
+    function effectiveHabitStreak(habit) {
+      const today = localDateKey();
+      const yesterday = yesterdayDateKey();
+      if (habit.lastCompletedDate === today || habit.lastCompletedDate === yesterday) {
+        return habit.streak || 0;
+      }
+      return 0;
+    }
+
+    function renderHabits() {
+      const container = document.getElementById('habitList');
+      container.innerHTML = '';
+
+      if (!state.habits.length) {
+        container.innerHTML = `<p class="text-xs font-mono text-slate-400 dark:text-inkMuted py-1">No daily habits yet — add one above (e.g., "Coding Practice", "System Design Reading", "Workout").</p>`;
+        return;
+      }
+
+      const sorted = state.habits.slice().sort((a, b) => (!!b.pinned - !!a.pinned));
+      sorted.forEach(habit => {
+        const doneToday = isHabitDoneToday(habit);
+        const streak = effectiveHabitStreak(habit);
+
+        const pill = document.createElement('div');
+        pill.className = `group/habit inline-flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+          doneToday
+            ? 'bg-planA/15 border-planA/50 text-emerald-800 dark:text-planA shadow-sm'
+            : 'bg-slate-50 dark:bg-panelAlt border-slate-200 dark:border-hairline text-slate-700 dark:text-ink hover:border-habitA/60'
+        }`;
+
+        pill.innerHTML = `
+          <button type="button" class="habit-toggle flex items-center gap-2 text-left" aria-pressed="${doneToday}">
+            <span class="w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${doneToday ? 'bg-planA border-planA text-slate-950' : 'border-slate-300 dark:border-inkMuted/60'}">
+              ${doneToday ? checkIcon : ''}
+            </span>
+            <span class="${doneToday ? ' font-semibold' : ''}">${esc(habit.text)}</span>
+          </button>
+          <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[11px] font-mono ${streak > 0 ? 'bg-habitA/15 text-habitA font-semibold' : 'text-slate-400 dark:text-inkMuted'}" title="Current daily streak">
+            🔥 ${streak}d
+          </span>
+          <button type="button" class="habit-del text-slate-400 hover:text-rose-500 opacity-70 group-hover/habit:opacity-100 px-1 transition-opacity" title="Delete habit" aria-label="Delete habit">&times;</button>
+        `;
+
+        pill.querySelector('.habit-toggle').addEventListener('click', () => {
+          const today = localDateKey();
+          const yesterday = yesterdayDateKey();
+          let patch;
+          if (doneToday) {
+            patch = {
+              lastCompletedDate: habit.prevCompletedDate || null,
+              streak: typeof habit.prevStreak === 'number' ? habit.prevStreak : Math.max(0, (habit.streak || 1) - 1)
+            };
+          } else {
+            const baseStreak = (habit.lastCompletedDate === yesterday) ? (habit.streak || 0) : 0;
+            patch = {
+              prevCompletedDate: habit.lastCompletedDate || null,
+              prevStreak: habit.streak || 0,
+              lastCompletedDate: today,
+              streak: baseStreak + 1
+            };
+          }
+          updateDoc(doc(db, 'habits', habit.id), patch).catch(err => reportError(err, 'update habit'));
+        });
+
+        pill.querySelector('.habit-del').addEventListener('click', () => {
+          if (!confirm(`Delete habit "${habit.text}"?`)) return;
+          deleteDoc(doc(db, 'habits', habit.id)).catch(err => reportError(err, 'delete habit'));
+        });
+
+        container.appendChild(pill);
+      });
+    }
+
+    async function addHabit() {
+      const input = document.getElementById('habitInput');
+      const text = input.value.trim();
+      if (!text) return;
+      addDoc(collection(db, 'habits'), {
+        text,
+        streak: 0,
+        lastCompletedDate: null,
+        createdAt: serverTimestamp()
+      }).catch(err => reportError(err, 'add habit'));
+      input.value = '';
+    }
+    document.getElementById('addHabitBtn').addEventListener('click', addHabit);
+    document.getElementById('habitInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); addHabit(); }
+    });
 
     // --- BACKUP JSON EXPORT ---
     document.getElementById('exportBackupBtn').addEventListener('click', () => {
@@ -920,6 +1201,8 @@
         exportedAt: new Date().toISOString(),
         projectId: firebaseConfig.projectId,
         collections: {
+          playbooks: state.playbooks,
+          habits: state.habits,
           tasks: state.tasks,
           notes: state.notes,
           quickLinks: state.links,
@@ -937,11 +1220,11 @@
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      toast('Backup JSON downloaded successfully.');
+      toast('Full Backup JSON downloaded!');
     });
 
     /* ==========================================================
-       DETAIL / EDIT DIALOG
+       DETAIL / EDIT DIALOG (Supports Subtasks, Progress & Pin)
        ========================================================== */
     const overlay = document.getElementById('editorOverlay');
     const editorFields = document.getElementById('editorFields');
@@ -967,56 +1250,146 @@
         </div>`;
     }
 
+    function stepRow(step = { text: '', done: false }) {
+      return `
+        <div class="ed-step-row flex gap-2 items-center">
+          <input type="checkbox" class="ed-step-done w-4 h-4 accent-planA rounded shrink-0" ${step.done ? 'checked' : ''}>
+          <input type="text" class="ed-step-text flex-1 min-w-0 px-3 py-1.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-mindA/40" placeholder="Action step…" value="${esc(step.text || '')}">
+          <button type="button" class="ed-step-remove w-8 h-8 shrink-0 rounded-lg border border-slate-200 dark:border-hairline text-slate-400 hover:text-rose-500 hover:border-rose-400 transition-colors" aria-label="Remove step">&times;</button>
+        </div>`;
+    }
+
+    function stepsEditorBlock(item) {
+      const steps = Array.isArray(item.steps) ? item.steps : [];
+      const manualPct = typeof item.progress === 'number' ? item.progress : (item.done ? 100 : 0);
+      return `
+        <div class="border-t border-slate-200/80 dark:border-hairline pt-3">
+          <div class="flex items-center justify-between mb-2">
+            <span class="${fieldLabel} !mb-0">Action Checklist Steps (Auto-calculates Progress Bar)</span>
+            <button type="button" id="edAddStep" class="text-xs font-semibold text-mindA hover:underline">+ Add Step</button>
+          </div>
+          <div id="edSteps" class="flex flex-col gap-2">${steps.map(stepRow).join('')}</div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="${fieldLabel} !mb-0">Manual Progress Override (Used when no steps exist)</span>
+            <span id="edProgressLabel" class="text-xs font-mono font-semibold text-planA">${manualPct}%</span>
+          </div>
+          <input type="range" id="edProgress" min="0" max="100" step="5" value="${manualPct}" class="w-full accent-planA cursor-pointer">
+        </div>`;
+    }
+
+    function wireStepsEditor() {
+      const addBtn = document.getElementById('edAddStep');
+      if (addBtn) {
+        addBtn.addEventListener('click', () => {
+          document.getElementById('edSteps').insertAdjacentHTML('beforeend', stepRow());
+        });
+      }
+      const slider = document.getElementById('edProgress');
+      const label = document.getElementById('edProgressLabel');
+      if (slider && label) {
+        slider.addEventListener('input', () => { label.textContent = `${slider.value}%`; });
+      }
+      editorFields.addEventListener('click', (e) => {
+        const rm = e.target.closest('.ed-step-remove');
+        if (rm) rm.closest('.ed-step-row').remove();
+      });
+    }
+
+    function collectStepsFromEditor() {
+      return [...document.querySelectorAll('#edSteps .ed-step-row')]
+        .map(row => ({
+          text: row.querySelector('.ed-step-text').value.trim(),
+          done: row.querySelector('.ed-step-done').checked
+        }))
+        .filter(s => s.text);
+    }
+
     function buildEditorFields(key, item) {
-      if (key === 'tasks') {
+      const pinCheck = `
+        <label class="flex items-center gap-2.5 cursor-pointer select-none">
+          <input type="checkbox" id="edPinned" ${item.pinned ? 'checked' : ''} class="w-4 h-4 accent-amber-500 rounded">
+          <span class="text-sm font-medium text-slate-700 dark:text-ink">📌 Pin to top of panel</span>
+        </label>`;
+
+      if (key === 'playbooks') {
+        editorFields.innerHTML =
+          `<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">${field('Topic / Blueprint Title', `<input type="text" id="edText" class="${fieldInput} font-semibold" value="${esc(item.text)}">`)}</div>
+            <div>${field('Domain / Category', `<input type="text" id="edCategory" class="${fieldInput}" value="${esc(item.category || 'General Strategy')}">`)}</div>
+          </div>` +
+          field('🧠 Overall Understanding & Mental Model', `<textarea id="edUnderstanding" rows="6" class="${fieldInput} leading-relaxed" placeholder="How does this work overall? Key concepts, architecture, or summary…">${esc(item.understanding || '')}</textarea>`) +
+          stepsEditorBlock(item) +
+          pinCheck;
+        wireStepsEditor();
+      }
+      else if (key === 'tasks') {
         editPriority = priorityOf(item);
         editDone = !!item.done;
         editorFields.innerHTML =
-          field('Task Description', `<textarea id="edText" rows="4" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
+          field('Task Description', `<textarea id="edText" rows="3" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
           `<div>
              <span class="${fieldLabel}">Priority</span>
              <div id="edPriority" class="flex gap-1.5 flex-wrap"></div>
-           </div>
-           <label class="flex items-center gap-2.5 cursor-pointer select-none pt-1">
-             <input type="checkbox" id="edDone" ${editDone ? 'checked' : ''} class="w-4 h-4 accent-planA rounded">
-             <span class="text-sm font-medium text-slate-700 dark:text-ink">Mark task as completed</span>
-           </label>`;
+           </div>` +
+          stepsEditorBlock(item) +
+          `<div class="flex flex-wrap gap-6 pt-1">
+             <label class="flex items-center gap-2.5 cursor-pointer select-none">
+               <input type="checkbox" id="edDone" ${editDone ? 'checked' : ''} class="w-4 h-4 accent-planA rounded">
+               <span class="text-sm font-medium text-slate-700 dark:text-ink">Mark task as completed</span>
+             </label>
+             ${pinCheck}
+           </div>`;
         renderEditPriority();
+        wireStepsEditor();
       }
       else if (key === 'plans') {
         editDone = !!item.done;
         editorFields.innerHTML =
-          field('Plan / Milestone', `<textarea id="edText" rows="5" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
-          `<label class="flex items-center gap-2.5 cursor-pointer select-none pt-1">
-             <input type="checkbox" id="edDone" ${editDone ? 'checked' : ''} class="w-4 h-4 accent-planA rounded">
-             <span class="text-sm font-medium text-slate-700 dark:text-ink">Mark milestone as achieved</span>
-           </label>`;
+          field('Plan / Milestone', `<textarea id="edText" rows="4" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
+          stepsEditorBlock(item) +
+          `<div class="flex flex-wrap gap-6 pt-1">
+             <label class="flex items-center gap-2.5 cursor-pointer select-none">
+               <input type="checkbox" id="edDone" ${editDone ? 'checked' : ''} class="w-4 h-4 accent-planA rounded">
+               <span class="text-sm font-medium text-slate-700 dark:text-ink">Mark milestone as achieved</span>
+             </label>
+             ${pinCheck}
+           </div>`;
+        wireStepsEditor();
       }
       else if (key === 'links') {
         editorFields.innerHTML =
           field('Bookmark Name', `<input type="text" id="edText" class="${fieldInput}" value="${esc(item.text)}">`) +
           field('Destination URL', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="${esc(item.url || '')}">`) +
+          pinCheck +
           `<a href="${esc(normalizeUrl(item.url) || '#')}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-semibold text-linkA hover:underline">Open link in new tab ↗</a>`;
       }
       else if (key === 'yt') {
         editorFields.innerHTML =
           field('Video Title', `<textarea id="edText" rows="2" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
           field('YouTube URL', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="https://youtu.be/${esc(item.videoId || '')}">`) +
-          `<label class="flex items-center gap-2.5 cursor-pointer select-none">
-            <input type="checkbox" id="edDone" ${item.done ? 'checked' : ''} class="w-4 h-4 accent-planA rounded">
-            <span class="text-sm font-medium text-slate-700 dark:text-ink">Finished watching</span>
-          </label>` +
-          field('Key Takeaways & Learning Notes', `<textarea id="edReflection" rows="6" maxlength="20000" placeholder="What did you learn? Any timestamps or action items?" class="${fieldInput} leading-relaxed">${esc(item.reflection || '')}</textarea>`) +
+          `<div class="flex flex-wrap gap-6">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="edDone" ${item.done ? 'checked' : ''} class="w-4 h-4 accent-planA rounded">
+              <span class="text-sm font-medium text-slate-700 dark:text-ink">Finished watching</span>
+            </label>
+            ${pinCheck}
+          </div>` +
+          field('Key Takeaways & Learning Notes', `<textarea id="edReflection" rows="6" maxlength="20000" placeholder="What did you learn? What will you try next?" class="${fieldInput} leading-relaxed">${esc(item.reflection || '')}</textarea>`) +
           `<a class="inline-flex items-center gap-1.5 text-xs font-semibold text-ytA hover:underline" target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=${esc(item.videoId || '')}">Open video on YouTube ↗</a>`;
       }
       else if (key === 'fb') {
         editorFields.innerHTML =
           field('Post Title / Summary', `<textarea id="edText" rows="2" class="${fieldInput} leading-relaxed">${esc(item.text)}</textarea>`) +
           field('Facebook URL', `<input type="text" id="edUrl" class="${fieldInput} font-mono text-xs" value="${esc(item.url || '')}">`) +
-          `<label class="flex items-center gap-2.5 cursor-pointer select-none">
-            <input type="checkbox" id="edDone" ${item.done ? 'checked' : ''} class="w-4 h-4 accent-planA rounded">
-            <span class="text-sm font-medium text-slate-700 dark:text-ink">Finished reading / viewing</span>
-          </label>` +
+          `<div class="flex flex-wrap gap-6">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="edDone" ${item.done ? 'checked' : ''} class="w-4 h-4 accent-planA rounded">
+              <span class="text-sm font-medium text-slate-700 dark:text-ink">Finished reading / viewing</span>
+            </label>
+            ${pinCheck}
+          </div>` +
           field('Key Takeaways & Thoughts', `<textarea id="edReflection" rows="6" maxlength="20000" placeholder="Key idea, reaction, or next action…" class="${fieldInput} leading-relaxed">${esc(item.reflection || '')}</textarea>`) +
           `<a href="${esc(normalizeUrl(item.url) || '#')}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-semibold text-fbA hover:underline">Open on Facebook ↗</a>`;
       }
@@ -1024,20 +1397,21 @@
         const links = Array.isArray(item.links) ? item.links : [];
         editorFields.innerHTML =
           field('Note Title', `<input type="text" id="edText" class="${fieldInput} font-semibold text-base" value="${esc(item.text)}">`) +
-          field('Note Content', `<textarea id="edBody" rows="10" class="${fieldInput} leading-relaxed">${esc(item.body || '')}</textarea>`) +
+          field('Note Content', `<textarea id="edBody" rows="9" class="${fieldInput} leading-relaxed">${esc(item.body || '')}</textarea>`) +
           `<div>
              <span class="${fieldLabel}">Attached Links</span>
              <div id="edLinks" class="flex flex-col gap-2">${links.map(linkRow).join('')}</div>
              <button type="button" id="edAddLink" class="mt-2.5 text-xs font-semibold text-noteA hover:underline">+ Attach another link</button>
-           </div>`;
+           </div>` +
+          pinCheck;
 
         document.getElementById('edAddLink').addEventListener('click', () => {
           document.getElementById('edLinks').insertAdjacentHTML('beforeend', linkRow());
         });
-        editorFields.onclick = (e) => {
+        editorFields.addEventListener('click', (e) => {
           const btn = e.target.closest('.ed-link-remove');
           if (btn) btn.closest('.ed-link-row').remove();
-        };
+        });
       }
     }
 
@@ -1097,19 +1471,44 @@
       const ref = doc(db, config[key].collection, id);
       const textEl = document.getElementById('edText');
       const text = textEl ? textEl.value.trim() : '';
+      const pinned = !!document.getElementById('edPinned')?.checked;
 
       let patch = null;
 
-      if (key === 'tasks' || key === 'plans') {
-        if (!text) { alert('Text cannot be empty.'); return; }
-        patch = key === 'tasks'
-          ? { text, priority: editPriority, done: document.getElementById('edDone').checked }
-          : { text, done: document.getElementById('edDone').checked };
+      if (key === 'playbooks') {
+        const understanding = document.getElementById('edUnderstanding').value.trim();
+        const category = document.getElementById('edCategory').value.trim() || 'General Strategy';
+        const steps = collectStepsFromEditor();
+        const progress = Number(document.getElementById('edProgress')?.value || 0);
+        if (!text && !understanding && !steps.length) { toast('Blueprint cannot be empty.'); return; }
+        patch = {
+          text: text || 'Untitled Blueprint',
+          category,
+          understanding,
+          steps,
+          progress: steps.length ? Math.round((steps.filter(s => s.done).length / steps.length) * 100) : progress,
+          done: steps.length ? steps.every(s => s.done) : progress === 100,
+          pinned
+        };
+      }
+      else if (key === 'tasks' || key === 'plans') {
+        if (!text) { toast('Text cannot be empty.'); return; }
+        const steps = collectStepsFromEditor();
+        const progress = Number(document.getElementById('edProgress')?.value || 0);
+        const doneChecked = document.getElementById('edDone').checked;
+        patch = {
+          text,
+          steps,
+          progress: steps.length ? Math.round((steps.filter(s => s.done).length / steps.length) * 100) : (doneChecked ? 100 : progress),
+          done: doneChecked,
+          pinned,
+          ...(key === 'tasks' ? { priority: editPriority } : {})
+        };
       }
       else if (key === 'links') {
         const url = normalizeUrl(document.getElementById('edUrl').value);
         if (!url) { toast('Please enter a valid http(s) link.'); return; }
-        patch = { text: text || hostOf(url), url };
+        patch = { text: text || hostOf(url), url, pinned };
       }
       else if (key === 'yt' || key === 'fb') {
         const url = normalizeUrl(document.getElementById('edUrl').value);
@@ -1121,6 +1520,7 @@
           text: text || (key === 'yt' ? 'Untitled video' : 'Untitled Facebook link'),
           reflection: document.getElementById('edReflection').value.trim(),
           done,
+          pinned,
           completedAt: done ? (oldItem?.done && oldItem.completedAt || serverTimestamp()) : null,
           ...(key === 'yt' ? { videoId: getYTVideoId(url) } : { url })
         };
@@ -1133,8 +1533,8 @@
             url: normalizeUrl(row.querySelector('.ed-link-url').value)
           }))
           .filter(l => l.url);
-        if (!text && !body && !links.length) { alert('The note is empty.'); return; }
-        patch = { text: text || 'Untitled note', body, links };
+        if (!text && !body && !links.length) { toast('The note is empty.'); return; }
+        patch = { text: text || 'Untitled note', body, links, pinned };
       }
 
       updateDoc(ref, patch).catch(err => reportError(err));
@@ -1179,16 +1579,69 @@
       const host = hostOf(safeUrl);
       const favicon = faviconFor(safeUrl);
       return `
-        <a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="flex items-center gap-2.5 p-2 rounded-lg bg-white dark:bg-panel border border-slate-200/80 dark:border-hairline hover:border-noteA transition-colors group/link">
-          <span class="w-7 h-7 shrink-0 rounded-md bg-slate-100 dark:bg-panelHi flex items-center justify-center overflow-hidden">
-            ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4" onerror="this.style.visibility='hidden'" alt="">` : ''}
-          </span>
-          <span class="flex flex-col min-w-0 leading-tight">
-            <span class="text-xs font-semibold text-slate-700 dark:text-ink truncate group-hover/link:text-noteA transition-colors">${esc(link.label || host)}</span>
-            <span class="text-[11px] font-mono text-slate-400 dark:text-inkMuted truncate">${esc(host)}</span>
-          </span>
-          <svg class="w-3.5 h-3.5 ml-auto shrink-0 text-slate-400 group-hover/link:text-noteA transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-        </a>`;
+        <div class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-panel border border-slate-200/80 dark:border-hairline hover:border-noteA transition-colors group/link">
+          <a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="flex items-center gap-2.5 min-w-0 flex-1">
+            <span class="w-7 h-7 shrink-0 rounded-md bg-slate-100 dark:bg-panelHi flex items-center justify-center overflow-hidden">
+              ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4" onerror="this.style.visibility='hidden'" alt="">` : ''}
+            </span>
+            <span class="flex flex-col min-w-0 leading-tight">
+              <span class="text-xs font-semibold text-slate-700 dark:text-ink truncate group-hover/link:text-noteA transition-colors">${esc(link.label || host)}</span>
+              <span class="text-[11px] font-mono text-slate-400 dark:text-inkMuted truncate">${esc(host)}</span>
+            </span>
+          </a>
+          <button type="button" class="copy-url-btn p-1.5 rounded-lg text-slate-400 hover:text-noteA hover:bg-slate-100 dark:hover:bg-panelAlt transition-colors" data-url="${esc(safeUrl)}" title="Copy link URL" aria-label="Copy link URL">${copyIcon}</button>
+        </div>`;
+    }
+
+    function renderSubstepsAndProgress(collectionName, item, accentColor = 'bg-planA') {
+      const steps = Array.isArray(item.steps) ? item.steps : [];
+      const pct = itemProgress(item);
+      const hasProgress = steps.length > 0 || (typeof item.progress === 'number' && item.progress > 0);
+      if (!hasProgress) return '';
+
+      const doneSteps = steps.filter(s => s.done).length;
+      const labelText = steps.length > 0 ? `${doneSteps}/${steps.length} steps` : `${pct}% complete`;
+
+      return `
+        <div class="mt-2.5 pt-2.5 border-t border-slate-200/70 dark:border-hairline space-y-2">
+          <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-inkMuted">
+            <span>${labelText}</span>
+            <span class="font-semibold ${pct === 100 ? 'text-planA' : ''}">${pct}%</span>
+          </div>
+          <div class="w-full h-1.5 bg-slate-200/80 dark:bg-panel rounded-full overflow-hidden">
+            <div class="h-full ${pct === 100 ? 'bg-planA' : accentColor} transition-all duration-300" style="width: ${pct}%"></div>
+          </div>
+          ${steps.length > 0 ? `
+            <ul class="space-y-1.5 pt-1">
+              ${steps.map((st, idx) => `
+                <li class="flex items-start gap-2 text-xs">
+                  <button type="button" class="step-toggle mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${st.done ? 'bg-planA border-planA text-slate-950' : 'border-slate-300 dark:border-inkMuted/60 hover:border-planA'}" data-step-idx="${idx}" aria-label="Toggle step">
+                    ${st.done ? checkIcon : ''}
+                  </button>
+                  <span class="leading-snug break-words ${st.done ? 'done-text text-slate-400 dark:text-inkMuted' : 'text-slate-700 dark:text-slate-200'}">${esc(st.text)}</span>
+                </li>
+              `).join('')}
+            </ul>
+          ` : ''}
+        </div>`;
+    }
+
+    function wireSubsteps(li, collectionName, item) {
+      li.querySelectorAll('.step-toggle').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = Number(btn.dataset.stepIdx);
+          const steps = Array.isArray(item.steps) ? item.steps.map(s => ({ ...s })) : [];
+          if (!steps[idx]) return;
+          steps[idx].done = !steps[idx].done;
+          const pct = Math.round((steps.filter(s => s.done).length / steps.length) * 100);
+          updateDoc(doc(db, collectionName, item.id), {
+            steps,
+            progress: pct,
+            done: steps.every(s => s.done)
+          }).catch(err => reportError(err, 'update step'));
+        });
+      });
     }
 
     function buildItem(key, item) {
@@ -1196,48 +1649,138 @@
       const li = document.createElement('li');
       const open = () => openEditor(key, item);
       const createdDate = formatTimestamp(item.createdAt);
+      const pinnedClass = item.pinned ? ' pinned-card' : '';
 
-      if (key === 'tasks') {
+      // 0. PLAYBOOKS (Overall Understanding & Action Blueprints)
+      if (key === 'playbooks') {
+        const steps = Array.isArray(item.steps) ? item.steps : [];
+        const pct = itemProgress(item);
+        li.className = `group/item flex flex-col justify-between gap-3 p-4 bg-slate-50/90 dark:bg-panelAlt/80 rounded-2xl border border-slate-200/90 dark:border-hairline hover:border-mindA/60 shadow-sm transition-all${pinnedClass}`;
+        li.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                  <span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-mindA/15 text-mindA border border-mindA/25">${esc(item.category || 'Strategy')}</span>
+                  ${item.pinned ? `<span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-500">📌 Pinned</span>` : ''}
+                  ${createdDate ? `<span class="text-[11px] font-mono text-slate-400 dark:text-inkMuted">${createdDate}</span>` : ''}
+                </div>
+                <h3 class="open-target openable font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white leading-snug break-words" title="Click to open full blueprint">${esc(item.text)}</h3>
+              </div>
+              <div class="flex items-center gap-0.5 shrink-0">
+                ${pinButtonHtml(item)}
+                <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
+                <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete blueprint">${trashIcon}</button>
+              </div>
+            </div>
+
+            ${item.understanding ? `
+              <div class="open-target openable p-3 rounded-xl bg-white dark:bg-panel border border-slate-200/70 dark:border-hairline/90">
+                <span class="text-[10px] font-mono uppercase tracking-wider text-mindA font-semibold block mb-1">🧠 Core Understanding &amp; Mental Model</span>
+                <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap break-words clamp-4">${esc(item.understanding)}</p>
+              </div>
+            ` : ''}
+
+            <div>
+              <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-inkMuted mb-1.5">
+                <span class="uppercase tracking-wider font-semibold text-slate-600 dark:text-slate-300">🎯 What To Do (${steps.filter(s => s.done).length}/${steps.length} steps)</span>
+                <span class="font-semibold ${pct === 100 ? 'text-planA' : 'text-mindA'}">${pct}%</span>
+              </div>
+              <div class="w-full h-2 bg-slate-200/80 dark:bg-panel rounded-full overflow-hidden mb-2.5">
+                <div class="h-full bg-gradient-to-r from-mindA to-planA transition-all duration-300" style="width: ${pct}%"></div>
+              </div>
+              ${steps.length > 0 ? `
+                <ul class="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                  ${steps.map((st, idx) => `
+                    <li class="flex items-start gap-2.5 text-xs p-1.5 rounded-lg hover:bg-white/60 dark:hover:bg-panel/50 transition-colors">
+                      <button type="button" class="step-toggle mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${st.done ? 'bg-planA border-planA text-slate-950' : 'border-slate-300 dark:border-inkMuted/60 hover:border-planA'}" data-step-idx="${idx}" aria-label="Toggle step">
+                        ${st.done ? checkIcon : ''}
+                      </button>
+                      <span class="leading-snug break-words flex-1 ${st.done ? 'done-text text-slate-400 dark:text-inkMuted' : 'text-slate-800 dark:text-slate-200 font-medium'}">${esc(st.text)}</span>
+                    </li>
+                  `).join('')}
+                </ul>
+              ` : `<p class="text-xs italic text-slate-400 dark:text-inkMuted">No action steps added yet — add one below.</p>`}
+            </div>
+          </div>
+
+          <!-- Inline Quick Step Adder -->
+          <div class="flex gap-1.5 pt-2 border-t border-slate-200/70 dark:border-hairline">
+            <input type="text" class="quick-step-input flex-1 min-w-0 px-2.5 py-1.5 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/60 focus:outline-none focus:ring-1 focus:ring-mindA" placeholder="+ Add next action step…">
+            <button type="button" class="quick-step-btn px-2.5 py-1.5 rounded-lg bg-mindA/15 text-mindA hover:bg-mindA hover:text-slate-950 text-xs font-semibold transition-colors">Add</button>
+          </div>
+        `;
+
+        wireSubsteps(li, collectionName, item);
+        const qInput = li.querySelector('.quick-step-input');
+        const qBtn = li.querySelector('.quick-step-btn');
+        const addQuickStep = () => {
+          const val = qInput.value.trim();
+          if (!val) return;
+          const nextSteps = [...(item.steps || []), { text: val, done: false }];
+          const newPct = Math.round((nextSteps.filter(s => s.done).length / nextSteps.length) * 100);
+          updateDoc(doc(db, collectionName, item.id), {
+            steps: nextSteps,
+            progress: newPct,
+            done: false
+          }).catch(err => reportError(err, 'add action step'));
+          qInput.value = '';
+        };
+        qBtn.addEventListener('click', addQuickStep);
+        qInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); addQuickStep(); } });
+      }
+
+      // 1. TASKS
+      else if (key === 'tasks') {
         const p = priorityOf(item);
         const conf = PRIORITIES[p];
         const done = !!item.done;
 
-        li.className = 'group/item flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50/80 dark:bg-panelAlt/70 border border-slate-200/80 dark:border-hairline hover:border-slate-300 dark:hover:border-slate-700 transition-all';
+        li.className = `group/item flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50/80 dark:bg-panelAlt/70 border border-slate-200/80 dark:border-hairline hover:border-slate-300 dark:hover:border-slate-700 transition-all${pinnedClass}`;
         li.innerHTML = `
           <button class="toggle-btn mt-0.5 w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center transition-all ${done ? 'bg-planA border-planA text-slate-950' : 'border-slate-300 dark:border-inkMuted/60 hover:border-planA'}" aria-label="${done ? 'Mark as not done' : 'Mark as done'}" aria-pressed="${done}">
             ${done ? checkIcon : ''}
           </button>
           <div class="min-w-0 flex-1">
-            <p class="open-target openable clamp-3 text-sm font-medium text-slate-800 dark:text-ink leading-relaxed break-words ${done ? 'done-text' : ''}" title="Click to view or edit">${esc(item.text)}</p>
+            <p class="open-target openable clamp-3 text-sm font-medium text-slate-800 dark:text-ink leading-relaxed break-words ${done ? 'done-text' : ''}" title="Click to view or add subtasks">${esc(item.text)}</p>
             <div class="flex flex-wrap items-center gap-2 mt-2">
               <button class="priority-btn seg inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium ${conf.chip} hover:brightness-110 transition-all" title="Click to cycle priority">
                 <span class="w-1.5 h-1.5 rounded-full ${conf.dot}"></span>${conf.label}
               </button>
+              ${item.pinned ? `<span class="text-[10px] font-mono font-semibold text-amber-500">📌 Pinned</span>` : ''}
               ${createdDate ? `<span class="text-[11px] font-mono text-slate-400 dark:text-inkMuted">${createdDate}</span>` : ''}
             </div>
+            ${renderSubstepsAndProgress(collectionName, item, 'bg-taskA')}
           </div>
           <div class="flex items-center gap-0.5 shrink-0">
+            ${pinButtonHtml(item)}
             <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
             <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete task">${trashIcon}</button>
           </div>`;
 
         li.querySelector('.toggle-btn').addEventListener('click', () =>
-          updateDoc(doc(db, collectionName, item.id), { done: !done }).catch(err => reportError(err, 'update completion'))
+          updateDoc(doc(db, collectionName, item.id), { done: !done, progress: !done ? 100 : 0 }).catch(err => reportError(err, 'update completion'))
         );
         li.querySelector('.priority-btn').addEventListener('click', () => {
           const next = PRIORITY_ORDER[(PRIORITY_ORDER.indexOf(p) + 1) % PRIORITY_ORDER.length];
           updateDoc(doc(db, collectionName, item.id), { priority: next }).catch(err => reportError(err, 'update priority'));
         });
+        wireSubsteps(li, collectionName, item);
       }
 
+      // 2. NOTES
       else if (key === 'notes') {
         const links = Array.isArray(item.links) ? item.links : [];
-        li.className = 'group/item flex flex-col justify-between gap-3 p-4 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-noteA/60 hover:shadow-sm transition-all';
+        li.className = `group/item flex flex-col justify-between gap-3 p-4 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-noteA/60 hover:shadow-sm transition-all${pinnedClass}`;
         li.innerHTML = `
           <div class="flex flex-col gap-2">
             <div class="flex items-start justify-between gap-2">
-              <h3 class="open-target openable font-display font-semibold text-base text-slate-900 dark:text-white leading-snug break-words clamp-2" title="Click to read full note">${esc(item.text)}</h3>
+              <div class="min-w-0">
+                ${item.pinned ? `<span class="text-[10px] font-mono font-semibold text-amber-500 block mb-0.5">📌 Pinned</span>` : ''}
+                <h3 class="open-target openable font-display font-semibold text-base text-slate-900 dark:text-white leading-snug break-words clamp-2" title="Click to read full note">${esc(item.text)}</h3>
+              </div>
               <div class="flex items-center gap-0.5 shrink-0">
+                ${pinButtonHtml(item)}
                 <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
                 <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete note">${trashIcon}</button>
               </div>
@@ -1248,14 +1791,19 @@
           ${links.length ? `<div class="flex flex-col gap-2 pt-3 border-t border-slate-200/80 dark:border-hairline">${links.map(renderNoteLink).join('')}</div>` : ''}`;
       }
 
+      // 3. YOUTUBE
       else if (key === 'yt' && item.videoId) {
         const done = !!item.done;
-        li.className = 'group/item flex flex-col justify-between gap-3 p-3.5 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-ytA/50 transition-all' + (done ? ' ring-1 ring-planA/30' : '');
+        li.className = `group/item flex flex-col justify-between gap-3 p-3.5 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-ytA/50 transition-all${done ? ' ring-1 ring-planA/30' : ''}${pinnedClass}`;
         li.innerHTML = `
           <div class="flex flex-col gap-2.5">
             <div class="flex items-start justify-between gap-2">
-              <h3 class="open-target openable clamp-2 font-semibold text-sm text-slate-900 dark:text-ink leading-snug break-words" title="Click to edit">${esc(item.text)}</h3>
+              <div class="min-w-0">
+                ${item.pinned ? `<span class="text-[10px] font-mono font-semibold text-amber-500 block mb-0.5">📌 Pinned</span>` : ''}
+                <h3 class="open-target openable clamp-2 font-semibold text-sm text-slate-900 dark:text-ink leading-snug break-words" title="Click to edit">${esc(item.text)}</h3>
+              </div>
               <div class="flex items-center gap-0.5 shrink-0">
+                ${pinButtonHtml(item)}
                 <button class="edit-btn ${iconBtn}" aria-label="Edit video and learning notes">${editIcon}</button>
                 <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete video">${trashIcon}</button>
               </div>
@@ -1272,8 +1820,10 @@
           </div>`;
       }
 
+      // 4. FACEBOOK LINKS (with 1-Click Copy URL & Pin)
       else if (key === 'fb' && normalizeUrl(item.url)) {
-        li.className = 'group/item flex flex-col gap-3 p-4 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-fbA/50 transition-all' + (item.done ? ' ring-1 ring-planA/30' : '');
+        const safeUrl = normalizeUrl(item.url);
+        li.className = `group/item flex flex-col gap-3 p-4 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-fbA/50 transition-all${item.done ? ' ring-1 ring-planA/30' : ''}${pinnedClass}`;
         li.innerHTML = `
           <div class="flex items-start justify-between gap-2">
             <div class="flex items-start gap-3 min-w-0">
@@ -1281,16 +1831,16 @@
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path></svg>
               </div>
               <div class="flex flex-col min-w-0">
+                ${item.pinned ? `<span class="text-[10px] font-mono font-semibold text-amber-500">📌 Pinned</span>` : ''}
                 <h3 class="open-target openable clamp-2 font-semibold text-sm text-slate-900 dark:text-ink leading-snug break-words" title="Click to edit">${esc(item.text)}</h3>
-                <a href="${esc(item.url)}" target="_blank" rel="noopener" class="text-[11px] font-mono text-slate-400 dark:text-inkMuted hover:text-fbA truncate mt-0.5 transition-colors">
-                  ${esc(hostOf(item.url))} ↗
+                <a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="text-[11px] font-mono text-slate-400 dark:text-inkMuted hover:text-fbA truncate mt-0.5 transition-colors">
+                  ${esc(hostOf(safeUrl))} ↗
                 </a>
               </div>
             </div>
             <div class="flex items-center gap-0.5 shrink-0">
-              <a href="${esc(item.url)}" target="_blank" rel="noopener" class="p-1.5 rounded-lg text-slate-400 dark:text-inkMuted hover:text-fbA transition-colors" aria-label="Open Link">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-              </a>
+              <button type="button" class="copy-url-btn p-1.5 rounded-lg text-slate-400 dark:text-inkMuted hover:text-fbA hover:bg-slate-200/60 dark:hover:bg-panel transition-colors" data-url="${esc(safeUrl)}" title="Copy Facebook URL" aria-label="Copy Facebook URL">${copyIcon}</button>
+              ${pinButtonHtml(item)}
               <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
               <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete Facebook link">${trashIcon}</button>
             </div>
@@ -1303,49 +1853,73 @@
           ${item.reflection ? `<div class="open-target openable text-xs leading-relaxed whitespace-pre-wrap break-words text-slate-700 dark:text-slate-300 rounded-lg bg-white dark:bg-panel border border-slate-200/70 dark:border-hairline p-2.5 clamp-3">${esc(item.reflection)}</div>` : ''}`;
       }
 
+      // 5. QUICK LINKS (with 1-Click Copy URL & Pin)
       else if (key === 'links' && normalizeUrl(item.url)) {
-        const favicon = faviconFor(item.url);
-        const host = hostOf(item.url);
-        li.className = 'group/item flex items-center justify-between gap-2 p-3 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-linkA/60 transition-all';
+        const safeUrl = normalizeUrl(item.url);
+        const favicon = faviconFor(safeUrl);
+        const host = hostOf(safeUrl);
+        li.className = `group/item flex items-center justify-between gap-2 p-3 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-linkA/60 transition-all${pinnedClass}`;
         li.innerHTML = `
-          <a href="${esc(item.url)}" target="_blank" rel="noopener" class="flex items-center gap-3 min-w-0 flex-1 group/anchor">
+          <a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="flex items-center gap-3 min-w-0 flex-1 group/anchor">
             <span class="w-8 h-8 rounded-lg bg-white dark:bg-panel border border-slate-200/80 dark:border-hairline flex items-center justify-center shrink-0">
               ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4 rounded-sm" onerror="this.style.visibility='hidden'" alt="">` : ''}
             </span>
             <span class="min-w-0 flex-1">
-              <span class="block text-sm font-semibold text-slate-800 dark:text-ink group-hover/anchor:text-linkA truncate transition-colors">${esc(item.text)}</span>
+              <span class="flex items-center gap-1.5">
+                ${item.pinned ? `<span class="text-[10px] text-amber-500" title="Pinned">📌</span>` : ''}
+                <span class="block text-sm font-semibold text-slate-800 dark:text-ink group-hover/anchor:text-linkA truncate transition-colors">${esc(item.text)}</span>
+              </span>
               <span class="block text-[11px] font-mono text-slate-400 dark:text-inkMuted truncate">${esc(host)}</span>
             </span>
           </a>
           <div class="flex items-center gap-0.5 shrink-0">
+            <button type="button" class="copy-url-btn p-1.5 rounded-lg text-slate-400 dark:text-inkMuted hover:text-linkA hover:bg-slate-200/60 dark:hover:bg-panel transition-colors" data-url="${esc(safeUrl)}" title="Copy link URL" aria-label="Copy link URL">${copyIcon}</button>
+            ${pinButtonHtml(item)}
             <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
             <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete link">${trashIcon}</button>
           </div>`;
       }
 
+      // 6. LONG TERM PLANS (with Substeps & Progress Bar & Pin)
       else if (key === 'plans') {
         const done = !!item.done;
-        li.className = 'group/item flex items-start gap-3 p-3.5 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-planA/50 transition-all';
+        li.className = `group/item flex items-start gap-3 p-3.5 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-planA/50 transition-all${pinnedClass}`;
         li.innerHTML = `
           <button class="toggle-btn mt-0.5 w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center transition-all ${done ? 'bg-planA border-planA text-slate-950' : 'border-slate-300 dark:border-inkMuted/60 hover:border-planA'}" aria-label="${done ? 'Mark as not done' : 'Mark as done'}" aria-pressed="${done}">
             ${done ? checkIcon : ''}
           </button>
           <div class="flex-1 min-w-0">
-            <span class="open-target openable clamp-3 text-sm font-medium text-slate-800 dark:text-ink leading-relaxed break-words ${done ? 'done-text' : ''}" title="Click to open">${esc(item.text)}</span>
+            <div class="flex items-center gap-1.5">
+              ${item.pinned ? `<span class="text-[10px] font-mono font-semibold text-amber-500">📌 Pinned</span>` : ''}
+            </div>
+            <span class="open-target openable clamp-3 text-sm font-medium text-slate-800 dark:text-ink leading-relaxed break-words ${done ? 'done-text' : ''}" title="Click to add steps or set progress">${esc(item.text)}</span>
+            ${renderSubstepsAndProgress(collectionName, item, 'bg-planA')}
           </div>
           <div class="flex items-center gap-0.5 shrink-0">
+            ${pinButtonHtml(item)}
             <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
             <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete item">${trashIcon}</button>
           </div>`;
 
         li.querySelector('.toggle-btn').addEventListener('click', () =>
-          updateDoc(doc(db, collectionName, item.id), { done: !done }).catch(err => reportError(err, 'update completion'))
+          updateDoc(doc(db, collectionName, item.id), { done: !done, progress: !done ? 100 : 0 }).catch(err => reportError(err, 'update completion'))
         );
+        wireSubsteps(li, collectionName, item);
       }
 
+      // Common action wiring
       li.querySelectorAll('.open-target').forEach(el => el.addEventListener('click', open));
-      const editBtn = li.querySelector('.edit-btn');
-      if (editBtn) editBtn.addEventListener('click', open);
+      li.querySelector('.edit-btn')?.addEventListener('click', open);
+      li.querySelector('.pin-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        updateDoc(doc(db, collectionName, item.id), { pinned: !item.pinned }).catch(err => reportError(err, 'pin item'));
+      });
+      li.querySelectorAll('.copy-url-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          copyToClipboard(btn.dataset.url, btn);
+        });
+      });
       const reflectionBtn = li.querySelector('.reflection-btn');
       if (reflectionBtn) reflectionBtn.addEventListener('click', () => {
         open();
@@ -1369,7 +1943,7 @@
     }
 
     function visibleItems(key) {
-      let items = state[key];
+      let items = state[key].slice();
 
       if (searchTerm) items = items.filter(i => searchableText(key, i).includes(searchTerm));
 
@@ -1384,12 +1958,16 @@
           if (taskFilter === 'done') return !!t.done;
           return priorityOf(t) === taskFilter && !t.done;
         });
-        items = items.slice().sort((a, b) => {
+        items.sort((a, b) => {
           if (!!a.done !== !!b.done) return a.done ? 1 : -1;
+          if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
           return PRIORITIES[priorityOf(a)].rank - PRIORITIES[priorityOf(b)].rank;
         });
+        return items;
       }
 
+      // Pin-to-top sorting for all other panels
+      items.sort((a, b) => (!!b.pinned - !!a.pinned));
       return items;
     }
 
@@ -1436,8 +2014,35 @@
       document.getElementById('statMedia').textContent = `${mediaItems.filter(x => x.done).length}/${mediaItems.length} watched`;
       document.getElementById('taskCount').textContent = open;
 
+      // Daily Habits Bar
+      const totalHabits = state.habits.length;
+      const doneHabits = state.habits.filter(isHabitDoneToday).length;
+      const habitPct = totalHabits ? Math.round((doneHabits / totalHabits) * 100) : 0;
+      document.getElementById('statHabits').textContent = `${doneHabits}/${totalHabits}`;
+      document.getElementById('habitProgressText').textContent = `${habitPct}% today`;
+      document.getElementById('habitProgressBar').style.width = `${habitPct}%`;
+
+      // Tasks Progress Bar
+      const taskPct = state.tasks.length ? Math.round((done / state.tasks.length) * 100) : 0;
+      document.getElementById('taskMasterBar').style.width = `${taskPct}%`;
+      document.getElementById('taskPctBadge').textContent = `${taskPct}%`;
+
+      // Long Term Plans Progress Bar
+      const planPct = state.plans.length
+        ? Math.round(state.plans.reduce((acc, p) => acc + itemProgress(p), 0) / state.plans.length)
+        : 0;
+      document.getElementById('planMasterBar').style.width = `${planPct}%`;
+      document.getElementById('planPctBadge').textContent = `${planPct}%`;
+
+      // Playbooks Overall Progress Bar
+      const pbPct = state.playbooks.length
+        ? Math.round(state.playbooks.reduce((acc, p) => acc + itemProgress(p), 0) / state.playbooks.length)
+        : 0;
+      document.getElementById('playbookMasterBar').style.width = `${pbPct}%`;
+      document.getElementById('playbookOverallPct').textContent = `${pbPct}% avg`;
+
       if (searchTerm) {
-        const matches = Object.keys(state).reduce((n, k) => n + visibleItems(k).length, 0);
+        const matches = Object.keys(config).reduce((n, k) => n + visibleItems(k).length, 0);
         searchNotice.textContent = `${matches} ${matches === 1 ? 'match' : 'matches'}`;
         searchNotice.classList.remove('hidden');
       } else {
@@ -1468,12 +2073,56 @@
       });
     }
 
-    // --- ADDING ---
+    function listenHabits() {
+      const q = query(collection(db, 'habits'), orderBy('createdAt', 'asc'));
+      onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+        state.habits = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderHabits();
+        updateStats();
+      }, (err) => {
+        console.warn('Habits collection listener error:', err);
+      });
+    }
+
+    // --- ADDING ITEMS ---
+    async function addPlaybook() {
+      const titleEl = document.getElementById('pbTitleInput');
+      const catEl = document.getElementById('pbCategoryInput');
+      const undEl = document.getElementById('pbUnderstandingInput');
+      const stepsEl = document.getElementById('pbStepsInput');
+
+      const text = titleEl.value.trim();
+      const understanding = undEl.value.trim();
+      const steps = stepsEl.value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .map(s => ({ text: s, done: false }));
+
+      if (!text && !understanding && !steps.length) return;
+
+      addDoc(collection(db, 'playbooks'), {
+        text: text || 'Untitled Blueprint',
+        category: catEl.value || 'General Strategy',
+        understanding,
+        steps,
+        progress: 0,
+        done: false,
+        pinned: false,
+        createdAt: serverTimestamp()
+      }).catch(err => reportError(err, 'save blueprint'));
+
+      titleEl.value = '';
+      undEl.value = '';
+      stepsEl.value = '';
+    }
+    document.getElementById('addPlaybookBtn').addEventListener('click', addPlaybook);
+
     async function addItem(collectionName, inputElement, type = 'text') {
       const mainInputValue = inputElement.value.trim();
       if (!mainInputValue) return;
 
-      const dataToSave = { createdAt: serverTimestamp() };
+      const dataToSave = { createdAt: serverTimestamp(), pinned: false };
 
       if (type === 'yt') {
         const titleInput = document.getElementById('ytTitleInput');
@@ -1507,6 +2156,8 @@
         dataToSave.text = mainInputValue;
         dataToSave.priority = newTaskPriority;
         dataToSave.done = false;
+        dataToSave.steps = [];
+        dataToSave.progress = 0;
         if (taskFilter === 'done' || (PRIORITIES[taskFilter] && taskFilter !== newTaskPriority)) {
           taskFilter = 'open';
           localStorage.setItem('taskFilter', taskFilter);
@@ -1515,6 +2166,8 @@
       }
       else {
         dataToSave.text = mainInputValue;
+        dataToSave.steps = [];
+        dataToSave.progress = 0;
       }
 
       addDoc(collection(db, collectionName), dataToSave).catch(err => {
@@ -1574,6 +2227,7 @@
         text: title || 'Untitled note',
         body,
         links: [...pendingNoteLinks],
+        pinned: false,
         createdAt: serverTimestamp()
       }).catch(err => {
         reportError(err);
@@ -1616,6 +2270,12 @@
       });
     });
 
+    ['pbTitleInput', 'pbUnderstandingInput', 'pbStepsInput'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !editing) { e.preventDefault(); addPlaybook(); }
+      });
+    });
+
     document.getElementById('noteTitleInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') { e.preventDefault(); document.getElementById('noteBodyInput').focus(); }
     });
@@ -1632,6 +2292,7 @@
 
     // --- START ---
     Object.keys(config).forEach(listen);
+    listenHabits();
     renderSyncStatus();
   </script>
 </body>
