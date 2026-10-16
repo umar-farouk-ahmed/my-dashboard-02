@@ -71,8 +71,8 @@
     .panel.collapsed .panel-body { grid-template-rows: 0fr; opacity: 0; }
 
     .scroll-area { overflow-y: auto; scrollbar-gutter: stable; }
-    .list-short { max-height: 380px; }
-    .list-tall  { max-height: 540px; }
+    .list-short { max-height: 360px; }
+    .list-tall  { max-height: 520px; }
 
     body[data-view]:not([data-view="all"]) .list-short,
     body[data-view]:not([data-view="all"]) .list-tall {
@@ -113,7 +113,7 @@
 
     .pinned-card {
       border-color: rgba(245, 158, 11, 0.45) !important;
-      background-image: linear-gradient(to right, rgba(245, 158, 11, 0.04), transparent);
+      background-image: linear-gradient(to right, rgba(245, 158, 11, 0.05), transparent);
     }
 
     @media (max-width: 767px) {
@@ -174,7 +174,7 @@
             <span class="hidden sm:inline">Backup JSON</span>
           </button>
 
-          <button id="collapseAllBtn" class="hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl bg-white dark:bg-panel border border-slate-200 dark:border-hairline text-slate-600 dark:text-inkMuted hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-inkMuted/50 shadow-sm transition-all">
+          <button id="collapseAllBtn" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl bg-white dark:bg-panel border border-slate-200 dark:border-hairline text-slate-600 dark:text-inkMuted hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-inkMuted/50 shadow-sm transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             <span id="collapseAllLabel">Collapse all</span>
           </button>
@@ -244,20 +244,20 @@
     <section id="habitsStrip" class="bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm p-4 sm:px-5 transition-all">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
         <div class="flex items-center gap-2.5">
-          <span class="w-7 h-7 rounded-lg bg-habitA/15 text-habitA flex items-center justify-center font-bold text-sm">🔥</span>
+          <span class="w-8 h-8 rounded-xl bg-habitA/15 text-habitA flex items-center justify-center font-bold text-sm">🔥</span>
           <div>
             <div class="flex items-center gap-2">
               <h2 class="font-display font-semibold text-sm sm:text-base text-slate-900 dark:text-white">Daily Habits &amp; Consistency</h2>
               <span id="habitProgressText" class="text-[11px] font-mono font-semibold text-habitA bg-habitA/10 px-2 py-0.5 rounded-full">0% today</span>
             </div>
-            <p class="text-[11px] text-slate-400 dark:text-inkMuted">Resets automatically each morning · Click a habit to check off today</p>
+            <p class="text-xs text-slate-400 dark:text-inkMuted">Resets automatically each morning · Click a habit to check off today</p>
           </div>
         </div>
 
         <!-- Add Habit Inline -->
         <div class="flex items-center gap-2 w-full sm:w-auto">
-          <input type="text" id="habitInput" placeholder="New daily habit (e.g. System Design 30m)…" class="flex-1 sm:w-64 px-3 py-1.5 text-xs bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-habitA/40 focus:border-habitA">
-          <button id="addHabitBtn" class="bg-habitA text-white font-semibold px-3 py-1.5 rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all shrink-0">+ Habit</button>
+          <input type="text" id="habitInput" placeholder="New daily habit (e.g. System Design 30m)…" class="flex-1 sm:w-64 px-3.5 py-2 text-xs bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-habitA/40 focus:border-habitA">
+          <button id="addHabitBtn" class="bg-habitA text-white font-semibold px-3.5 py-2 rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all shrink-0">+ Habit</button>
         </div>
       </div>
 
@@ -270,11 +270,11 @@
       <div id="habitList" class="flex flex-wrap items-center gap-2"></div>
     </section>
 
-    <!-- MAIN BENTO GRID -->
+    <!-- SYMMETRIC BENTO GRID (Every row aligns cleanly whether open or collapsed) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-      <!-- 0. OVERALL UNDERSTANDING & ACTION BLUEPRINTS (Full 12 cols) -->
-      <section class="panel lg:col-span-12 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="playbooks" data-group="blueprint">
+      <!-- ROW 1: OVERALL UNDERSTANDING & ACTION BLUEPRINTS (12 cols) -->
+      <section class="panel lg:col-span-12 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="playbooks" data-group="blueprint" data-span="lg:col-span-12">
         <div class="h-1.5 bg-gradient-to-r from-mindA via-linkA to-noteA"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
           <span class="flex items-center gap-3 min-w-0">
@@ -296,7 +296,6 @@
         <div class="panel-body">
           <div>
             <div class="px-5 pb-5 pt-1">
-              <!-- Overall Blueprint Progress Bar -->
               <div class="w-full h-1.5 bg-slate-100 dark:bg-panelAlt rounded-full overflow-hidden mb-5">
                 <div id="playbookMasterBar" class="h-full bg-gradient-to-r from-mindA to-planA transition-all duration-500" style="width: 0%"></div>
               </div>
@@ -340,8 +339,8 @@
         </div>
       </section>
 
-      <!-- 1. WHAT TO DO NEXT (7 cols on desktop) -->
-      <section class="panel lg:col-span-7 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="tasks" data-group="focus">
+      <!-- ROW 2 LEFT: WHAT TO DO NEXT (7 cols) -->
+      <section class="panel lg:col-span-7 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="tasks" data-group="focus" data-span="lg:col-span-7">
         <div class="h-1 bg-gradient-to-r from-taskA to-urgent"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
@@ -350,7 +349,7 @@
             </span>
             <div>
               <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">What To Do Next</span>
-              <span class="text-xs text-slate-400 dark:text-inkMuted">Actionable tasks · Pin (`📌`) or add subtasks in editor</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">Actionable tasks · Pin 📌 or add subtasks in editor</span>
             </div>
           </span>
           <span class="flex items-center gap-2.5 shrink-0">
@@ -363,7 +362,6 @@
         <div class="panel-body">
           <div>
             <div class="px-5 pb-5 pt-1">
-              <!-- Tasks Completion Bar -->
               <div class="w-full h-1.5 bg-slate-100 dark:bg-panelAlt rounded-full overflow-hidden mb-3.5">
                 <div id="taskMasterBar" class="h-full bg-gradient-to-r from-taskA to-planA transition-all duration-500" style="width: 0%"></div>
               </div>
@@ -387,84 +385,78 @@
         </div>
       </section>
 
-      <!-- RIGHT COLUMN STACK: LONG TERM PLANS + QUICK LINKS (5 cols on desktop) -->
-      <div id="rightStack" class="lg:col-span-5 flex flex-col gap-6">
-
-        <!-- 2. LONG TERM PLANS -->
-        <section class="panel bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="plans" data-group="focus">
-          <div class="h-1 bg-planA"></div>
-          <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
-            <span class="flex items-center gap-2.5 min-w-0">
-              <span class="w-8 h-8 rounded-lg bg-planA/10 text-planA flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22M21.75 12.75V7.5h-5.25"></path></svg>
-              </span>
-              <div>
-                <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Long Term Plans</span>
-                <span class="text-xs text-slate-400 dark:text-inkMuted">Milestones &amp; multi-step progress bars</span>
-              </div>
+      <!-- ROW 2 RIGHT: LONG TERM PLANS (5 cols) -->
+      <section class="panel lg:col-span-5 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="plans" data-group="focus" data-span="lg:col-span-5">
+        <div class="h-1 bg-planA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
+          <span class="flex items-center gap-2.5 min-w-0">
+            <span class="w-8 h-8 rounded-lg bg-planA/10 text-planA flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22M21.75 12.75V7.5h-5.25"></path></svg>
             </span>
-            <span class="flex items-center gap-2.5 shrink-0">
-              <span id="planPctBadge" class="text-[11px] font-mono text-slate-400 dark:text-inkMuted">0%</span>
-              <span id="planCount" class="text-xs font-mono font-semibold text-planA bg-planA/10 border border-planA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-              <svg class="chevron w-4 h-4 text-slate-400 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </span>
-          </button>
-          <div class="panel-body">
             <div>
-              <div class="px-5 pb-5 pt-1">
-                <!-- Plans Progress Bar -->
-                <div class="w-full h-1.5 bg-slate-100 dark:bg-panelAlt rounded-full overflow-hidden mb-3.5">
-                  <div id="planMasterBar" class="h-full bg-planA transition-all duration-500" style="width: 0%"></div>
-                </div>
-
-                <div class="flex gap-2 mb-3.5">
-                  <input type="text" id="planInput" placeholder="Add a future plan or milestone…" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-planA/40 focus:border-planA transition-colors">
-                  <button id="addPlanBtn" class="bg-planA text-slate-950 font-semibold px-4 shrink-0 rounded-xl hover:brightness-105 active:scale-95 transition-all text-sm shadow-sm" aria-label="Add plan">Add</button>
-                </div>
-                <ul id="planList" class="scroll-area list-short space-y-2.5 pr-1"></ul>
+              <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Long Term Plans</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">Milestones &amp; multi-step progress bars</span>
+            </div>
+          </span>
+          <span class="flex items-center gap-2.5 shrink-0">
+            <span id="planPctBadge" class="text-[11px] font-mono text-slate-400 dark:text-inkMuted">0%</span>
+            <span id="planCount" class="text-xs font-mono font-semibold text-planA bg-planA/10 border border-planA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-slate-400 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
+        </button>
+        <div class="panel-body">
+          <div>
+            <div class="px-5 pb-5 pt-1">
+              <div class="w-full h-1.5 bg-slate-100 dark:bg-panelAlt rounded-full overflow-hidden mb-3.5">
+                <div id="planMasterBar" class="h-full bg-planA transition-all duration-500" style="width: 0%"></div>
               </div>
+
+              <div class="flex gap-2 mb-3.5">
+                <input type="text" id="planInput" placeholder="Add a future plan or milestone…" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-planA/40 focus:border-planA transition-colors">
+                <button id="addPlanBtn" class="bg-planA text-slate-950 font-semibold px-4 shrink-0 rounded-xl hover:brightness-105 active:scale-95 transition-all text-sm shadow-sm" aria-label="Add plan">Add</button>
+              </div>
+              <ul id="planList" class="scroll-area list-tall space-y-2.5 pr-1"></ul>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- 3. QUICK LINKS -->
-        <section class="panel bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="links" data-group="links">
-          <div class="h-1 bg-linkA"></div>
-          <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
-            <span class="flex items-center gap-2.5 min-w-0">
-              <span class="w-8 h-8 rounded-lg bg-linkA/10 text-linkA flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-              </span>
-              <div>
-                <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Quick Links</span>
-                <span class="text-xs text-slate-400 dark:text-inkMuted">1-click copy URL or pin top bookmarks</span>
-              </div>
+      <!-- ROW 3: QUICK LINKS (12 cols — sleek 4-column horizontal bookmark grid) -->
+      <section class="panel lg:col-span-12 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="links" data-group="links" data-span="lg:col-span-12">
+        <div class="h-1 bg-linkA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
+          <span class="flex items-center gap-2.5 min-w-0">
+            <span class="w-8 h-8 rounded-lg bg-linkA/10 text-linkA flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
             </span>
-            <span class="flex items-center gap-2.5 shrink-0">
-              <span id="linkCount" class="text-xs font-mono font-semibold text-linkA bg-linkA/10 border border-linkA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
-              <svg class="chevron w-4 h-4 text-slate-400 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </span>
-          </button>
-          <div class="panel-body">
             <div>
-              <div class="px-5 pb-5 pt-1">
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 mb-3.5">
-                  <input type="text" id="linkTitleInput" placeholder="Name (e.g. GitHub)" class="sm:col-span-5 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA transition-colors">
-                  <div class="sm:col-span-7 flex gap-2">
-                    <input type="text" id="linkUrlInput" placeholder="URL (e.g. github.com)" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA transition-colors">
-                    <button id="addLinkBtn" class="bg-linkA text-slate-950 font-semibold px-4 shrink-0 rounded-xl hover:brightness-105 active:scale-95 transition-all text-sm shadow-sm" aria-label="Save link">Add</button>
-                  </div>
+              <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Quick Links</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">1-click copy URL or pin 📌 top bookmarks</span>
+            </div>
+          </span>
+          <span class="flex items-center gap-2.5 shrink-0">
+            <span id="linkCount" class="text-xs font-mono font-semibold text-linkA bg-linkA/10 border border-linkA/20 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-slate-400 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
+        </button>
+        <div class="panel-body">
+          <div>
+            <div class="px-5 pb-5 pt-1">
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 mb-4">
+                <input type="text" id="linkTitleInput" placeholder="Name (e.g. ChatGPT, GitHub, AWS Console)" class="sm:col-span-4 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA transition-colors">
+                <div class="sm:col-span-8 flex gap-2">
+                  <input type="text" id="linkUrlInput" placeholder="URL (e.g. chatgpt.com)" class="flex-1 min-w-0 px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA transition-colors">
+                  <button id="addLinkBtn" class="bg-linkA text-slate-950 font-semibold px-5 shrink-0 rounded-xl hover:brightness-105 active:scale-95 transition-all text-sm shadow-sm" aria-label="Save link">Add Link</button>
                 </div>
-                <ul id="linkList" class="scroll-area list-short grid grid-cols-1 sm:grid-cols-2 gap-2.5 pr-1 content-start"></ul>
               </div>
+              <ul id="linkList" class="scroll-area list-short grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pr-1 content-start"></ul>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-      </div>
-
-      <!-- 4. NOTES (Full 12 cols) -->
-      <section class="panel lg:col-span-12 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="notes" data-group="notes">
+      <!-- ROW 4: NOTES (12 cols) -->
+      <section class="panel lg:col-span-12 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="notes" data-group="notes" data-span="lg:col-span-12">
         <div class="h-1 bg-noteA"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
@@ -473,7 +465,7 @@
             </span>
             <div>
               <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Notes &amp; Reference Scratchpad</span>
-              <span class="text-xs text-slate-400 dark:text-inkMuted">Pin (`📌`) important notes to top · Click any note to read in full</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">Pin 📌 important notes to top · Click any note to read in full</span>
             </div>
           </span>
           <span class="flex items-center gap-2.5 shrink-0">
@@ -508,8 +500,8 @@
         </div>
       </section>
 
-      <!-- 5. YOUTUBE LINKS (7 cols on desktop) -->
-      <section class="panel lg:col-span-7 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="yt" data-group="media">
+      <!-- ROW 5 LEFT: YOUTUBE LINKS (7 cols) -->
+      <section class="panel lg:col-span-7 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="yt" data-group="media" data-span="lg:col-span-7">
         <div class="h-1 bg-ytA"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
@@ -543,8 +535,8 @@
         </div>
       </section>
 
-      <!-- 6. FACEBOOK LINKS (5 cols on desktop) -->
-      <section class="panel lg:col-span-5 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="fb" data-group="media">
+      <!-- ROW 5 RIGHT: FACEBOOK LINKS (5 cols) -->
+      <section class="panel lg:col-span-5 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="fb" data-group="media" data-span="lg:col-span-5">
         <div class="h-1 bg-fbA"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
           <span class="flex items-center gap-2.5 min-w-0">
@@ -658,7 +650,6 @@
         now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) +
         ' · ' + now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
-      // Automatically reset daily habits view when midnight passes
       const newDayKey = localDateKey(now);
       if (newDayKey !== currentDayKey) {
         currentDayKey = newDayKey;
@@ -672,7 +663,6 @@
     // --- WORKSPACE VIEW TABS ---
     const viewTabs = [...document.querySelectorAll('.view-tab')];
     const panels = [...document.querySelectorAll('.panel')];
-    const rightStack = document.getElementById('rightStack');
     const panelApi = new Map();
 
     function setWorkspaceView(viewName) {
@@ -685,17 +675,12 @@
             : 'font-medium text-slate-600 dark:text-inkMuted hover:bg-slate-200/60 dark:hover:bg-panelAlt');
       });
 
-      if (viewName === 'all') {
-        rightStack.className = 'lg:col-span-5 flex flex-col gap-6';
-        panels.forEach(p => {
-          p.classList.remove('hidden', 'lg:col-span-12');
-          if (['tasks', 'yt'].includes(p.dataset.panel)) p.classList.add('lg:col-span-7');
-          if (p.dataset.panel === 'fb') p.classList.add('lg:col-span-5');
-          if (['notes', 'playbooks'].includes(p.dataset.panel)) p.classList.add('lg:col-span-12');
-        });
-      } else {
-        rightStack.className = (viewName === 'focus' || viewName === 'links') ? 'lg:col-span-12 flex flex-col gap-6' : 'hidden';
-        panels.forEach(p => {
+      panels.forEach(p => {
+        const defaultSpan = p.dataset.span || 'lg:col-span-12';
+        if (viewName === 'all') {
+          p.classList.remove('hidden', 'lg:col-span-12', 'lg:col-span-7', 'lg:col-span-5');
+          p.classList.add(defaultSpan);
+        } else {
           const match = p.dataset.group === viewName;
           p.classList.toggle('hidden', !match);
           if (match) {
@@ -703,17 +688,17 @@
             p.classList.add('lg:col-span-12');
             panelApi.get(p)?.(false, false);
           }
-        });
-      }
+        }
+      });
     }
 
     viewTabs.forEach(tab => {
       tab.addEventListener('click', () => setWorkspaceView(tab.dataset.viewTarget));
     });
 
-    // --- COLLAPSE / EXPAND ---
+    // --- COLLAPSE / EXPAND (Uses v2 storage key so panels open expanded by default) ---
     panels.forEach((panel) => {
-      const key = 'panelCollapsed:' + panel.dataset.panel;
+      const key = 'panelCollapsedV2:' + panel.dataset.panel;
       const toggleBtn = panel.querySelector('.collapse-toggle');
       const chevron = panel.querySelector('.chevron');
 
@@ -849,7 +834,6 @@
       } catch { return ''; }
     }
 
-    // Calculate item progress percentage from checklist steps or manual progress or done state
     function itemProgress(item) {
       const steps = Array.isArray(item.steps) ? item.steps : [];
       if (steps.length > 0) {
@@ -891,7 +875,7 @@
 
     function pinButtonHtml(item) {
       const pinned = !!item.pinned;
-      return `<button type="button" class="pin-btn ${pinned ? 'text-amber-500 opacity-100 bg-amber-500/10' : iconBtn}" title="${pinned ? 'Unpin from top' : 'Pin to top'}" aria-label="${pinned ? 'Unpin from top' : 'Pin to top'}" aria-pressed="${pinned}">${pinIcon}</button>`;
+      return `<button type="button" class="pin-btn ${pinned ? 'text-amber-500 opacity-100 bg-amber-500/10 p-1.5 rounded-lg' : iconBtn}" title="${pinned ? 'Unpin from top' : 'Pin to top'}" aria-label="${pinned ? 'Unpin from top' : 'Pin to top'}" aria-pressed="${pinned}">${pinIcon}</button>`;
     }
 
     function completedLabel(item) {
@@ -1114,12 +1098,33 @@
       return 0;
     }
 
+    function createHabitDoc(text) {
+      addDoc(collection(db, 'habits'), {
+        text,
+        streak: 0,
+        lastCompletedDate: null,
+        createdAt: serverTimestamp()
+      }).catch(err => reportError(err, 'add habit'));
+    }
+
     function renderHabits() {
       const container = document.getElementById('habitList');
       container.innerHTML = '';
 
       if (!state.habits.length) {
-        container.innerHTML = `<p class="text-xs font-mono text-slate-400 dark:text-inkMuted py-1">No daily habits yet — add one above (e.g., "Coding Practice", "System Design Reading", "Workout").</p>`;
+        const presets = ['Coding Practice', 'System Design Reading', 'Cloud / DevOps Lab', 'Workout'];
+        const wrap = document.createElement('div');
+        wrap.className = 'flex flex-wrap items-center gap-2 py-0.5';
+        wrap.innerHTML = `<span class="text-xs font-mono text-slate-400 dark:text-inkMuted mr-1">Quick-add starter habits:</span>`;
+        presets.forEach(name => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-panelAlt border border-slate-200 dark:border-hairline text-slate-600 dark:text-inkMuted hover:border-habitA hover:text-habitA transition-colors';
+          btn.textContent = `+ ${name}`;
+          btn.addEventListener('click', () => createHabitDoc(name));
+          wrap.appendChild(btn);
+        });
+        container.appendChild(wrap);
         return;
       }
 
@@ -1140,7 +1145,7 @@
             <span class="w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${doneToday ? 'bg-planA border-planA text-slate-950' : 'border-slate-300 dark:border-inkMuted/60'}">
               ${doneToday ? checkIcon : ''}
             </span>
-            <span class="${doneToday ? ' font-semibold' : ''}">${esc(habit.text)}</span>
+            <span class="${doneToday ? 'font-semibold' : ''}">${esc(habit.text)}</span>
           </button>
           <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[11px] font-mono ${streak > 0 ? 'bg-habitA/15 text-habitA font-semibold' : 'text-slate-400 dark:text-inkMuted'}" title="Current daily streak">
             🔥 ${streak}d
@@ -1182,12 +1187,7 @@
       const input = document.getElementById('habitInput');
       const text = input.value.trim();
       if (!text) return;
-      addDoc(collection(db, 'habits'), {
-        text,
-        streak: 0,
-        lastCompletedDate: null,
-        createdAt: serverTimestamp()
-      }).catch(err => reportError(err, 'add habit'));
+      createHabitDoc(text);
       input.value = '';
     }
     document.getElementById('addHabitBtn').addEventListener('click', addHabit);
@@ -1651,7 +1651,7 @@
       const createdDate = formatTimestamp(item.createdAt);
       const pinnedClass = item.pinned ? ' pinned-card' : '';
 
-      // 0. PLAYBOOKS (Overall Understanding & Action Blueprints)
+      // 0. PLAYBOOKS
       if (key === 'playbooks') {
         const steps = Array.isArray(item.steps) ? item.steps : [];
         const pct = itemProgress(item);
@@ -1704,7 +1704,6 @@
             </div>
           </div>
 
-          <!-- Inline Quick Step Adder -->
           <div class="flex gap-1.5 pt-2 border-t border-slate-200/70 dark:border-hairline">
             <input type="text" class="quick-step-input flex-1 min-w-0 px-2.5 py-1.5 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/60 focus:outline-none focus:ring-1 focus:ring-mindA" placeholder="+ Add next action step…">
             <button type="button" class="quick-step-btn px-2.5 py-1.5 rounded-lg bg-mindA/15 text-mindA hover:bg-mindA hover:text-slate-950 text-xs font-semibold transition-colors">Add</button>
@@ -1820,7 +1819,7 @@
           </div>`;
       }
 
-      // 4. FACEBOOK LINKS (with 1-Click Copy URL & Pin)
+      // 4. FACEBOOK LINKS
       else if (key === 'fb' && normalizeUrl(item.url)) {
         const safeUrl = normalizeUrl(item.url);
         li.className = `group/item flex flex-col gap-3 p-4 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-fbA/50 transition-all${item.done ? ' ring-1 ring-planA/30' : ''}${pinnedClass}`;
@@ -1853,7 +1852,7 @@
           ${item.reflection ? `<div class="open-target openable text-xs leading-relaxed whitespace-pre-wrap break-words text-slate-700 dark:text-slate-300 rounded-lg bg-white dark:bg-panel border border-slate-200/70 dark:border-hairline p-2.5 clamp-3">${esc(item.reflection)}</div>` : ''}`;
       }
 
-      // 5. QUICK LINKS (with 1-Click Copy URL & Pin)
+      // 5. QUICK LINKS
       else if (key === 'links' && normalizeUrl(item.url)) {
         const safeUrl = normalizeUrl(item.url);
         const favicon = faviconFor(safeUrl);
@@ -1880,7 +1879,7 @@
           </div>`;
       }
 
-      // 6. LONG TERM PLANS (with Substeps & Progress Bar & Pin)
+      // 6. LONG TERM PLANS
       else if (key === 'plans') {
         const done = !!item.done;
         li.className = `group/item flex items-start gap-3 p-3.5 bg-slate-50/80 dark:bg-panelAlt/70 rounded-xl border border-slate-200/80 dark:border-hairline hover:border-planA/50 transition-all${pinnedClass}`;
@@ -1907,7 +1906,6 @@
         wireSubsteps(li, collectionName, item);
       }
 
-      // Common action wiring
       li.querySelectorAll('.open-target').forEach(el => el.addEventListener('click', open));
       li.querySelector('.edit-btn')?.addEventListener('click', open);
       li.querySelector('.pin-btn')?.addEventListener('click', (e) => {
@@ -1966,7 +1964,6 @@
         return items;
       }
 
-      // Pin-to-top sorting for all other panels
       items.sort((a, b) => (!!b.pinned - !!a.pinned));
       return items;
     }
@@ -2014,7 +2011,6 @@
       document.getElementById('statMedia').textContent = `${mediaItems.filter(x => x.done).length}/${mediaItems.length} watched`;
       document.getElementById('taskCount').textContent = open;
 
-      // Daily Habits Bar
       const totalHabits = state.habits.length;
       const doneHabits = state.habits.filter(isHabitDoneToday).length;
       const habitPct = totalHabits ? Math.round((doneHabits / totalHabits) * 100) : 0;
@@ -2022,19 +2018,16 @@
       document.getElementById('habitProgressText').textContent = `${habitPct}% today`;
       document.getElementById('habitProgressBar').style.width = `${habitPct}%`;
 
-      // Tasks Progress Bar
       const taskPct = state.tasks.length ? Math.round((done / state.tasks.length) * 100) : 0;
       document.getElementById('taskMasterBar').style.width = `${taskPct}%`;
       document.getElementById('taskPctBadge').textContent = `${taskPct}%`;
 
-      // Long Term Plans Progress Bar
       const planPct = state.plans.length
         ? Math.round(state.plans.reduce((acc, p) => acc + itemProgress(p), 0) / state.plans.length)
         : 0;
       document.getElementById('planMasterBar').style.width = `${planPct}%`;
       document.getElementById('planPctBadge').textContent = `${planPct}%`;
 
-      // Playbooks Overall Progress Bar
       const pbPct = state.playbooks.length
         ? Math.round(state.playbooks.reduce((acc, p) => acc + itemProgress(p), 0) / state.playbooks.length)
         : 0;
