@@ -33,6 +33,7 @@
             noteA: '#A78BFA',
             mindA: '#06B6D4',
             habitA: '#F97316',
+            careerA: '#6366F1',
             urgent: '#EF4444',
             steady: '#38BDF8',
           },
@@ -72,7 +73,7 @@
 
     .scroll-area { overflow-y: auto; scrollbar-gutter: stable; }
     .list-short { max-height: 360px; }
-    .list-tall  { max-height: 520px; }
+    .list-tall  { max-height: 560px; }
 
     body[data-view]:not([data-view="all"]) .list-short,
     body[data-view]:not([data-view="all"]) .list-tall {
@@ -160,7 +161,7 @@
         <div class="order-last w-full lg:order-none lg:w-auto lg:flex-1 lg:max-w-md mx-auto">
           <div class="relative">
             <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-inkMuted pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"></path></svg>
-            <input type="search" id="searchInput" placeholder="Search blueprints, tasks, notes, links…" aria-label="Search all panels"
+            <input type="search" id="searchInput" placeholder="Search blueprints, masters, jobs, tasks, notes…" aria-label="Search all panels"
               class="w-full pl-10 pr-20 py-2 text-sm bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-xl shadow-sm placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-linkA/40 focus:border-linkA transition-all">
             <span id="searchNotice" class="hidden absolute right-9 top-1/2 -translate-y-1/2 text-[11px] font-mono font-medium text-linkA bg-linkA/10 px-2 py-0.5 rounded-md"></span>
             <kbd class="hidden sm:inline-block absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400 dark:text-inkMuted bg-slate-100 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded px-1.5 py-0.5">/</kbd>
@@ -194,6 +195,9 @@
           <button type="button" data-view-target="blueprint" class="view-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-inkMuted hover:bg-slate-200/60 dark:hover:bg-panelAlt transition-all shrink-0">
             🧠 Understanding &amp; Strategy
           </button>
+          <button type="button" data-view-target="career" class="view-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-inkMuted hover:bg-slate-200/60 dark:hover:bg-panelAlt transition-all shrink-0">
+            🎓 Masters &amp; Jobs
+          </button>
           <button type="button" data-view-target="focus" class="view-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-inkMuted hover:bg-slate-200/60 dark:hover:bg-panelAlt transition-all shrink-0">
             Tasks &amp; Plans
           </button>
@@ -212,6 +216,10 @@
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-panel border border-slate-200/80 dark:border-hairline text-slate-700 dark:text-ink">
             <span class="w-2 h-2 rounded-full bg-habitA"></span>
             <strong id="statHabits" class="font-semibold">0/0</strong> habits
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-panel border border-slate-200/80 dark:border-hairline text-slate-700 dark:text-ink">
+            <span class="w-2 h-2 rounded-full bg-careerA"></span>
+            <strong id="statCareer" class="font-semibold">0</strong> masters/jobs
           </span>
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-panel border border-slate-200/80 dark:border-hairline text-slate-700 dark:text-ink">
             <span class="w-2 h-2 rounded-full bg-taskA"></span>
@@ -339,7 +347,126 @@
         </div>
       </section>
 
-      <!-- ROW 2 LEFT: WHAT TO DO NEXT (7 cols) -->
+      <!-- ROW 2: MASTERS & JOBS PIPELINE (12 cols) -->
+      <section class="panel lg:col-span-12 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="career" data-group="career" data-span="lg:col-span-12">
+        <div class="h-1.5 bg-gradient-to-r from-careerA via-linkA to-planA"></div>
+        <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
+          <span class="flex items-center gap-3 min-w-0">
+            <span class="w-9 h-9 rounded-xl bg-careerA/15 text-careerA flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path></svg>
+            </span>
+            <div>
+              <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Masters &amp; Jobs Pipeline</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">Track graduate programs, scholarships, and SWE / Cloud roles · Click stage badge to advance</span>
+            </div>
+          </span>
+          <span class="flex items-center gap-2.5 shrink-0">
+            <span id="careerOverallPct" class="hidden sm:inline-block text-xs font-mono text-careerA bg-careerA/10 px-2.5 py-0.5 rounded-full">0% prep</span>
+            <span id="careerCount" class="text-xs font-mono font-semibold text-careerA bg-careerA/10 border border-careerA/25 px-2.5 py-0.5 rounded-full min-w-[1.75rem] text-center">0</span>
+            <svg class="chevron w-4 h-4 text-slate-400 dark:text-inkMuted transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </span>
+        </button>
+
+        <div class="panel-body">
+          <div>
+            <div class="px-5 pb-5 pt-1">
+              <!-- Master Progress Bar -->
+              <div class="w-full h-1.5 bg-slate-100 dark:bg-panelAlt rounded-full overflow-hidden mb-4">
+                <div id="careerMasterBar" class="h-full bg-gradient-to-r from-careerA to-planA transition-all duration-500" style="width: 0%"></div>
+              </div>
+
+              <!-- Pipeline Metrics & Filter Bar -->
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3.5 border-b border-slate-100 dark:border-hairline">
+                <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-panelAlt border border-slate-200/80 dark:border-hairline text-slate-700 dark:text-ink">
+                    🎓 <strong id="statMastersCount">0</strong> Masters
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-panelAlt border border-slate-200/80 dark:border-hairline text-slate-700 dark:text-ink">
+                    💼 <strong id="statJobsCount">0</strong> Jobs
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-700 dark:text-sky-300">
+                    🚀 <strong id="statAppliedCount">0</strong> Applied
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300">
+                    🎤 <strong id="statInterviewCount">0</strong> Interview / Review
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-planA">
+                    🎉 <strong id="statOfferCount">0</strong> Offers / Admits
+                  </span>
+                </div>
+
+                <div id="careerFilters" class="flex flex-wrap items-center gap-1" role="group" aria-label="Filter Masters and Jobs"></div>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-[370px_minmax(0,1fr)] gap-6">
+                <!-- Masters & Jobs Composer -->
+                <div class="flex flex-col gap-3 bg-slate-50/80 dark:bg-panelAlt/50 p-4 rounded-xl border border-slate-200/80 dark:border-hairline self-start">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-mono uppercase tracking-wider text-careerA font-semibold">New Opportunity</span>
+                    <div class="flex items-center gap-1.5">
+                      <select id="crTypeInput" class="text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg px-2 py-1 text-slate-700 dark:text-ink focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                        <option value="masters">🎓 Masters / Grad</option>
+                        <option value="job">💼 Job / Role</option>
+                      </select>
+                      <select id="crStageInput" class="text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg px-2 py-1 text-slate-700 dark:text-ink focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                        <option value="saved">📌 Shortlisted</option>
+                        <option value="preparing">📝 Preparing</option>
+                        <option value="applied">🚀 Applied</option>
+                        <option value="interview">🎤 Interview / Review</option>
+                        <option value="offer">🎉 Offer / Admit</option>
+                        <option value="rejected">✖ Closed</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <input type="text" id="crTitleInput" placeholder="Program or Role (e.g. MSc CS / Cloud Engineer)" class="w-full px-3.5 py-2.5 text-sm font-semibold bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40 focus:border-careerA transition-colors">
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input type="text" id="crOrgInput" placeholder="University or Company" class="w-full px-3 py-2 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                    <input type="text" id="crLocationInput" placeholder="Country / Mode (e.g. USA, Remote)" class="w-full px-3 py-2 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label class="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-inkMuted block mb-1">Deadline (Optional)</label>
+                      <input type="date" id="crDeadlineInput" class="w-full px-3 py-1.5 text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl text-slate-700 dark:text-ink focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                    </div>
+                    <div>
+                      <label class="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-inkMuted block mb-1">Funding / Comp / Tag</label>
+                      <input type="text" id="crFundingInput" placeholder="e.g. DAAD / Visa Sponsored" class="w-full px-3 py-1.5 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                    </div>
+                  </div>
+
+                  <input type="text" id="crUrlInput" placeholder="Portal / Job Posting URL (https://…)" class="w-full px-3 py-2 text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
+
+                  <div>
+                    <label class="text-[11px] font-mono text-slate-500 dark:text-inkMuted mb-1 block">📋 Requirements / Professor / Tech Stack Notes</label>
+                    <textarea id="crNotesInput" rows="2" placeholder="IELTS/GRE, professor name, tech stack, referral contact…" class="w-full px-3 py-2 text-xs leading-relaxed bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40"></textarea>
+                  </div>
+
+                  <div>
+                    <div class="flex items-center justify-between gap-1 mb-1">
+                      <label class="text-[11px] font-mono text-slate-500 dark:text-inkMuted">✅ Preparation Steps (one per line)</label>
+                      <div class="flex items-center gap-1">
+                        <button type="button" id="crPresetMastersBtn" class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-careerA/10 text-careerA hover:bg-careerA/20 transition-colors" title="Fill standard Masters application steps">+ Masters Template</button>
+                        <button type="button" id="crPresetJobBtn" class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-planA/10 text-emerald-700 dark:text-planA hover:bg-planA/20 transition-colors" title="Fill standard Job application steps">+ Job Template</button>
+                      </div>
+                    </div>
+                    <textarea id="crStepsInput" rows="3" placeholder="Tailor CV / Resume&#10;Write SOP / Cover Letter&#10;Submit application" class="w-full px-3 py-2 text-xs font-mono leading-relaxed bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40"></textarea>
+                  </div>
+
+                  <button id="addCareerBtn" class="w-full bg-careerA text-white py-2.5 rounded-xl font-semibold text-sm hover:brightness-110 active:scale-[.99] transition-all shadow-sm">Save to Pipeline</button>
+                </div>
+
+                <!-- Masters & Jobs Cards Grid -->
+                <ul id="careerList" class="scroll-area list-tall grid grid-cols-1 xl:grid-cols-2 gap-4 pr-1 content-start items-start"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ROW 3 LEFT: WHAT TO DO NEXT (7 cols) -->
       <section class="panel lg:col-span-7 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="tasks" data-group="focus" data-span="lg:col-span-7">
         <div class="h-1 bg-gradient-to-r from-taskA to-urgent"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
@@ -385,7 +512,7 @@
         </div>
       </section>
 
-      <!-- ROW 2 RIGHT: LONG TERM PLANS (5 cols) -->
+      <!-- ROW 3 RIGHT: LONG TERM PLANS (5 cols) -->
       <section class="panel lg:col-span-5 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="plans" data-group="focus" data-span="lg:col-span-5">
         <div class="h-1 bg-planA"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
@@ -421,7 +548,7 @@
         </div>
       </section>
 
-      <!-- ROW 3: QUICK LINKS (12 cols — sleek 4-column horizontal bookmark grid) -->
+      <!-- ROW 4: QUICK LINKS (12 cols — sleek 4-column horizontal bookmark grid) -->
       <section class="panel lg:col-span-12 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="links" data-group="links" data-span="lg:col-span-12">
         <div class="h-1 bg-linkA"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
@@ -455,7 +582,7 @@
         </div>
       </section>
 
-      <!-- ROW 4: NOTES (12 cols) -->
+      <!-- ROW 5: NOTES (12 cols) -->
       <section class="panel lg:col-span-12 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="notes" data-group="notes" data-span="lg:col-span-12">
         <div class="h-1 bg-noteA"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
@@ -494,14 +621,13 @@
                 <p class="text-[11px] font-mono text-slate-400 dark:text-inkMuted text-center">Ctrl + Enter saves · YouTube links embed</p>
               </div>
 
-              <!-- Added items-start so short notes don't stretch to match tall notes in the same row -->
               <ul id="noteList" class="scroll-area list-tall grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pr-1 content-start items-start"></ul>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ROW 5 LEFT: YOUTUBE LINKS (7 cols) -->
+      <!-- ROW 6 LEFT: YOUTUBE LINKS (7 cols) -->
       <section class="panel lg:col-span-7 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="yt" data-group="media" data-span="lg:col-span-7">
         <div class="h-1 bg-ytA"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
@@ -536,7 +662,7 @@
         </div>
       </section>
 
-      <!-- ROW 5 RIGHT: FACEBOOK LINKS (5 cols) -->
+      <!-- ROW 6 RIGHT: FACEBOOK LINKS (5 cols) -->
       <section class="panel lg:col-span-5 bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline rounded-2xl shadow-sm overflow-hidden transition-all" data-panel="fb" data-group="media" data-span="lg:col-span-5">
         <div class="h-1 bg-fbA"></div>
         <button type="button" class="collapse-toggle w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/60 dark:hover:bg-panelAlt/40 transition-colors" aria-expanded="true">
@@ -655,6 +781,7 @@
       if (newDayKey !== currentDayKey) {
         currentDayKey = newDayKey;
         renderHabits();
+        renderList('career');
         updateStats();
       }
     }
@@ -779,7 +906,7 @@
       const pending = statuses.some(s => s.pending);
       const cached = statuses.some(s => s.cached);
       const failed = statuses.some(s => s.failed);
-      const message = failed ? 'Sync error' : isOffline ? 'Offline (cached)' : pending ? 'Saving…' : cached || statuses.length < 6 ? 'Syncing…' : 'Synced';
+      const message = failed ? 'Sync error' : isOffline ? 'Offline (cached)' : pending ? 'Saving…' : cached || statuses.length < 7 ? 'Syncing…' : 'Synced';
       label.textContent = message;
       dot.className = 'w-2 h-2 rounded-full ' + (failed ? 'bg-rose-500' : isOffline || cached ? 'bg-amber-400' : pending ? 'bg-blue-400 animate-pulse' : 'bg-planA');
     }
@@ -833,6 +960,42 @@
         const date = typeof ts.toDate === 'function' ? ts.toDate() : new Date(ts.seconds * 1000);
         return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
       } catch { return ''; }
+    }
+
+    function daysUntilDate(dateStr) {
+      if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const target = new Date(y, m - 1, d);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return Math.round((target - today) / 86400000);
+    }
+
+    function renderDeadlineBadge(item) {
+      if (!item.deadline) return '';
+      const diff = daysUntilDate(item.deadline);
+      if (diff === null) return '';
+
+      const finished = item.stage === 'offer' || item.stage === 'rejected';
+      const [y, m, d] = item.deadline.split('-').map(Number);
+      const formatted = new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+      if (finished) {
+        return `<span class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-panel text-slate-500 dark:text-inkMuted">📅 ${formatted}</span>`;
+      }
+      if (diff < 0) {
+        return `<span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30" title="Deadline passed">⏰ ${formatted} (${Math.abs(diff)}d ago)</span>`;
+      }
+      if (diff === 0) {
+        return `<span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-rose-500 text-white animate-pulse">⏰ Due Today!</span>`;
+      }
+      if (diff <= 7) {
+        return `<span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30">⏰ ${diff}d left (${formatted})</span>`;
+      }
+      if (diff <= 21) {
+        return `<span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">⏳ ${diff}d left (${formatted})</span>`;
+      }
+      return `<span class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-panel text-slate-600 dark:text-inkMuted border border-slate-300/60 dark:border-hairline">📅 ${formatted} (${diff}d)</span>`;
     }
 
     function itemProgress(item) {
@@ -924,6 +1087,81 @@
       try { return `https://www.google.com/s2/favicons?sz=32&domain=${new URL(url).hostname}`; }
       catch { return ''; }
     };
+
+    // --- MASTERS & JOBS STAGES & FILTERS ---
+    const CAREER_STAGES = {
+      saved:     { label: '📌 Shortlisted',       rank: 2, chip: 'bg-slate-200/80 dark:bg-panel text-slate-700 dark:text-slate-300 border-slate-300 dark:border-hairline' },
+      preparing: { label: '📝 Preparing',         rank: 1, chip: 'bg-careerA/15 text-careerA border-careerA/30' },
+      applied:   { label: '🚀 Applied',           rank: 0, chip: 'bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30' },
+      interview: { label: '🎤 Interview / Review', rank: 0, chip: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30' },
+      offer:     { label: '🎉 Offer / Admit',     rank: 0, chip: 'bg-emerald-500/15 text-emerald-700 dark:text-planA border-emerald-500/30' },
+      rejected:  { label: '✖ Closed',             rank: 3, chip: 'bg-rose-500/10 text-rose-500/80 border-rose-500/20 opacity-75' },
+    };
+    const CAREER_STAGE_ORDER = ['saved', 'preparing', 'applied', 'interview', 'offer', 'rejected'];
+    const stageOfCareer = (item) => CAREER_STAGES[item.stage] ? item.stage : 'saved';
+
+    let careerFilter = localStorage.getItem('careerFilter') || 'all';
+    const CAREER_FILTERS = [
+      { id: 'all',       label: 'All' },
+      { id: 'masters',   label: '🎓 Masters' },
+      { id: 'job',       label: '💼 Jobs' },
+      { id: 'active',    label: '🔥 Active' },
+      { id: 'interview', label: '🎤 Interview / Review' },
+      { id: 'offer',     label: '🎉 Offer / Admit' },
+      { id: 'urgent',    label: '⏰ Deadline Soon' },
+    ];
+    if (!CAREER_FILTERS.some(f => f.id === careerFilter)) careerFilter = 'all';
+
+    const careerFiltersEl = document.getElementById('careerFilters');
+    function renderCareerFilters() {
+      careerFiltersEl.innerHTML = '';
+      CAREER_FILTERS.forEach(f => {
+        const active = f.id === careerFilter;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-pressed', String(active));
+        btn.className = 'seg shrink-0 px-2.5 py-1 rounded-lg text-xs transition-colors ' +
+          (active ? 'bg-slate-900 dark:bg-ink text-white dark:text-graphite border-slate-900 dark:border-ink font-semibold'
+                  : 'bg-transparent text-slate-500 dark:text-inkMuted border-slate-200 dark:border-hairline hover:border-slate-300');
+        btn.textContent = f.label;
+        btn.addEventListener('click', () => {
+          careerFilter = f.id;
+          localStorage.setItem('careerFilter', f.id);
+          renderCareerFilters();
+          renderList('career');
+          updateStats();
+        });
+        careerFiltersEl.appendChild(btn);
+      });
+    }
+    renderCareerFilters();
+
+    // Starter checklist template buttons in composer
+    document.getElementById('crPresetMastersBtn').addEventListener('click', () => {
+      document.getElementById('crTypeInput').value = 'masters';
+      const stepsBox = document.getElementById('crStepsInput');
+      const preset = [
+        'Verify program requirements, IELTS/GRE & tuition/funding',
+        'Update Academic CV & Transcripts',
+        'Draft tailored SOP / Motivation Letter',
+        'Request 2-3 Letters of Recommendation (LOR)',
+        'Submit application on university / scholarship portal'
+      ].join('\n');
+      stepsBox.value = stepsBox.value.trim() ? `${stepsBox.value.trim()}\n${preset}` : preset;
+    });
+
+    document.getElementById('crPresetJobBtn').addEventListener('click', () => {
+      document.getElementById('crTypeInput').value = 'job';
+      const stepsBox = document.getElementById('crStepsInput');
+      const preset = [
+        'Tailor Resume & keywords for role',
+        'Reach out for referral / hiring manager on LinkedIn',
+        'Submit online application',
+        'Complete Online Assessment (OA) / Coding round',
+        'Review System Design & behavioral stories'
+      ].join('\n');
+      stepsBox.value = stepsBox.value.trim() ? `${stepsBox.value.trim()}\n${preset}` : preset;
+    });
 
     // --- PRIORITIES ---
     const PRIORITIES = {
@@ -1017,9 +1255,9 @@
     });
 
     // --- STATE ---
-    const state = { playbooks: [], tasks: [], notes: [], links: [], plans: [], yt: [], fb: [], habits: [] };
+    const state = { playbooks: [], career: [], tasks: [], notes: [], links: [], plans: [], yt: [], fb: [], habits: [] };
     const PAGE_SIZE = 48;
-    const visibleLimits = { playbooks: PAGE_SIZE, tasks: PAGE_SIZE, notes: PAGE_SIZE, links: PAGE_SIZE, plans: PAGE_SIZE, yt: PAGE_SIZE, fb: PAGE_SIZE };
+    const visibleLimits = { playbooks: PAGE_SIZE, career: PAGE_SIZE, tasks: PAGE_SIZE, notes: PAGE_SIZE, links: PAGE_SIZE, plans: PAGE_SIZE, yt: PAGE_SIZE, fb: PAGE_SIZE };
     const mediaFilters = {
       yt: localStorage.getItem('ytFilter') || 'queued',
       fb: localStorage.getItem('fbFilter') || 'queued'
@@ -1053,17 +1291,19 @@
     renderMediaFilters('fb');
 
     const config = {
-      playbooks: { collection: 'playbooks',  el: document.getElementById('playbookList'), countId: 'playbookCount', accent: 'bg-mindA', title: 'Understanding & Action Blueprint' },
-      tasks:     { collection: 'tasks',      el: document.getElementById('taskList'),     countId: 'taskCount',     accent: 'bg-taskA', title: 'Task' },
-      notes:     { collection: 'notes',      el: document.getElementById('noteList'),     countId: 'noteCount',     accent: 'bg-noteA', title: 'Note' },
-      links:     { collection: 'quickLinks', el: document.getElementById('linkList'),     countId: 'linkCount',     accent: 'bg-linkA', title: 'Quick Link' },
-      plans:     { collection: 'plans',      el: document.getElementById('planList'),     countId: 'planCount',     accent: 'bg-planA', title: 'Long Term Plan' },
-      yt:        { collection: 'ytLinks',    el: document.getElementById('ytList'),       countId: 'ytCount',       accent: 'bg-ytA',   title: 'YouTube Video' },
-      fb:        { collection: 'fbLinks',    el: document.getElementById('fbList'),       countId: 'fbCount',       accent: 'bg-fbA',   title: 'Facebook Link' },
+      playbooks: { collection: 'playbooks',   el: document.getElementById('playbookList'), countId: 'playbookCount', accent: 'bg-mindA',   title: 'Understanding & Action Blueprint' },
+      career:    { collection: 'careerItems', el: document.getElementById('careerList'),   countId: 'careerCount',   accent: 'bg-careerA', title: 'Masters & Job Opportunity' },
+      tasks:     { collection: 'tasks',       el: document.getElementById('taskList'),     countId: 'taskCount',     accent: 'bg-taskA',   title: 'Task' },
+      notes:     { collection: 'notes',       el: document.getElementById('noteList'),     countId: 'noteCount',     accent: 'bg-noteA',   title: 'Note' },
+      links:     { collection: 'quickLinks',  el: document.getElementById('linkList'),     countId: 'linkCount',     accent: 'bg-linkA',   title: 'Quick Link' },
+      plans:     { collection: 'plans',       el: document.getElementById('planList'),     countId: 'planCount',     accent: 'bg-planA',   title: 'Long Term Plan' },
+      yt:        { collection: 'ytLinks',     el: document.getElementById('ytList'),       countId: 'ytCount',       accent: 'bg-ytA',     title: 'YouTube Video' },
+      fb:        { collection: 'fbLinks',     el: document.getElementById('fbList'),       countId: 'fbCount',       accent: 'bg-fbA',     title: 'Facebook Link' },
     };
 
     const emptyMessages = {
       playbooks: 'No blueprints yet — create your first Overall Understanding & Action Plan on the left.',
+      career: 'No Masters or Job opportunities in this view — add a university program, scholarship, or role on the left.',
       tasks: 'No tasks match this filter — add one above or switch filters.',
       notes: 'No notes saved yet — write one in the composer.',
       links: 'No quick links saved yet — add a bookmark above.',
@@ -1076,6 +1316,10 @@
       if (key === 'playbooks') {
         const stepText = (item.steps || []).map(s => s.text || '').join(' ');
         return `${item.text || ''} ${item.category || ''} ${item.understanding || ''} ${stepText}`.toLowerCase();
+      }
+      if (key === 'career') {
+        const stepText = (item.steps || []).map(s => s.text || '').join(' ');
+        return `${item.text || ''} ${item.org || ''} ${item.location || ''} ${item.funding || ''} ${item.notes || ''} ${item.track || ''} ${item.stage || ''} ${stepText}`.toLowerCase();
       }
       if (key === 'notes') {
         const linkText = (item.links || []).map(l => `${l.label || ''} ${l.url || ''}`).join(' ');
@@ -1203,6 +1447,7 @@
         projectId: firebaseConfig.projectId,
         collections: {
           playbooks: state.playbooks,
+          careerItems: state.career,
           habits: state.habits,
           tasks: state.tasks,
           notes: state.notes,
@@ -1321,6 +1566,33 @@
             <div>${field('Domain / Category', `<input type="text" id="edCategory" class="${fieldInput}" value="${esc(item.category || 'General Strategy')}">`)}</div>
           </div>` +
           field('🧠 Overall Understanding & Mental Model', `<textarea id="edUnderstanding" rows="6" class="${fieldInput} leading-relaxed" placeholder="How does this work overall? Key concepts, architecture, or summary…">${esc(item.understanding || '')}</textarea>`) +
+          stepsEditorBlock(item) +
+          pinCheck;
+        wireStepsEditor();
+      }
+      else if (key === 'career') {
+        const curTrack = item.track === 'job' ? 'job' : 'masters';
+        const curStage = stageOfCareer(item);
+        const stageOptions = CAREER_STAGE_ORDER.map(st => `<option value="${st}" ${st === curStage ? 'selected' : ''}>${CAREER_STAGES[st].label}</option>`).join('');
+        editorFields.innerHTML =
+          `<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>${field('Track', `<select id="edCareerTrack" class="${fieldInput}">
+              <option value="masters" ${curTrack === 'masters' ? 'selected' : ''}>🎓 Masters / Grad</option>
+              <option value="job" ${curTrack === 'job' ? 'selected' : ''}>💼 Job / Role</option>
+            </select>`)}</div>
+            <div class="sm:col-span-2">${field('Stage / Status', `<select id="edCareerStage" class="${fieldInput}">${stageOptions}</select>`)}</div>
+          </div>` +
+          `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>${field('Program or Role Title', `<input type="text" id="edText" class="${fieldInput} font-semibold" value="${esc(item.text)}">`)}</div>
+            <div>${field('University or Company', `<input type="text" id="edCareerOrg" class="${fieldInput}" value="${esc(item.org || '')}">`)}</div>
+          </div>` +
+          `<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>${field('Country / Location / Mode', `<input type="text" id="edCareerLocation" class="${fieldInput}" value="${esc(item.location || '')}">`)}</div>
+            <div>${field('Deadline Date', `<input type="date" id="edCareerDeadline" class="${fieldInput} font-mono" value="${esc(item.deadline || '')}">`)}</div>
+            <div>${field('Funding / Comp / Tag', `<input type="text" id="edCareerFunding" class="${fieldInput}" value="${esc(item.funding || '')}">`)}</div>
+          </div>` +
+          field('Portal / Job Posting URL', `<input type="text" id="edCareerUrl" class="${fieldInput} font-mono text-xs" value="${esc(item.url || '')}">`) +
+          field('📋 Requirements, Professor, Tech Stack & Interview Notes', `<textarea id="edCareerNotes" rows="4" class="${fieldInput} leading-relaxed" placeholder="IELTS/GRE, professor details, tech stack, referral contact, or interview questions…">${esc(item.notes || '')}</textarea>`) +
           stepsEditorBlock(item) +
           pinCheck;
         wireStepsEditor();
@@ -1489,6 +1761,36 @@
           steps,
           progress: steps.length ? Math.round((steps.filter(s => s.done).length / steps.length) * 100) : progress,
           done: steps.length ? steps.every(s => s.done) : progress === 100,
+          pinned
+        };
+      }
+      else if (key === 'career') {
+        const track = document.getElementById('edCareerTrack').value === 'job' ? 'job' : 'masters';
+        const stage = document.getElementById('edCareerStage').value || 'saved';
+        const org = document.getElementById('edCareerOrg').value.trim();
+        const location = document.getElementById('edCareerLocation').value.trim();
+        const deadline = document.getElementById('edCareerDeadline').value;
+        const funding = document.getElementById('edCareerFunding').value.trim();
+        const rawUrl = document.getElementById('edCareerUrl').value.trim();
+        const url = rawUrl ? normalizeUrl(rawUrl) : '';
+        const notes = document.getElementById('edCareerNotes').value.trim();
+        const steps = collectStepsFromEditor();
+        const progress = Number(document.getElementById('edProgress')?.value || 0);
+
+        if (!text && !org) { toast('Please provide a role/program title or organization.'); return; }
+        patch = {
+          text: text || org || 'Untitled Opportunity',
+          track,
+          stage,
+          org,
+          location,
+          deadline,
+          funding,
+          url,
+          notes,
+          steps,
+          progress: steps.length ? Math.round((steps.filter(s => s.done).length / steps.length) * 100) : progress,
+          done: stage === 'offer' || (steps.length ? steps.every(s => s.done) : progress === 100),
           pinned
         };
       }
@@ -1730,6 +2032,96 @@
         qInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); addQuickStep(); } });
       }
 
+      // 0.5 MASTERS & JOBS PIPELINE
+      else if (key === 'career') {
+        const isJob = item.track === 'job';
+        const stKey = stageOfCareer(item);
+        const stConf = CAREER_STAGES[stKey];
+        const steps = Array.isArray(item.steps) ? item.steps : [];
+        const pct = itemProgress(item);
+        const safeUrl = normalizeUrl(item.url);
+        const deadlineBadge = renderDeadlineBadge(item);
+
+        li.className = `group/item self-start flex flex-col gap-3 p-4 bg-slate-50/90 dark:bg-panelAlt/80 rounded-2xl border border-slate-200/90 dark:border-hairline hover:border-careerA/60 shadow-sm transition-all${stKey === 'offer' ? ' ring-1 ring-planA/40' : ''}${pinnedClass}`;
+        li.innerHTML = `
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-1.5 mb-1.5">
+                  <span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md ${isJob ? 'bg-emerald-500/15 text-emerald-700 dark:text-planA border border-emerald-500/25' : 'bg-careerA/15 text-careerA border border-careerA/25'}">
+                    ${isJob ? '💼 Job / Role' : '🎓 Masters / Grad'}
+                  </span>
+                  <button type="button" class="stage-cycle-btn seg text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full border ${stConf.chip} hover:brightness-110 transition-all" title="Click to advance stage">
+                    ${stConf.label}
+                  </button>
+                  ${deadlineBadge}
+                  ${item.pinned ? `<span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-500">📌 Pinned</span>` : ''}
+                </div>
+
+                <h3 class="open-target openable font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white leading-snug break-words" title="Click to edit details">${esc(item.text)}</h3>
+
+                ${(item.org || item.location || item.funding) ? `
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-slate-600 dark:text-slate-300">
+                    ${item.org ? `<span class="font-semibold text-slate-800 dark:text-ink">🏛️ ${esc(item.org)}</span>` : ''}
+                    ${item.location ? `<span class="text-slate-500 dark:text-inkMuted">📍 ${esc(item.location)}</span>` : ''}
+                    ${item.funding ? `<span class="font-mono text-[11px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">💰 ${esc(item.funding)}</span>` : ''}
+                  </div>
+                ` : ''}
+              </div>
+
+              <div class="flex items-center gap-0.5 shrink-0">
+                ${safeUrl ? `
+                  <a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="p-1.5 rounded-lg text-slate-400 dark:text-inkMuted hover:text-careerA hover:bg-slate-200/60 dark:hover:bg-panel transition-colors" title="Open portal / job posting">↗</a>
+                  <button type="button" class="copy-url-btn p-1.5 rounded-lg text-slate-400 dark:text-inkMuted hover:text-careerA hover:bg-slate-200/60 dark:hover:bg-panel transition-colors" data-url="${esc(safeUrl)}" title="Copy portal URL" aria-label="Copy portal URL">${copyIcon}</button>
+                ` : ''}
+                ${pinButtonHtml(item)}
+                <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
+                <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete opportunity">${trashIcon}</button>
+              </div>
+            </div>
+
+            ${item.notes ? `
+              <div class="open-target openable p-2.5 rounded-xl bg-white dark:bg-panel border border-slate-200/70 dark:border-hairline/90">
+                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words clamp-3">${esc(item.notes)}</p>
+              </div>
+            ` : ''}
+
+            ${renderSubstepsAndProgress(collectionName, item, 'bg-careerA')}
+          </div>
+
+          <div class="flex gap-1.5 pt-2 border-t border-slate-200/70 dark:border-hairline">
+            <input type="text" class="quick-step-input flex-1 min-w-0 px-2.5 py-1.5 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg placeholder:text-slate-400 dark:placeholder:text-inkMuted/60 focus:outline-none focus:ring-1 focus:ring-careerA" placeholder="+ Add requirement / prep step…">
+            <button type="button" class="quick-step-btn px-2.5 py-1.5 rounded-lg bg-careerA/15 text-careerA hover:bg-careerA hover:text-white text-xs font-semibold transition-colors">Add</button>
+          </div>
+        `;
+
+        li.querySelector('.stage-cycle-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const nextStage = CAREER_STAGE_ORDER[(CAREER_STAGE_ORDER.indexOf(stKey) + 1) % CAREER_STAGE_ORDER.length];
+          updateDoc(doc(db, collectionName, item.id), {
+            stage: nextStage,
+            done: nextStage === 'offer'
+          }).catch(err => reportError(err, 'update application stage'));
+        });
+
+        wireSubsteps(li, collectionName, item);
+        const qInput = li.querySelector('.quick-step-input');
+        const qBtn = li.querySelector('.quick-step-btn');
+        const addQuickStep = () => {
+          const val = qInput.value.trim();
+          if (!val) return;
+          const nextSteps = [...(item.steps || []), { text: val, done: false }];
+          const newPct = Math.round((nextSteps.filter(s => s.done).length / nextSteps.length) * 100);
+          updateDoc(doc(db, collectionName, item.id), {
+            steps: nextSteps,
+            progress: newPct
+          }).catch(err => reportError(err, 'add preparation step'));
+          qInput.value = '';
+        };
+        qBtn.addEventListener('click', addQuickStep);
+        qInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); addQuickStep(); } });
+      }
+
       // 1. TASKS
       else if (key === 'tasks') {
         const p = priorityOf(item);
@@ -1946,6 +2338,38 @@
 
       if (searchTerm) items = items.filter(i => searchableText(key, i).includes(searchTerm));
 
+      if (key === 'career') {
+        items = items.filter(item => {
+          const st = stageOfCareer(item);
+          const tr = item.track === 'job' ? 'job' : 'masters';
+          if (careerFilter === 'all') return true;
+          if (careerFilter === 'masters') return tr === 'masters';
+          if (careerFilter === 'job') return tr === 'job';
+          if (careerFilter === 'active') return ['saved', 'preparing', 'applied'].includes(st);
+          if (careerFilter === 'interview') return st === 'interview';
+          if (careerFilter === 'offer') return st === 'offer';
+          if (careerFilter === 'urgent') {
+            const d = daysUntilDate(item.deadline);
+            return d !== null && d <= 30 && st !== 'rejected' && st !== 'offer';
+          }
+          return true;
+        });
+
+        items.sort((a, b) => {
+          if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+          const stA = stageOfCareer(a);
+          const stB = stageOfCareer(b);
+          if ((stA === 'rejected') !== (stB === 'rejected')) return stA === 'rejected' ? 1 : -1;
+          const dA = daysUntilDate(a.deadline);
+          const dB = daysUntilDate(b.deadline);
+          if (dA !== null && dB !== null && dA !== dB) return dA - dB;
+          if (dA !== null && dB === null) return -1;
+          if (dA === null && dB !== null) return 1;
+          return CAREER_STAGES[stA].rank - CAREER_STAGES[stB].rank;
+        });
+        return items;
+      }
+
       if (key === 'yt' || key === 'fb') {
         if (mediaFilters[key] === 'queued') items = items.filter(x => !x.done);
         if (mediaFilters[key] === 'watched') items = items.filter(x => !!x.done);
@@ -2007,11 +2431,13 @@
       document.getElementById('statOpen').textContent = open;
       document.getElementById('statHigh').textContent = high;
       document.getElementById('statDone').textContent = done;
+      document.getElementById('statCareer').textContent = state.career.length;
       document.getElementById('statTotal').textContent = total + (total === 1 ? ' item' : ' items');
       const mediaItems = [...state.yt, ...state.fb];
       document.getElementById('statMedia').textContent = `${mediaItems.filter(x => x.done).length}/${mediaItems.length} watched`;
       document.getElementById('taskCount').textContent = open;
 
+      // Habits stats
       const totalHabits = state.habits.length;
       const doneHabits = state.habits.filter(isHabitDoneToday).length;
       const habitPct = totalHabits ? Math.round((doneHabits / totalHabits) * 100) : 0;
@@ -2019,6 +2445,7 @@
       document.getElementById('habitProgressText').textContent = `${habitPct}% today`;
       document.getElementById('habitProgressBar').style.width = `${habitPct}%`;
 
+      // Tasks & Plans master bars
       const taskPct = state.tasks.length ? Math.round((done / state.tasks.length) * 100) : 0;
       document.getElementById('taskMasterBar').style.width = `${taskPct}%`;
       document.getElementById('taskPctBadge').textContent = `${taskPct}%`;
@@ -2034,6 +2461,25 @@
         : 0;
       document.getElementById('playbookMasterBar').style.width = `${pbPct}%`;
       document.getElementById('playbookOverallPct').textContent = `${pbPct}% avg`;
+
+      // Masters & Jobs stats
+      const mastersCount = state.career.filter(c => c.track !== 'job').length;
+      const jobsCount = state.career.filter(c => c.track === 'job').length;
+      const appliedCount = state.career.filter(c => ['applied', 'interview', 'offer'].includes(stageOfCareer(c))).length;
+      const interviewCount = state.career.filter(c => stageOfCareer(c) === 'interview').length;
+      const offerCount = state.career.filter(c => stageOfCareer(c) === 'offer').length;
+
+      document.getElementById('statMastersCount').textContent = mastersCount;
+      document.getElementById('statJobsCount').textContent = jobsCount;
+      document.getElementById('statAppliedCount').textContent = appliedCount;
+      document.getElementById('statInterviewCount').textContent = interviewCount;
+      document.getElementById('statOfferCount').textContent = offerCount;
+
+      const careerPct = state.career.length
+        ? Math.round(state.career.reduce((acc, c) => acc + itemProgress(c), 0) / state.career.length)
+        : 0;
+      document.getElementById('careerMasterBar').style.width = `${careerPct}%`;
+      document.getElementById('careerOverallPct').textContent = `${careerPct}% prep`;
 
       if (searchTerm) {
         const matches = Object.keys(config).reduce((n, k) => n + visibleItems(k).length, 0);
@@ -2111,6 +2557,65 @@
       stepsEl.value = '';
     }
     document.getElementById('addPlaybookBtn').addEventListener('click', addPlaybook);
+
+    async function addCareerItem() {
+      const typeEl = document.getElementById('crTypeInput');
+      const stageEl = document.getElementById('crStageInput');
+      const titleEl = document.getElementById('crTitleInput');
+      const orgEl = document.getElementById('crOrgInput');
+      const locEl = document.getElementById('crLocationInput');
+      const deadEl = document.getElementById('crDeadlineInput');
+      const fundEl = document.getElementById('crFundingInput');
+      const urlEl = document.getElementById('crUrlInput');
+      const notesEl = document.getElementById('crNotesInput');
+      const stepsEl = document.getElementById('crStepsInput');
+
+      const text = titleEl.value.trim();
+      const org = orgEl.value.trim();
+      if (!text && !org) {
+        toast('Please enter a Program / Role title or University / Company.');
+        titleEl.focus();
+        return;
+      }
+
+      const rawUrl = urlEl.value.trim();
+      const url = rawUrl ? normalizeUrl(rawUrl) : '';
+      const steps = stepsEl.value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .map(s => ({ text: s, done: false }));
+
+      const stage = stageEl.value || 'saved';
+      const track = typeEl.value === 'job' ? 'job' : 'masters';
+
+      addDoc(collection(db, 'careerItems'), {
+        text: text || org || 'Untitled Opportunity',
+        track,
+        stage,
+        org,
+        location: locEl.value.trim(),
+        deadline: deadEl.value || '',
+        funding: fundEl.value.trim(),
+        url,
+        notes: notesEl.value.trim(),
+        steps,
+        progress: 0,
+        done: stage === 'offer',
+        pinned: false,
+        createdAt: serverTimestamp()
+      }).catch(err => reportError(err, 'save opportunity'));
+
+      titleEl.value = '';
+      orgEl.value = '';
+      locEl.value = '';
+      deadEl.value = '';
+      fundEl.value = '';
+      urlEl.value = '';
+      notesEl.value = '';
+      stepsEl.value = '';
+    }
+    document.getElementById('addCareerBtn').addEventListener('click', addCareerItem);
 
     async function addItem(collectionName, inputElement, type = 'text') {
       const mainInputValue = inputElement.value.trim();
@@ -2267,6 +2772,12 @@
     ['pbTitleInput', 'pbUnderstandingInput', 'pbStepsInput'].forEach(id => {
       document.getElementById(id).addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !editing) { e.preventDefault(); addPlaybook(); }
+      });
+    });
+
+    ['crTitleInput', 'crOrgInput', 'crLocationInput', 'crFundingInput', 'crUrlInput', 'crNotesInput', 'crStepsInput'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !editing) { e.preventDefault(); addCareerItem(); }
       });
     });
 
