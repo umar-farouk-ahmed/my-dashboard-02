@@ -357,7 +357,7 @@
             </span>
             <div>
               <span class="font-display font-semibold text-base sm:text-lg text-slate-900 dark:text-white block leading-tight">Masters &amp; Jobs Pipeline</span>
-              <span class="text-xs text-slate-400 dark:text-inkMuted">Track graduate programs, scholarships, and SWE / Cloud roles · Click stage badge to advance</span>
+              <span class="text-xs text-slate-400 dark:text-inkMuted">Track graduate programs, scholarships, and SWE / Cloud roles · Attach multiple titled links</span>
             </div>
           </span>
           <span class="flex items-center gap-2.5 shrink-0">
@@ -398,17 +398,17 @@
                 <div id="careerFilters" class="flex flex-wrap items-center gap-1" role="group" aria-label="Filter Masters and Jobs"></div>
               </div>
 
-              <div class="grid grid-cols-1 lg:grid-cols-[370px_minmax(0,1fr)] gap-6">
-                <!-- Masters & Jobs Composer -->
+              <div class="grid grid-cols-1 lg:grid-cols-[380px_minmax(0,1fr)] gap-6">
+                <!-- Masters & Jobs Composer (Fixed overflow with 2-col dropdowns + Multi-Link Bar) -->
                 <div class="flex flex-col gap-3 bg-slate-50/80 dark:bg-panelAlt/50 p-4 rounded-xl border border-slate-200/80 dark:border-hairline self-start">
-                  <div class="flex items-center justify-between gap-2">
+                  <div class="flex flex-col gap-2">
                     <span class="text-xs font-mono uppercase tracking-wider text-careerA font-semibold">New Opportunity</span>
-                    <div class="flex items-center gap-1.5">
-                      <select id="crTypeInput" class="text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg px-2 py-1 text-slate-700 dark:text-ink focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                    <div class="grid grid-cols-2 gap-2">
+                      <select id="crTypeInput" aria-label="Opportunity track" class="w-full min-w-0 text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg px-2.5 py-2 text-slate-700 dark:text-ink focus:outline-none focus:ring-2 focus:ring-careerA/40">
                         <option value="masters">🎓 Masters / Grad</option>
                         <option value="job">💼 Job / Role</option>
                       </select>
-                      <select id="crStageInput" class="text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg px-2 py-1 text-slate-700 dark:text-ink focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                      <select id="crStageInput" aria-label="Application stage" class="w-full min-w-0 text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-lg px-2.5 py-2 text-slate-700 dark:text-ink focus:outline-none focus:ring-2 focus:ring-careerA/40">
                         <option value="saved">📌 Shortlisted</option>
                         <option value="preparing">📝 Preparing</option>
                         <option value="applied">🚀 Applied</option>
@@ -422,22 +422,31 @@
                   <input type="text" id="crTitleInput" placeholder="Program or Role (e.g. MSc CS / Cloud Engineer)" class="w-full px-3.5 py-2.5 text-sm font-semibold bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40 focus:border-careerA transition-colors">
 
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input type="text" id="crOrgInput" placeholder="University or Company" class="w-full px-3 py-2 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
-                    <input type="text" id="crLocationInput" placeholder="Country / Mode (e.g. USA, Remote)" class="w-full px-3 py-2 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                    <input type="text" id="crOrgInput" placeholder="University or Company" class="w-full min-w-0 px-3 py-2 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                    <input type="text" id="crLocationInput" placeholder="Country / Mode (e.g. USA, Remote)" class="w-full min-w-0 px-3 py-2 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
                   </div>
 
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <label class="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-inkMuted block mb-1">Deadline (Optional)</label>
-                      <input type="date" id="crDeadlineInput" class="w-full px-3 py-1.5 text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl text-slate-700 dark:text-ink focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                      <input type="date" id="crDeadlineInput" class="w-full min-w-0 px-3 py-1.5 text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl text-slate-700 dark:text-ink focus:outline-none focus:ring-2 focus:ring-careerA/40">
                     </div>
                     <div>
                       <label class="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-inkMuted block mb-1">Funding / Comp / Tag</label>
-                      <input type="text" id="crFundingInput" placeholder="e.g. DAAD / Visa Sponsored" class="w-full px-3 py-1.5 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                      <input type="text" id="crFundingInput" placeholder="e.g. DAAD / Visa Sponsored" class="w-full min-w-0 px-3 py-1.5 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
                     </div>
                   </div>
 
-                  <input type="text" id="crUrlInput" placeholder="Portal / Job Posting URL (https://…)" class="w-full px-3 py-2 text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                  <!-- Multi-Link Adder with Titles -->
+                  <div>
+                    <label class="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-inkMuted block mb-1">🔗 Portals &amp; Important Links (Add multiple with titles)</label>
+                    <div class="flex gap-1.5">
+                      <input type="text" id="crLinkLabelInput" placeholder="Title (e.g. Portal, JD, Prof)" class="w-[38%] min-w-0 px-2.5 py-2 text-xs bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                      <input type="text" id="crLinkUrlInput" placeholder="https://…" class="flex-1 min-w-0 px-2.5 py-2 text-xs font-mono bg-white dark:bg-panel border border-slate-200 dark:border-hairline rounded-xl placeholder:text-slate-400 dark:placeholder:text-inkMuted/70 focus:outline-none focus:ring-2 focus:ring-careerA/40">
+                      <button type="button" id="addCrLinkBtn" class="bg-careerA/15 text-careerA border border-careerA/30 px-2.5 shrink-0 rounded-xl hover:bg-careerA hover:text-white active:scale-95 transition-all text-xs font-semibold" title="Attach link">+ Link</button>
+                    </div>
+                    <div id="crLinkChips" class="hidden flex-wrap gap-1.5 pt-2"></div>
+                  </div>
 
                   <div>
                     <label class="text-[11px] font-mono text-slate-500 dark:text-inkMuted mb-1 block">📋 Requirements / Professor / Tech Stack Notes</label>
@@ -445,7 +454,7 @@
                   </div>
 
                   <div>
-                    <div class="flex items-center justify-between gap-1 mb-1">
+                    <div class="flex flex-wrap items-center justify-between gap-1 mb-1">
                       <label class="text-[11px] font-mono text-slate-500 dark:text-inkMuted">✅ Preparation Steps (one per line)</label>
                       <div class="flex items-center gap-1">
                         <button type="button" id="crPresetMastersBtn" class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-careerA/10 text-careerA hover:bg-careerA/20 transition-colors" title="Fill standard Masters application steps">+ Masters Template</button>
@@ -938,6 +947,22 @@
 
     const hostOf = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; } };
 
+    // Normalizes both multi-links array and legacy single item.url for Masters & Jobs
+    function getCareerLinks(item) {
+      const list = [];
+      if (Array.isArray(item.links)) {
+        item.links.forEach(l => {
+          const safe = normalizeUrl(l?.url);
+          if (safe) list.push({ label: (l.label || '').trim(), url: safe });
+        });
+      }
+      const single = normalizeUrl(item.url);
+      if (single && !list.some(l => l.url === single)) {
+        list.unshift({ label: item.track === 'job' ? 'Job Posting' : 'Application Portal', url: single });
+      }
+      return list;
+    }
+
     function getYTVideoId(input) {
       try {
         const url = new URL(normalizeUrl(input));
@@ -1029,11 +1054,12 @@
       }
     }
 
-    const checkIcon = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4L19 6"/></svg>';
-    const copyIcon  = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>';
-    const pinIcon   = '<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>';
-    const trashIcon = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
-    const editIcon  = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`;
+    const checkIcon    = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4L19 6"/></svg>';
+    const copyIcon     = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>';
+    const externalIcon = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>';
+    const pinIcon      = '<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>';
+    const trashIcon    = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
+    const editIcon     = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`;
 
     const iconBtn = 'action-btn text-slate-400 dark:text-inkMuted hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-panel rounded-lg transition-all shrink-0 p-1.5 inline-flex items-center justify-center opacity-100 md:opacity-0 md:group-hover/item:opacity-100 md:focus:opacity-100';
 
@@ -1161,6 +1187,58 @@
         'Review System Design & behavioral stories'
       ].join('\n');
       stepsBox.value = stepsBox.value.trim() ? `${stepsBox.value.trim()}\n${preset}` : preset;
+    });
+
+    // --- MULTI-LINK STAGING FOR MASTERS & JOBS COMPOSER ---
+    let pendingCareerLinks = [];
+    const crLinkChips = document.getElementById('crLinkChips');
+
+    function renderCareerChips() {
+      crLinkChips.innerHTML = '';
+      const has = pendingCareerLinks.length > 0;
+      crLinkChips.classList.toggle('hidden', !has);
+      crLinkChips.classList.toggle('flex', has);
+      if (!has) return;
+
+      pendingCareerLinks.forEach((link, index) => {
+        const chip = document.createElement('span');
+        chip.className = 'inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 text-xs bg-careerA/15 text-careerA border border-careerA/30 rounded-lg font-medium';
+        chip.innerHTML = `
+          <span class="truncate max-w-[170px]">🔗 ${esc(link.label || hostOf(link.url))}</span>
+          <button type="button" class="text-slate-400 hover:text-rose-500 transition-colors leading-none px-1" aria-label="Remove link">&times;</button>`;
+        chip.querySelector('button').addEventListener('click', () => {
+          pendingCareerLinks.splice(index, 1);
+          renderCareerChips();
+        });
+        crLinkChips.appendChild(chip);
+      });
+    }
+
+    function stageCareerLink() {
+      const urlInput = document.getElementById('crLinkUrlInput');
+      const labelInput = document.getElementById('crLinkLabelInput');
+      const rawUrl = urlInput.value.trim();
+      if (!rawUrl) return false;
+      const url = normalizeUrl(rawUrl);
+      if (!url) {
+        toast('Please enter a valid http(s) link.');
+        return false;
+      }
+      pendingCareerLinks.push({
+        label: labelInput.value.trim() || hostOf(url),
+        url
+      });
+      urlInput.value = '';
+      labelInput.value = '';
+      renderCareerChips();
+      return true;
+    }
+
+    document.getElementById('addCrLinkBtn').addEventListener('click', stageCareerLink);
+    ['crLinkLabelInput', 'crLinkUrlInput'].forEach(id => {
+      document.getElementById(id).addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); stageCareerLink(); }
+      });
     });
 
     // --- PRIORITIES ---
@@ -1319,7 +1397,8 @@
       }
       if (key === 'career') {
         const stepText = (item.steps || []).map(s => s.text || '').join(' ');
-        return `${item.text || ''} ${item.org || ''} ${item.location || ''} ${item.funding || ''} ${item.notes || ''} ${item.track || ''} ${item.stage || ''} ${stepText}`.toLowerCase();
+        const linkText = getCareerLinks(item).map(l => `${l.label || ''} ${l.url || ''}`).join(' ');
+        return `${item.text || ''} ${item.org || ''} ${item.location || ''} ${item.funding || ''} ${item.notes || ''} ${item.track || ''} ${item.stage || ''} ${stepText} ${linkText}`.toLowerCase();
       }
       if (key === 'notes') {
         const linkText = (item.links || []).map(l => `${l.label || ''} ${l.url || ''}`).join(' ');
@@ -1470,7 +1549,7 @@
     });
 
     /* ==========================================================
-       DETAIL / EDIT DIALOG (Supports Subtasks, Progress & Pin)
+       DETAIL / EDIT DIALOG (Supports Multi-Links, Subtasks & Pin)
        ========================================================== */
     const overlay = document.getElementById('editorOverlay');
     const editorFields = document.getElementById('editorFields');
@@ -1490,8 +1569,8 @@
     function linkRow(link = { label: '', url: '' }) {
       return `
         <div class="ed-link-row flex gap-2 items-center">
-          <input type="text" class="ed-link-label w-[34%] min-w-0 px-3 py-2 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-noteA/40" placeholder="Label" value="${esc(link.label || '')}">
-          <input type="text" class="ed-link-url flex-1 min-w-0 px-3 py-2 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-noteA/40" placeholder="https://" value="${esc(link.url || '')}">
+          <input type="text" class="ed-link-label w-[36%] min-w-0 px-3 py-2 text-sm bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-careerA/40" placeholder="Link Title (e.g. Portal)" value="${esc(link.label || '')}">
+          <input type="text" class="ed-link-url flex-1 min-w-0 px-3 py-2 text-sm font-mono bg-slate-50 dark:bg-panelAlt border border-slate-200 dark:border-hairline rounded-lg focus:outline-none focus:ring-2 focus:ring-careerA/40" placeholder="https://" value="${esc(link.url || '')}">
           <button type="button" class="ed-link-remove w-9 h-9 shrink-0 rounded-lg border border-slate-200 dark:border-hairline text-slate-400 hover:text-rose-500 hover:border-rose-400 transition-colors" aria-label="Remove link">&times;</button>
         </div>`;
     }
@@ -1574,13 +1653,16 @@
         const curTrack = item.track === 'job' ? 'job' : 'masters';
         const curStage = stageOfCareer(item);
         const stageOptions = CAREER_STAGE_ORDER.map(st => `<option value="${st}" ${st === curStage ? 'selected' : ''}>${CAREER_STAGES[st].label}</option>`).join('');
+        const careerLinks = getCareerLinks(item);
+        const initialRows = careerLinks.length ? careerLinks.map(linkRow).join('') : linkRow();
+
         editorFields.innerHTML =
-          `<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>${field('Track', `<select id="edCareerTrack" class="${fieldInput}">
               <option value="masters" ${curTrack === 'masters' ? 'selected' : ''}>🎓 Masters / Grad</option>
               <option value="job" ${curTrack === 'job' ? 'selected' : ''}>💼 Job / Role</option>
             </select>`)}</div>
-            <div class="sm:col-span-2">${field('Stage / Status', `<select id="edCareerStage" class="${fieldInput}">${stageOptions}</select>`)}</div>
+            <div>${field('Stage / Status', `<select id="edCareerStage" class="${fieldInput}">${stageOptions}</select>`)}</div>
           </div>` +
           `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>${field('Program or Role Title', `<input type="text" id="edText" class="${fieldInput} font-semibold" value="${esc(item.text)}">`)}</div>
@@ -1591,10 +1673,24 @@
             <div>${field('Deadline Date', `<input type="date" id="edCareerDeadline" class="${fieldInput} font-mono" value="${esc(item.deadline || '')}">`)}</div>
             <div>${field('Funding / Comp / Tag', `<input type="text" id="edCareerFunding" class="${fieldInput}" value="${esc(item.funding || '')}">`)}</div>
           </div>` +
-          field('Portal / Job Posting URL', `<input type="text" id="edCareerUrl" class="${fieldInput} font-mono text-xs" value="${esc(item.url || '')}">`) +
+          `<div>
+             <div class="flex items-center justify-between mb-1.5">
+               <span class="${fieldLabel} !mb-0">🔗 Portals &amp; Attached Links (With Titles)</span>
+               <button type="button" id="edAddCareerLink" class="text-xs font-semibold text-careerA hover:underline">+ Attach another link</button>
+             </div>
+             <div id="edCareerLinks" class="flex flex-col gap-2">${initialRows}</div>
+           </div>` +
           field('📋 Requirements, Professor, Tech Stack & Interview Notes', `<textarea id="edCareerNotes" rows="4" class="${fieldInput} leading-relaxed" placeholder="IELTS/GRE, professor details, tech stack, referral contact, or interview questions…">${esc(item.notes || '')}</textarea>`) +
           stepsEditorBlock(item) +
           pinCheck;
+
+        document.getElementById('edAddCareerLink').addEventListener('click', () => {
+          document.getElementById('edCareerLinks').insertAdjacentHTML('beforeend', linkRow());
+        });
+        editorFields.addEventListener('click', (e) => {
+          const btn = e.target.closest('.ed-link-remove');
+          if (btn) btn.closest('.ed-link-row').remove();
+        });
         wireStepsEditor();
       }
       else if (key === 'tasks') {
@@ -1771,9 +1867,14 @@
         const location = document.getElementById('edCareerLocation').value.trim();
         const deadline = document.getElementById('edCareerDeadline').value;
         const funding = document.getElementById('edCareerFunding').value.trim();
-        const rawUrl = document.getElementById('edCareerUrl').value.trim();
-        const url = rawUrl ? normalizeUrl(rawUrl) : '';
         const notes = document.getElementById('edCareerNotes').value.trim();
+        const links = [...document.querySelectorAll('#edCareerLinks .ed-link-row')]
+          .map(row => {
+            const url = normalizeUrl(row.querySelector('.ed-link-url').value);
+            const label = row.querySelector('.ed-link-label').value.trim();
+            return url ? { label: label || hostOf(url), url } : null;
+          })
+          .filter(Boolean);
         const steps = collectStepsFromEditor();
         const progress = Number(document.getElementById('edProgress')?.value || 0);
 
@@ -1786,7 +1887,8 @@
           location,
           deadline,
           funding,
-          url,
+          links,
+          url: links[0]?.url || '',
           notes,
           steps,
           progress: steps.length ? Math.round((steps.filter(s => s.done).length / steps.length) * 100) : progress,
@@ -1893,6 +1995,36 @@
             </span>
           </a>
           <button type="button" class="copy-url-btn p-1.5 rounded-lg text-slate-400 hover:text-noteA hover:bg-slate-100 dark:hover:bg-panelAlt transition-colors" data-url="${esc(safeUrl)}" title="Copy link URL" aria-label="Copy link URL">${copyIcon}</button>
+        </div>`;
+    }
+
+    // High-visibility Link Pill Row for Masters & Jobs cards
+    function renderCareerLinkItem(link) {
+      if (!link || !link.url) return '';
+      const safeUrl = normalizeUrl(link.url);
+      if (!safeUrl) return '';
+      const host = hostOf(safeUrl);
+      const favicon = faviconFor(safeUrl);
+      const title = link.label || host;
+
+      return `
+        <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white dark:bg-panel border border-slate-200/90 dark:border-hairline hover:border-careerA transition-all group/clink">
+          <a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="flex items-center gap-2.5 min-w-0 flex-1">
+            <span class="w-7 h-7 shrink-0 rounded-lg bg-careerA/10 border border-careerA/20 flex items-center justify-center overflow-hidden">
+              ${favicon ? `<img src="${esc(favicon)}" class="w-4 h-4" onerror="this.style.visibility='hidden'" alt="">` : '🌐'}
+            </span>
+            <span class="flex flex-col min-w-0 leading-tight">
+              <span class="text-xs font-semibold text-slate-800 dark:text-ink truncate group-hover/clink:text-careerA transition-colors">${esc(title)}</span>
+              <span class="text-[11px] font-mono text-slate-400 dark:text-inkMuted truncate">${esc(host)}</span>
+            </span>
+          </a>
+          <div class="flex items-center gap-1 shrink-0">
+            <a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-careerA/15 text-careerA border border-careerA/30 hover:bg-careerA hover:text-white transition-all shadow-sm" title="Open ${esc(title)} in new tab">
+              <span>Open</span>
+              ${externalIcon}
+            </a>
+            <button type="button" class="copy-url-btn p-1.5 rounded-lg text-slate-400 dark:text-inkMuted hover:text-careerA hover:bg-slate-100 dark:hover:bg-panelAlt transition-colors" data-url="${esc(safeUrl)}" title="Copy URL" aria-label="Copy URL">${copyIcon}</button>
+          </div>
         </div>`;
     }
 
@@ -2032,14 +2164,13 @@
         qInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); addQuickStep(); } });
       }
 
-      // 0.5 MASTERS & JOBS PIPELINE
+      // 0.5 MASTERS & JOBS PIPELINE (Prominent Portal Button + Multiple Titled Links)
       else if (key === 'career') {
         const isJob = item.track === 'job';
         const stKey = stageOfCareer(item);
         const stConf = CAREER_STAGES[stKey];
-        const steps = Array.isArray(item.steps) ? item.steps : [];
-        const pct = itemProgress(item);
-        const safeUrl = normalizeUrl(item.url);
+        const careerLinks = getCareerLinks(item);
+        const primaryLink = careerLinks[0] || null;
         const deadlineBadge = renderDeadlineBadge(item);
 
         li.className = `group/item self-start flex flex-col gap-3 p-4 bg-slate-50/90 dark:bg-panelAlt/80 rounded-2xl border border-slate-200/90 dark:border-hairline hover:border-careerA/60 shadow-sm transition-all${stKey === 'offer' ? ' ring-1 ring-planA/40' : ''}${pinnedClass}`;
@@ -2069,16 +2200,27 @@
                 ` : ''}
               </div>
 
-              <div class="flex items-center gap-0.5 shrink-0">
-                ${safeUrl ? `
-                  <a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="p-1.5 rounded-lg text-slate-400 dark:text-inkMuted hover:text-careerA hover:bg-slate-200/60 dark:hover:bg-panel transition-colors" title="Open portal / job posting">↗</a>
-                  <button type="button" class="copy-url-btn p-1.5 rounded-lg text-slate-400 dark:text-inkMuted hover:text-careerA hover:bg-slate-200/60 dark:hover:bg-panel transition-colors" data-url="${esc(safeUrl)}" title="Copy portal URL" aria-label="Copy portal URL">${copyIcon}</button>
+              <div class="flex items-center gap-1 shrink-0">
+                ${primaryLink ? `
+                  <a href="${esc(primaryLink.url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-careerA text-white hover:brightness-110 shadow-sm transition-all" title="Open ${esc(primaryLink.label || 'Portal')}">
+                    <span>${esc(primaryLink.label || 'Portal')}</span>
+                    ${externalIcon}
+                  </a>
                 ` : ''}
                 ${pinButtonHtml(item)}
                 <button class="edit-btn ${iconBtn}" aria-label="Open and edit">${editIcon}</button>
                 <button class="delete-btn ${iconBtn} hover:!text-rose-500" aria-label="Delete opportunity">${trashIcon}</button>
               </div>
             </div>
+
+            ${careerLinks.length > 0 ? `
+              <div class="space-y-1.5 pt-1">
+                <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-inkMuted block">🔗 Portals &amp; Links (${careerLinks.length})</span>
+                <div class="flex flex-col gap-1.5">
+                  ${careerLinks.map(renderCareerLinkItem).join('')}
+                </div>
+              </div>
+            ` : ''}
 
             ${item.notes ? `
               <div class="open-target openable p-2.5 rounded-xl bg-white dark:bg-panel border border-slate-200/70 dark:border-hairline/90">
@@ -2566,9 +2708,14 @@
       const locEl = document.getElementById('crLocationInput');
       const deadEl = document.getElementById('crDeadlineInput');
       const fundEl = document.getElementById('crFundingInput');
-      const urlEl = document.getElementById('crUrlInput');
+      const linkUrlEl = document.getElementById('crLinkUrlInput');
       const notesEl = document.getElementById('crNotesInput');
       const stepsEl = document.getElementById('crStepsInput');
+
+      // If the user typed a link in the input box without clicking "+ Link", stage it automatically
+      if (linkUrlEl.value.trim()) {
+        stageCareerLink();
+      }
 
       const text = titleEl.value.trim();
       const org = orgEl.value.trim();
@@ -2578,8 +2725,6 @@
         return;
       }
 
-      const rawUrl = urlEl.value.trim();
-      const url = rawUrl ? normalizeUrl(rawUrl) : '';
       const steps = stepsEl.value
         .split('\n')
         .map(s => s.trim())
@@ -2588,6 +2733,7 @@
 
       const stage = stageEl.value || 'saved';
       const track = typeEl.value === 'job' ? 'job' : 'masters';
+      const links = [...pendingCareerLinks];
 
       addDoc(collection(db, 'careerItems'), {
         text: text || org || 'Untitled Opportunity',
@@ -2597,7 +2743,8 @@
         location: locEl.value.trim(),
         deadline: deadEl.value || '',
         funding: fundEl.value.trim(),
-        url,
+        links,
+        url: links[0]?.url || '',
         notes: notesEl.value.trim(),
         steps,
         progress: 0,
@@ -2611,9 +2758,10 @@
       locEl.value = '';
       deadEl.value = '';
       fundEl.value = '';
-      urlEl.value = '';
       notesEl.value = '';
       stepsEl.value = '';
+      pendingCareerLinks = [];
+      renderCareerChips();
     }
     document.getElementById('addCareerBtn').addEventListener('click', addCareerItem);
 
@@ -2775,7 +2923,7 @@
       });
     });
 
-    ['crTitleInput', 'crOrgInput', 'crLocationInput', 'crFundingInput', 'crUrlInput', 'crNotesInput', 'crStepsInput'].forEach(id => {
+    ['crTitleInput', 'crOrgInput', 'crLocationInput', 'crFundingInput', 'crLinkLabelInput', 'crLinkUrlInput', 'crNotesInput', 'crStepsInput'].forEach(id => {
       document.getElementById(id).addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !editing) { e.preventDefault(); addCareerItem(); }
       });
